@@ -14,6 +14,9 @@ from .. import (
     BalboaSpa,
 )
 
+DEPENDENCIES = ["balboa_spa"]
+AUTO_LOAD = ["binary_sensor"]
+
 BalboaSpaSensors = balboa_spa_ns.class_('BalboaSpaSensors', cg.Component)
 
 CONF_JET1 = "jet1"

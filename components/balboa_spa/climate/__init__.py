@@ -9,6 +9,9 @@ from .. import (
     BalboaSpa,
 )
 
+DEPENDENCIES = ["balboa_spa"]
+AUTO_LOAD = ["climate"]
+
 BalboaSpaThermostat = balboa_spa_ns.class_('BalboaSpaThermostat', cg.Component, climate.Climate)
 
 CONFIG_SCHEMA = cv.Schema(
@@ -24,3 +27,4 @@ async def to_code(config):
 
     parent = await cg.get_variable(config[CONF_SPA_ID])
     cg.add(var.set_parent(parent))
+

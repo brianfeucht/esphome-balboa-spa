@@ -35,3 +35,4 @@ binary_sensor:
 climate:
   - platform: balboa_spa
     balboa_spa_id: test_spa
+    id: test_spa_thermostat
