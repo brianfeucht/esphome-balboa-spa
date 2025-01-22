@@ -27,8 +27,7 @@ climate::ClimateTraits BalboaSpaThermostat::traits()
 
 void BalboaSpaThermostat::set_parent(BalboaSpa *parent) { spa = parent; }
 
-void BalboaSpaThermostat::loop() {
-    yield();
+void BalboaSpaThermostat::update() {
     SpaState spaState = spa->get_current_state();
 
     this->target_temperature = spaState.target_temp;
