@@ -5,21 +5,10 @@
 namespace esphome {
 namespace balboa_spa {
 
-void BalboaSpaSensors::set_parent(BalboaSpa *parent) {   
-  ESP_LOGD("SPA/Sensors", "Parent set");
-  spa = parent; 
-  }
+void BalboaSpaSensors::set_parent(BalboaSpa *parent) { spa = parent; }
 
 void BalboaSpaSensors::update() {
-  ESP_LOGD("SPA/Sensors", "Starting update");
-  if(spa != nullptr)
-  {
-    update_sensors();
-  }
-  else
-  {
-    ESP_LOGD("SPA/Sensors", "Parent not yet associated.  Unable to update");
-  }
+  update_sensors();
 }
 
 void BalboaSpaSensors::set_jet1_binary_sensor(binary_sensor::BinarySensor *sensor) { 
