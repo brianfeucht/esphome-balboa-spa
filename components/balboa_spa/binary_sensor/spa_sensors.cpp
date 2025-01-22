@@ -51,12 +51,11 @@ void BalboaSpaSensors::set_lights_binary_sensor(binary_sensor::BinarySensor *sen
 }
 
 void BalboaSpaSensors::update_sensors() {
-    SpaState spaState; // = spa->get_current_state();
+    SpaState spaState = spa->get_current_state();
     
     if(this->jet1_sensor != nullptr && 
        this->jet1_sensor->state != spaState.jet1)
     {
-      ESP_LOGD("SPA/Sensors", "Updated Jet1");
       jet1_sensor->publish_state(spaState.jet1);
     }
     
