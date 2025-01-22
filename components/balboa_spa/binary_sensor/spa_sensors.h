@@ -8,9 +8,12 @@
 namespace esphome {
 namespace balboa_spa {
 
-class BalboaSpaSensors : public Component {
+class BalboaSpaSensors :  public PollingComponent {
  public:
-  void loop() override;
+  // Update thermostat status from UART device every second
+  BalboaSpaSensors() : PollingComponent(1000) {}
+
+  void update() override;
   void set_parent(BalboaSpa *parent);
   
   void set_jet1_binary_sensor(binary_sensor::BinarySensor *sensor);    
