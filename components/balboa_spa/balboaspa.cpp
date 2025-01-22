@@ -25,7 +25,7 @@ SpaConfig BalboaSpa::get_current_config() { return spaConfig; }
 SpaState BalboaSpa::get_current_state() { return spaState; }
 
 void BalboaSpa::set_temp(int temp) {
-    if (temp >= 62 || temp < 105) {
+    if (temp >= ESPHOME_BALBOASPA_MIN_TEMPERATURE || temp < ESPHOME_BALBOASPA_MAX_TEMPERATURE) {
         settemp = temp;
         send = 0xff;
     }
@@ -296,7 +296,8 @@ void BalboaSpa::read_serial() {
     double c = 0.0;
 
     // 25:Flag Byte 20 - Set Temperature
-    d = Q_in[25];
+    d = Q_in[25];    
+    spaState.target_temp = d;
     /*
     if (spaConfig.temp_scale == 1) {
       d = Q_in[25];
@@ -327,6 +328,7 @@ void BalboaSpa::read_serial() {
     } else {
       d = 0;
     }
+    spaState.current_temp = d;
     // REMARK Move upper publish to HERE to get 0 for unknown temperature
 
     // 8:Flag Byte 3 Hour & 9:Flag Byte 4 Minute => Time

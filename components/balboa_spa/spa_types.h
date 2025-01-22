@@ -32,6 +32,8 @@ namespace balboa_spa {
         uint8_t highrange:1;
         uint8_t hour :5;
         uint8_t minutes :6;
+        double current_temp;
+        double target_temp;
     };
 
     struct SpaFaultLog {

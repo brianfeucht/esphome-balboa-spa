@@ -13,6 +13,11 @@ namespace balboa_spa {
 // https://github.com/espressif/arduino-esp32/blob/496b8411773243e1ad88a68652d6982ba2366d6b/cores/esp32/Arduino.h#L99
 #define bitRead(value, bit)            (((value) >> (bit)) & 0x01)
 
+static const uint8_t ESPHOME_BALBOASPA_MIN_TEMPERATURE = 62; // degrees F
+static const uint8_t ESPHOME_BALBOASPA_MAX_TEMPERATURE = 105; // degrees F
+static const float   ESPHOME_BALBOASPA_TEMPERATURE_STEP = 1.0; // temperature setting step in degrees F
+
+
 class BalboaSpa : public uart::UARTDevice, public Component {
   public:
     void setup() override;
