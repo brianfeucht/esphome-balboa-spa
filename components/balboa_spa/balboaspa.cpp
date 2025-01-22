@@ -5,8 +5,6 @@
 namespace esphome {
 namespace balboa_spa {
 
-#define STRON String("ON").c_str()
-#define STROFF String("OFF").c_str()
 static const char *TAG = "BalboaSpa.component";
 
 void BalboaSpa::setup() {

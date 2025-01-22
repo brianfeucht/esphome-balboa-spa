@@ -17,6 +17,8 @@ static const uint8_t ESPHOME_BALBOASPA_MIN_TEMPERATURE = 62; // degrees F
 static const uint8_t ESPHOME_BALBOASPA_MAX_TEMPERATURE = 105; // degrees F
 static const float   ESPHOME_BALBOASPA_TEMPERATURE_STEP = 1.0; // temperature setting step in degrees F
 
+#define STRON String("ON").c_str()
+#define STROFF String("OFF").c_str()
 
 class BalboaSpa : public uart::UARTDevice, public Component {
   public:
