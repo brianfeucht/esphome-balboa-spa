@@ -2,6 +2,9 @@
 
 esphome:
     name: balboa_spa_test
-    platform: ESP8266
-    board: nodemcuv2
     build_path: .build/balboa_spa_test
+
+esp32:
+  board: lolin_s2_mini
+  framework: 
+    type: arduino

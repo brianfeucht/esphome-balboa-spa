@@ -13,9 +13,14 @@ balboa_spa:
   id: test_spa
 
 uart:
-  tx_pin: D0
-  rx_pin: D1
-  baud_rate: 9600
+  id: spa_uart_bus
+  tx_pin: GPIO37
+  rx_pin: GPIO39
+  data_bits: 8
+  parity: NONE
+  stop_bits: 1
+  baud_rate: 115200
+  rx_buffer_size: 128
 
 binary_sensor:
   - platform: balboa_spa
