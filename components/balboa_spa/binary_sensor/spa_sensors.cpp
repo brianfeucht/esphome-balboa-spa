@@ -11,7 +11,7 @@ void BalboaSpaSensors::update() {
   ESP_LOGD("SPA/Sensors", "Starting update");
   if(spa != nullptr)
   {
-    //update_sensors();
+    update_sensors();
   }
   else
   {
@@ -49,7 +49,7 @@ void BalboaSpaSensors::set_lights_binary_sensor(binary_sensor::BinarySensor *sen
 
 void BalboaSpaSensors::update_sensors() {
     ESP_LOGD("SPA/Sensors", "Requested SPA State");
-    SpaState spaState = spa->get_current_state();
+    SpaState spaState; // = spa->get_current_state();
 
     ESP_LOGD("SPA/Sensors", "Received SPA State");
     
