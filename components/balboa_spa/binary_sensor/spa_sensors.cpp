@@ -8,7 +8,14 @@ namespace balboa_spa {
 void BalboaSpaSensors::set_parent(BalboaSpa *parent) { spa = parent; }
 
 void BalboaSpaSensors::update() {
-  //update_sensors();
+  if(spa != nullptr)
+  {
+    update_sensors();
+  }
+  else
+  {
+    ESP_LOGD("SPA/Sensors", "Parent not yet associated.  Unable to update");
+  }
 }
 
 void BalboaSpaSensors::set_jet1_binary_sensor(binary_sensor::BinarySensor *sensor) { 
