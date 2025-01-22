@@ -8,14 +8,7 @@ namespace balboa_spa {
 void BalboaSpaSensors::set_parent(BalboaSpa *parent) { spa = parent; }
 
 void BalboaSpaSensors::update() {
-  try
-  {
-     update_sensors();
-  }
-  catch
-  {
-    ESP_LOGD("BalboaSpaSensors.update_sensors failed");
-  }
+  update_sensors();
 }
 
 void BalboaSpaSensors::set_jet1_binary_sensor(binary_sensor::BinarySensor *sensor) { 
