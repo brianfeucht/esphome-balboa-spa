@@ -9,6 +9,10 @@
 namespace esphome {
 namespace balboa_spa {
 
+// Not defined in recent framework libs so stealing from
+// https://github.com/espressif/arduino-esp32/blob/496b8411773243e1ad88a68652d6982ba2366d6b/cores/esp32/Arduino.h#L99
+#define bitRead(value, bit)            (((value) >> (bit)) & 0x01)
+
 class BalboaSpa : public uart::UARTDevice, public Component {
   public:
     void setup() override;
