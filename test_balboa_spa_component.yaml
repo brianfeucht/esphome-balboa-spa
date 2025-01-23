@@ -31,3 +31,8 @@ switch:
       name: Jet2
     light:
       name: Lights
+
+climate:
+  - platform: balboa_spa
+    balboa_spa_id: test_spa
+    name: "Spa Thermostat"
