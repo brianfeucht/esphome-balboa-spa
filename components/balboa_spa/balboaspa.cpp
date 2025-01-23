@@ -296,8 +296,12 @@ void BalboaSpa::read_serial() {
     double c = 0.0;
 
     // 25:Flag Byte 20 - Set Temperature
-    d = Q_in[25];    
-    spaState.target_temp = d;
+    d = Q_in[25];
+    // Check for invalid readings
+    if(d > 65 && d < 110)
+    {
+      spaState.target_temp = d;
+    }
     /*
     if (spaConfig.temp_scale == 1) {
       d = Q_in[25];
