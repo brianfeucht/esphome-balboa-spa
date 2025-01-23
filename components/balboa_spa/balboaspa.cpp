@@ -294,23 +294,17 @@ void BalboaSpa::read_serial() {
     String s;
     double d = 0.0;
     double c = 0.0;
+    bool newState = false;
 
     // 25:Flag Byte 20 - Set Temperature
     d = Q_in[25];
     // Check for invalid readings
-    if(d > 65 && d < 110)
+    if(d > 65 && d < 110 && d != spaState.target_temp)
     {
+      newState = true;
       spaState.target_temp = d;
+      ESP_LOGD("Spa/target_temp/state", String(d, 2).c_str());
     }
-    /*
-    if (spaConfig.temp_scale == 1) {
-      d = Q_in[25];
-    } else if (spaConfig.temp_scale == 0){
-      d = Q_in[25] / 2;
-      if (Q_in[25] % 2 == 1) d += 0.5;
-    }*/
-
-    ESP_LOGD("Spa/target_temp/state", String(d, 2).c_str());
 
     // 7:Flag Byte 2 - Actual temperature
     if (Q_in[7] != 0xFF) {
@@ -327,101 +321,106 @@ void BalboaSpa::read_serial() {
         if ((d > c * 1.2) || (d < c * 0.8)) d = c; //remove spurious readings greater or less than 20% away from previous read
       }
 
-      ESP_LOGD("Spa/temperature/state", String(d, 2).c_str());
       c = d;
     } else {
       d = 0;
     }
-    spaState.current_temp = d;
+
+    if(d != spaState.current_temp)
+    {
+      newState = true;
+      spaState.current_temp = d;      
+      ESP_LOGD("Spa/temperature/state", String(d, 2).c_str());
+    }
+
     // REMARK Move upper publish to HERE to get 0 for unknown temperature
 
     // 8:Flag Byte 3 Hour & 9:Flag Byte 4 Minute => Time
     if (Q_in[8] < 10) s = "0"; else s = "";
-    spaState.hour = Q_in[8];
+    sethour = Q_in[8];
     s += String(Q_in[8]) + ":";
     if (Q_in[9] < 10) s += "0";
     s += String(Q_in[9]);
-    spaState.minutes = Q_in[9];
-    ESP_LOGD("Spa/time/state", s.c_str());
-    sethour = spaState.hour;
-    setminute = spaState.minutes;
+    setminute = Q_in[9];
 
-    // 10:Flag Byte 5 - Heating Mode
-    switch (Q_in[10]) {
-      case 0:
-        ESP_LOGD("Spa/restmode/state", STROFF);
-        spaState.restmode = 0;
-        break;
-      case 3:// Ready-in-Rest
-        ESP_LOGD("Spa/restmode/state", "READY");
-        spaState.restmode = 0;
-        break;
-      case 1:
-        ESP_LOGD("Spa/restmode/state", STRON); //Rest
-        spaState.restmode = 1;
-        break;
+    if(sethour != spaState.hour || setminute != spaState.minutes)
+    {
+      // Do not trigger a new state for clock
+      // newState = true;
+      ESP_LOGD("Spa/time/state", s.c_str());
+      spaState.hour = sethour;
+      spaState.minutes = setminute;
     }
 
+    d = Q_in[10];
+    if(d != spaState.restmode)
+    {
+      newState = true;
+      spaState.restmode =d ;      
+      ESP_LOGD("Spa/restmode/state", String(d, 2).c_str());
+    }
+    
     // 15:Flags Byte 10 / Heat status, Temp Range
-    d = bitRead(Q_in[15], 4);
-    if (d == 0)
-    { 
-      ESP_LOGD("Spa/heatstate/state", STROFF);
-      spaState.heat_state = 0;
-    }
-    else if (d == 1 || d == 2){ 
+    d = bitRead(Q_in[15], 4);    
+    if (d != spaState.heat_state)
+    {
+      newState = true;
       ESP_LOGD("Spa/heatstate/state", String(d, 2).c_str());
       spaState.heat_state = d;
     }
 
-
     d = bitRead(Q_in[15], 2);
-    if (d == 0) {
-      ESP_LOGD("Spa/highrange/state", STROFF); //LOW
-      spaState.highrange = 0;
-    } else if (d == 1) {
-      ESP_LOGD("Spa/highrange/state", STRON); //HIGH
-      spaState.highrange = 1;
+    if (d != spaState.highrange) 
+    {
+      newState = true;
+      ESP_LOGD("Spa/highrange/state", String(d, 2).c_str()); //LOW
+      spaState.highrange = d;
     }
 
     // 16:Flags Byte 11
-    if (bitRead(Q_in[16], 1) == 1) {
-      ESP_LOGD("Spa/jet_1/state", STRON);
-      spaState.jet1 = 1;
-    } else {
-      ESP_LOGD("Spa/jet_1/state", STROFF);
-      spaState.jet1 = 0;
-    }
+    d = bitRead(Q_in[16], 1);
+    if (d != spaState.jet1) 
+    {
+      newState = true;
+      ESP_LOGD("Spa/jet_1/state", String(d, 2).c_str());
+      spaState.jet1 = d;
+    } 
 
-    if (bitRead(Q_in[16], 3) == 1) {
-      ESP_LOGD("Spa/jet_2/state", STRON);
-      spaState.jet2 = 1;
-    } else {
-      ESP_LOGD("Spa/jet_2/state", STROFF);
-      spaState.jet2 = 0;
+    d = bitRead(Q_in[16], 3);
+    if (d != spaState.jet2) 
+    {
+      newState = true;
+      ESP_LOGD("Spa/jet_2/state", String(d, 2).c_str());
+      spaState.jet2 = d;
     }
 
     // 18:Flags Byte 13
-    if (bitRead(Q_in[18], 1) == 1)
-      ESP_LOGD("Spa/circ/state", STRON);
-    else
-      ESP_LOGD("Spa/circ/state", STROFF);
+    d = bitRead(Q_in[18], 1);
+    if (d != spaState.circulation)
+    {
+      newState = true;
+      ESP_LOGD("Spa/circ/state", String(d, 2).c_str());
+      spaState.circulation = d;
+    }
 
-    if (bitRead(Q_in[18], 2) == 1) {
-      ESP_LOGD("Spa/blower/state", STRON);
-      spaState.blower = 1;      
-    } else {
-      ESP_LOGD("Spa/blower/state", STROFF);
-      spaState.blower = 0;
+    d = bitRead(Q_in[18], 2);
+    if (d != spaState.blower) 
+    {
+      newState = true;
+      ESP_LOGD("Spa/blower/state", String(d, 2).c_str());
+      spaState.blower = d;      
     }
+
+    d = Q_in[19] == 0x03;
     // 19:Flags Byte 14
-    if (Q_in[19] == 0x03) {
-      ESP_LOGD("Spa/light/state", STRON);
+    if (d != spaState.light) 
+    {
+      newState = true;
+      ESP_LOGD("Spa/light/state",  String(d, 2).c_str());
       spaState.light = 1;
-    } else {
-      ESP_LOGD("Spa/light/state", STROFF);
-      spaState.light = 0;
     }
+
+    // TODO: callback on newState
 
     last_state_crc = Q_in[Q_in[1]];
   }
