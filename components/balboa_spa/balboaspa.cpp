@@ -349,14 +349,15 @@ void BalboaSpa::read_serial() {
     // 10:Flag Byte 5 - Heating Mode
     switch (Q_in[10]) {
       case 0:
-        ESP_LOGD("Spa/heatingmode/state", STRON); //Ready
+        ESP_LOGD("Spa/restmode/state", STROFF);
         spaState.restmode = 0;
         break;
       case 3:// Ready-in-Rest
+        ESP_LOGD("Spa/restmode/state", "READY");
         spaState.restmode = 0;
         break;
       case 1:
-        ESP_LOGD("Spa/heatingmode/state", STROFF); //Rest
+        ESP_LOGD("Spa/restmode/state", STRON); //Rest
         spaState.restmode = 1;
         break;
     }
@@ -369,9 +370,10 @@ void BalboaSpa::read_serial() {
       spaState.heat_state = 0;
     }
     else if (d == 1 || d == 2){ 
-      ESP_LOGD("Spa/heatstate/state", STRON);
+      ESP_LOGD("Spa/heatstate/state", String(d, 2).c_str());
       spaState.heat_state = d;
     }
+
 
     d = bitRead(Q_in[15], 2);
     if (d == 0) {

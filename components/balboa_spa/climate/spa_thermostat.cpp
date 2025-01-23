@@ -45,7 +45,7 @@ void BalboaSpaThermostat::update() {
         update = true;
     }
 
-    if(spaState.heat_state && this->action != climate::CLIMATE_ACTION_HEATING)
+    if(spaState.heat_state > 0 && this->action != climate::CLIMATE_ACTION_HEATING)
     {
         this->action = climate::CLIMATE_ACTION_HEATING;
         update = true;
