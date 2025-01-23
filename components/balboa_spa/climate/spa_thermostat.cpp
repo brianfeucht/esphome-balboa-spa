@@ -35,7 +35,7 @@ void BalboaSpaThermostat::update() {
     this->target_temperature = spaState.target_temp;
     this->current_temperature = spaState.current_temp;
     
-    if(spaState.restmode)
+    if(spaState.heat_state)
     {
         this->action = climate::CLIMATE_ACTION_IDLE; 
     }

@@ -29,6 +29,7 @@ namespace balboa_spa {
         uint8_t blower :1;
         uint8_t light :1;
         uint8_t restmode:1;
+        uint8_t heat_state:2;
         uint8_t highrange:1;
         uint8_t hour :5;
         uint8_t minutes :6;

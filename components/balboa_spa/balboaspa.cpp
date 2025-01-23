@@ -359,8 +359,15 @@ void BalboaSpa::read_serial() {
 
     // 15:Flags Byte 10 / Heat status, Temp Range
     d = bitRead(Q_in[15], 4);
-    if (d == 0) ESP_LOGD("Spa/heatstate/state", STROFF);
-    else if (d == 1 || d == 2) ESP_LOGD("Spa/heatstate/state", STRON);
+    if (d == 0)
+    { 
+      ESP_LOGD("Spa/heatstate/state", STROFF);
+      spaState.heat_state = 0;
+    }
+    else if (d == 1 || d == 2){ 
+      ESP_LOGD("Spa/heatstate/state", STRON);
+      spaState.heat_state = d;
+    }
 
     d = bitRead(Q_in[15], 2);
     if (d == 0) {
