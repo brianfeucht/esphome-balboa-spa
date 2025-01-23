@@ -22,17 +22,12 @@ uart:
   baud_rate: 115200
   rx_buffer_size: 128
 
-binary_sensor:
+switch:
   - platform: balboa_spa
     balboa_spa_id: test_spa
     jet1:
-      id: jet1
+      name: Jet1
     jet2:
-      id: jet2
-    lights:
-      id: lights
-
-climate:
-  - platform: balboa_spa
-    balboa_spa_id: test_spa
-    id: test_spa_thermostat
+      name: Jet2
+    light:
+      name: Lights
