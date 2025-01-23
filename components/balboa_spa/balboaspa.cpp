@@ -357,7 +357,7 @@ void BalboaSpa::read_serial() {
     {
       newState = true;
       spaState.restmode =d ;      
-      ESP_LOGD("Spa/restmode/state", String(d, 2).c_str());
+      ESP_LOGD("Spa/restmode/state", String(d, 0).c_str());
     }
     
     // 15:Flags Byte 10 / Heat status, Temp Range
@@ -365,7 +365,7 @@ void BalboaSpa::read_serial() {
     if (d != spaState.heat_state)
     {
       newState = true;
-      ESP_LOGD("Spa/heatstate/state", String(d, 2).c_str());
+      ESP_LOGD("Spa/heatstate/state", String(d, 0).c_str());
       spaState.heat_state = d;
     }
 
@@ -373,7 +373,7 @@ void BalboaSpa::read_serial() {
     if (d != spaState.highrange) 
     {
       newState = true;
-      ESP_LOGD("Spa/highrange/state", String(d, 2).c_str()); //LOW
+      ESP_LOGD("Spa/highrange/state", String(d, 0).c_str()); //LOW
       spaState.highrange = d;
     }
 
@@ -382,7 +382,7 @@ void BalboaSpa::read_serial() {
     if (d != spaState.jet1) 
     {
       newState = true;
-      ESP_LOGD("Spa/jet_1/state", String(d, 2).c_str());
+      ESP_LOGD("Spa/jet_1/state", String(d, 0).c_str());
       spaState.jet1 = d;
     } 
 
@@ -390,7 +390,7 @@ void BalboaSpa::read_serial() {
     if (d != spaState.jet2) 
     {
       newState = true;
-      ESP_LOGD("Spa/jet_2/state", String(d, 2).c_str());
+      ESP_LOGD("Spa/jet_2/state", String(d, 0).c_str());
       spaState.jet2 = d;
     }
 
@@ -399,7 +399,7 @@ void BalboaSpa::read_serial() {
     if (d != spaState.circulation)
     {
       newState = true;
-      ESP_LOGD("Spa/circ/state", String(d, 2).c_str());
+      ESP_LOGD("Spa/circ/state", String(d, 0).c_str());
       spaState.circulation = d;
     }
 
@@ -407,7 +407,7 @@ void BalboaSpa::read_serial() {
     if (d != spaState.blower) 
     {
       newState = true;
-      ESP_LOGD("Spa/blower/state", String(d, 2).c_str());
+      ESP_LOGD("Spa/blower/state", String(d, 0).c_str());
       spaState.blower = d;      
     }
 
@@ -416,7 +416,7 @@ void BalboaSpa::read_serial() {
     if (d != spaState.light) 
     {
       newState = true;
-      ESP_LOGD("Spa/light/state",  String(d, 2).c_str());
+      ESP_LOGD("Spa/light/state",  String(d, 0).c_str());
       spaState.light = d;
     }
 
