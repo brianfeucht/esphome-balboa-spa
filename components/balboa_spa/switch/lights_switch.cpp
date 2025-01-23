@@ -17,7 +17,9 @@ void LightsSwitch::update()  {
 void LightsSwitch::set_parent(BalboaSpa *parent) { spa = parent; }
 
 void LightsSwitch::write_state(bool state) {
-    if(this->state != state){
+    SpaState spaState = spa->get_current_state();
+
+    if(spaState.light != state){
         spa->toggle_light();
     }
 }

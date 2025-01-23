@@ -17,7 +17,9 @@ void Jet1Switch::update() {
 void Jet1Switch::set_parent(BalboaSpa *parent) { spa = parent; }
 
 void Jet1Switch::write_state(bool state) {
-    if(this->state != state){
+    SpaState spaState = spa->get_current_state();
+
+    if(spaState.jet1  != state){
         spa->toggle_jet1();
     }
 }
