@@ -41,7 +41,7 @@ void BalboaSpaThermostat::update() {
 
     if(this->current_temperature != spaState.current_temp)
     {
-        this->current_temperature = spaState.current_temp
+        this->current_temperature = spaState.current_temp;
         update = true;
     }
 
