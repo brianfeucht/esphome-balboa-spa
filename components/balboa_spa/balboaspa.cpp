@@ -347,7 +347,7 @@ void BalboaSpa::read_serial() {
     {
       // Do not trigger a new state for clock
       // newState = true;
-      ESP_LOGD("Spa/time/state", s.c_str());
+      // ESP_LOGD("Spa/time/state", s.c_str());
       spaState.hour = sethour;
       spaState.minutes = setminute;
     }
@@ -417,7 +417,7 @@ void BalboaSpa::read_serial() {
     {
       newState = true;
       ESP_LOGD("Spa/light/state",  String(d, 2).c_str());
-      spaState.light = 1;
+      spaState.light = d;
     }
 
     // TODO: callback on newState
