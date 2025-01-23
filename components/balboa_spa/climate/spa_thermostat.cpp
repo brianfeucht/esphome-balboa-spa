@@ -31,20 +31,35 @@ void BalboaSpaThermostat::set_parent(BalboaSpa *parent) { spa = parent; }
 void BalboaSpaThermostat::update() {
     yield();
     SpaState spaState = spa->get_current_state();
+    bool update = false;
 
-    this->target_temperature = spaState.target_temp;
-    this->current_temperature = spaState.current_temp;
-    
-    if(spaState.heat_state)
+    if(this->target_temperature != spaState.target_temp)
     {
-        this->action = climate::CLIMATE_ACTION_IDLE; 
+        this->target_temperature = spaState.target_temp;
+        update = true;
     }
-    else
+
+    if(this->current_temperature != spaState.current_temp)
+    {
+        this->current_temperature = spaState.current_temp
+        update = true;
+    }
+
+    if(spaState.heat_state && this->action != climate::CLIMATE_ACTION_IDLE)
+    {
+        this->action = climate::CLIMATE_ACTION_IDLE;
+        update = true;
+    }
+    else if(this->action != climate::CLIMATE_ACTION_HEATING)
     {
         this->action = climate::CLIMATE_ACTION_HEATING;
+        update = true;
     }
 
-    this->publish_state();
+    if(update)
+    {
+        this->publish_state();
+    }
 }
 
 }
