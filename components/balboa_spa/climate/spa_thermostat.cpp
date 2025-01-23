@@ -1,6 +1,7 @@
 #include "esphome.h"
 #include "esphome/core/log.h"
 #include "spa_thermostat.h"
+#include "esphome/components/climate/climate_mode.h"
 
 namespace esphome {
 namespace balboa_spa {
@@ -8,7 +9,7 @@ namespace balboa_spa {
 climate::ClimateTraits BalboaSpaThermostat::traits()
 {
     auto traits = climate::ClimateTraits();
-    traits.add_supported_mode(climate::CLIMATE_MODE_HEAT);
+    traits.set_supported_modes({climate::CLIMATE_MODE_OFF, climate::ClimateMode::CLIMATE_MODE_HEAT});
     traits.set_supports_action(true);
     traits.set_supports_current_temperature(true);
     traits.set_supports_two_point_target_temperature(false);
@@ -33,6 +34,15 @@ void BalboaSpaThermostat::update() {
 
     this->target_temperature = spaState.target_temp;
     this->current_temperature = spaState.current_temp;
+    
+    if(spaState.restmode)
+    {
+        this->action = climate::CLIMATE_ACTION_IDLE; 
+    }
+    else
+    {
+        this->action = climate::CLIMATE_ACTION_HEATING;
+    }
 }
 
 }
