@@ -43,6 +43,8 @@ void BalboaSpaThermostat::update() {
     {
         this->action = climate::CLIMATE_ACTION_HEATING;
     }
+
+    this->publish_state();
 }
 
 }
