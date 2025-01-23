@@ -29,8 +29,6 @@ void BalboaSpa::set_temp(int temp) {
         settemp = temp;
         send = 0xff;
     }
-
-    this->update();
 }
 
 void BalboaSpa::set_hour(int hour) {
@@ -38,8 +36,6 @@ void BalboaSpa::set_hour(int hour) {
         sethour = hour;
         send = 0x21;
     }
-    
-    this->update();
 }
 
 void BalboaSpa::set_minute(int minute) {
@@ -47,24 +43,16 @@ void BalboaSpa::set_minute(int minute) {
         setminute = minute;
         send = 0x21;
     }
-    
-    this->update();
 }
 
 void BalboaSpa::toggle_light() {
     send = 0x11;
-    
-    this->update();
 }
 void BalboaSpa::toggle_jet1() {
     send = 0x04;
-    
-    this->update();
 }
 void BalboaSpa::toggle_jet2() {
     send = 0x05;
-    
-    this->update();
 }
 
 void BalboaSpa::read_serial() {
