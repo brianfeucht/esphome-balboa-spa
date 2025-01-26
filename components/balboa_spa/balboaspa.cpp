@@ -301,11 +301,10 @@ void BalboaSpa::read_serial() {
     bool newState = false;
 
     // 25:Flag Byte 20 - Set Temperature
-    if (spaConfig.temp_scale == 0) {
+    if (spaConfig.temp_scale == 1) {
       d = Q_in[25];
-    } else if (spaConfig.temp_scale == 1){
-      d = Q_in[25] / 2;
-      if (Q_in[25] % 2 == 1) d += 0.5;
+    } else if (spaConfig.temp_scale == 0){
+      d = (Q_in[25] - 32) * 5/9;
     }
 
     if(d != spaState.target_temp)
@@ -318,11 +317,10 @@ void BalboaSpa::read_serial() {
     // 7:Flag Byte 2 - Actual temperature
     if (Q_in[7] != 0xFF) 
     {
-      if (spaConfig.temp_scale == 0) {
+      if (spaConfig.temp_scale == 1) {
         d = Q_in[7];
-      } else if (spaConfig.temp_scale == 1){
-        d = Q_in[7] / 2;
-        if (Q_in[7] % 2 == 1) d += 0.5;
+      } else if (spaConfig.temp_scale == 0){
+        d = (Q_in[7] - 32) * 5/9;
       }
 
       if (c > 0) {
