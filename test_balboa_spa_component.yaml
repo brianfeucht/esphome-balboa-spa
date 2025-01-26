@@ -36,3 +36,7 @@ climate:
   - platform: balboa_spa
     balboa_spa_id: test_spa
     name: "Spa Thermostat"
+    visual:
+      min_temperature: 62 °F    # min: 17
+      max_temperature: 105 °F    # max: 30
+      temperature_step: 1.0 °F  # min: 0.5

@@ -6,6 +6,8 @@
 namespace esphome {
 namespace balboa_spa {
 
+BalboaSpaThermostat::BalboaSpaThermostat() : PollingComponent(1000) {}
+
 climate::ClimateTraits BalboaSpaThermostat::traits()
 {
     auto traits = climate::ClimateTraits();
@@ -13,9 +15,6 @@ climate::ClimateTraits BalboaSpaThermostat::traits()
     traits.set_supports_action(true);
     traits.set_supports_current_temperature(true);
     traits.set_supports_two_point_target_temperature(false);
-    traits.set_visual_min_temperature(ESPHOME_BALBOASPA_MIN_TEMPERATURE);
-    traits.set_visual_max_temperature(ESPHOME_BALBOASPA_MAX_TEMPERATURE);
-    traits.set_visual_temperature_step(ESPHOME_BALBOASPA_TEMPERATURE_STEP);
     return traits;
 }
 

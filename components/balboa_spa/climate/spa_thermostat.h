@@ -10,7 +10,7 @@ namespace balboa_spa {
 class BalboaSpaThermostat : public climate::Climate, public PollingComponent {
  public:
   // Update thermostat status from UART device every second
-  BalboaSpaThermostat() : PollingComponent(1000) {}
+  BalboaSpaThermostat();
 
   void update() override;
   void set_parent(BalboaSpa *parent);
