@@ -24,10 +24,15 @@ float BalboaSpa::get_setup_priority() const { return esphome::setup_priority::LA
 SpaConfig BalboaSpa::get_current_config() { return spaConfig; }
 SpaState BalboaSpa::get_current_state() { return spaState; }
 
-void BalboaSpa::set_temp(int temp) {
-    if (temp >= ESPHOME_BALBOASPA_MIN_TEMPERATURE || temp < ESPHOME_BALBOASPA_MAX_TEMPERATURE) {
-        settemp = temp;
-        send = 0xff;
+void BalboaSpa::set_temp(double temp)
+{
+    if(spaConfig.temp_scale == 1){
+      temp = ((celsius * 9.0) / 5.0) + 32;
+    }
+
+    if (temp >= ESPHOME_BALBOASPA_MIN_TEMPERATURE || temp <= ESPHOME_BALBOASPA_MAX_TEMPERATURE) {
+      settemp = temp;
+      send = 0xff;
     }
 }
 
