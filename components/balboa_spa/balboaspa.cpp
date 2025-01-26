@@ -304,7 +304,7 @@ void BalboaSpa::read_serial() {
     if (spaConfig.temp_scale == 0) {
       d = Q_in[25];
     } else if (spaConfig.temp_scale == 1){
-      d = (Q_in[25] - 32) * 5/9;
+      d = (Q_in[25] - 32.0) * 5.0/9.0;
     }
 
     if(d != spaState.target_temp)
@@ -320,7 +320,7 @@ void BalboaSpa::read_serial() {
       if (spaConfig.temp_scale == 0) {
         d = Q_in[7];
       } else if (spaConfig.temp_scale == 1){
-        d = (Q_in[7] - 32) * 5/9;
+        d = (Q_in[7] - 32.0) * 5.0/9.0;
       }
 
       if (c > 0) {
