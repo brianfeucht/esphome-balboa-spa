@@ -46,13 +46,13 @@ void BalboaSpa::set_minute(int minute) {
 }
 
 void BalboaSpa::toggle_light() {
-    send = 0x11;
+    //send = 0x11;
 }
 void BalboaSpa::toggle_jet1() {
-    send = 0x04;
+    //send = 0x04;
 }
 void BalboaSpa::toggle_jet2() {
-    send = 0x05;
+    //send = 0x05;
 }
 
 void BalboaSpa::read_serial() {
