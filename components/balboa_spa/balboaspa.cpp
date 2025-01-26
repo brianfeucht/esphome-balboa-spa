@@ -46,13 +46,13 @@ void BalboaSpa::set_minute(int minute) {
 }
 
 void BalboaSpa::toggle_light() {
-    //send = 0x11;
+    send = 0x11;
 }
 void BalboaSpa::toggle_jet1() {
-    //send = 0x04;
+    send = 0x04;
 }
 void BalboaSpa::toggle_jet2() {
-    //send = 0x05;
+    send = 0x05;
 }
 
 void BalboaSpa::read_serial() {
@@ -140,11 +140,15 @@ void BalboaSpa::read_serial() {
               }
             } else {
               // Send toggle commands
+              ESP_LOGD("Spa/debug/SEND/id",String(id).c_str());
+              ESP_LOGD("Spa/debug/SEND/send",String(send).c_str());
+              /*
               Q_out.push(id);
               Q_out.push(0xBF);
               Q_out.push(0x11);
               Q_out.push(send);
               Q_out.push(0x00);
+              */
             }
 
             rs485_send();
