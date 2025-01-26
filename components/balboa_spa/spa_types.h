@@ -20,7 +20,7 @@ namespace balboa_spa {
         uint8_t mister :1;
         uint8_t aux1 :1;
         uint8_t aux2 :1;
-        uint8_t temp_scale :1; //0 -> Farenheit, 1-> Celcius
+        uint8_t temp_scale :1; //1 -> Farenheit, 0-> Celcius
     };
 
     struct SpaState {
