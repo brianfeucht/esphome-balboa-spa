@@ -159,6 +159,7 @@ void BalboaSpa::read_serial() {
               // Send toggle commands
               ESP_LOGD("Spa/debug/SEND/id",String(id).c_str());
               ESP_LOGD("Spa/debug/SEND/send",String(send).c_str());
+              return;
               /*
               Q_out.push(id);
               Q_out.push(0xBF);
@@ -257,7 +258,7 @@ void BalboaSpa::read_serial() {
       write(Q_out[i]);
     }
 
-    print_msg(Q_out);
+    //print_msg(Q_out);
 
     flush();
 
@@ -379,7 +380,7 @@ void BalboaSpa::read_serial() {
     if(d != spaState.restmode)
     {
       newState = true;
-      spaState.restmode =d ;      
+      spaState.restmode = d ;      
       ESP_LOGD("Spa/restmode/state", String(d, 0).c_str());
     }
     
