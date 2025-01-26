@@ -297,9 +297,14 @@ void BalboaSpa::read_serial() {
     bool newState = false;
 
     // 25:Flag Byte 20 - Set Temperature
-    d = Q_in[25];
-    // Check for invalid readings
-    if(d > 65 && d < 110 && d != spaState.target_temp)
+    if (spaConfig.temp_scale == 0) {
+      d = Q_in[25];
+    } else if (spaConfig.temp_scale == 1){
+      d = Q_in[25] / 2;
+      if (Q_in[25] % 2 == 1) d += 0.5;
+    }
+
+    if(d != spaState.target_temp)
     {
       newState = true;
       spaState.target_temp = d;
@@ -307,16 +312,15 @@ void BalboaSpa::read_serial() {
     }
 
     // 7:Flag Byte 2 - Actual temperature
-    if (Q_in[7] != 0xFF) {
-      d = Q_in[7];
-      /* this doesn't seem reliable
-      if (spaConfig.temp_scale == 1) {
+    if (Q_in[7] != 0xFF) 
+    {
+      if (spaConfig.temp_scale == 0) {
         d = Q_in[7];
-      } else if (spaConfig.temp_scale == 0){
+      } else if (spaConfig.temp_scale == 1){
         d = Q_in[7] / 2;
         if (Q_in[7] % 2 == 1) d += 0.5;
       }
-      */
+
       if (c > 0) {
         if ((d > c * 1.2) || (d < c * 0.8)) d = c; //remove spurious readings greater or less than 20% away from previous read
       }
