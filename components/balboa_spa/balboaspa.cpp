@@ -29,6 +29,10 @@ void BalboaSpa::set_temp(float temp)
     if(spaConfig.temp_scale == 1){
       temp = ((temp * 9.0) / 5.0) + 32;
     }
+    else
+    {
+      temp = temp * 2.0;
+    }
 
     if (temp >= ESPHOME_BALBOASPA_MIN_TEMPERATURE || temp <= ESPHOME_BALBOASPA_MAX_TEMPERATURE) {
       settemp = temp;
@@ -315,7 +319,7 @@ void BalboaSpa::read_serial() {
 
     // 25:Flag Byte 20 - Set Temperature
     if (spaConfig.temp_scale == 0) {
-      d = Q_in[25];
+      d = Q_in[25] / 2.0;
     } else if (spaConfig.temp_scale == 1){
       d = (Q_in[25] - 32.0) * 5.0/9.0;
     }
@@ -331,7 +335,7 @@ void BalboaSpa::read_serial() {
     if (Q_in[7] != 0xFF) 
     {
       if (spaConfig.temp_scale == 0) {
-        d = Q_in[7];
+        d = Q_in[7] / 2.0;
       } else if (spaConfig.temp_scale == 1){
         d = (Q_in[7] - 32.0) * 5.0/9.0;
       }
