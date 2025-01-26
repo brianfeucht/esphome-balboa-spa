@@ -24,10 +24,10 @@ float BalboaSpa::get_setup_priority() const { return esphome::setup_priority::LA
 SpaConfig BalboaSpa::get_current_config() { return spaConfig; }
 SpaState BalboaSpa::get_current_state() { return spaState; }
 
-void BalboaSpa::set_temp(double temp)
+void BalboaSpa::set_temp(float temp)
 {
     if(spaConfig.temp_scale == 1){
-      temp = ((celsius * 9.0) / 5.0) + 32;
+      temp = ((temp * 9.0) / 5.0) + 32;
     }
 
     if (temp >= ESPHOME_BALBOASPA_MIN_TEMPERATURE || temp <= ESPHOME_BALBOASPA_MAX_TEMPERATURE) {
@@ -95,7 +95,9 @@ void BalboaSpa::read_serial() {
             ESP_LOGD("Spa/node/id", "Requesting ID");
             ID_request();
           }
-        } else if (Q_in[2] == id && Q_in[4] == 0x06) { // we have an ID, do clever stuff
+        } 
+        else if (Q_in[2] == id && Q_in[4] == 0x06) 
+        { // we have an ID, do clever stuff
             // id BF 06:Ready to Send
             if (send == 0x21) {
               Q_out.push(id);
@@ -103,13 +105,15 @@ void BalboaSpa::read_serial() {
               Q_out.push(0x21);
               Q_out.push(sethour);
               Q_out.push(setminute);
-            } else if (send == 0xff) {
+            } 
+            else if (send == 0xff) {
               // 0xff marks dirty temperature for now
               Q_out.push(id);
               Q_out.push(0xBF);
               Q_out.push(0x20);
               Q_out.push(settemp);
-            } else if (send == 0x00) {
+            } 
+            else if (send == 0x00) {
               if (have_config == 0) { // Get configuration of the hot tub
                 Q_out.push(id);
                 Q_out.push(0xBF);
@@ -119,7 +123,8 @@ void BalboaSpa::read_serial() {
                 Q_out.push(0x01);
                 ESP_LOGD("Spa/config/status", "Getting config");
                 have_config = 1;
-              } else if (have_faultlog == 0) { // Get the fault log
+              } 
+              else if (have_faultlog == 0) { // Get the fault log
                 Q_out.push(id);
                 Q_out.push(0xBF);
                 Q_out.push(0x22);
@@ -128,7 +133,8 @@ void BalboaSpa::read_serial() {
                 Q_out.push(0x00);
                 have_faultlog = 1;
                 ESP_LOGD("Spa/debug/have_faultlog", "requesting fault log, #1");
-              } else if ((have_filtersettings == 0) && (have_faultlog == 2)) { // Get the filter cycles log once we have the faultlog
+              } 
+              else if ((have_filtersettings == 0) && (have_faultlog == 2)) { // Get the filter cycles log once we have the faultlog
                 Q_out.push(id);
                 Q_out.push(0xBF);
                 Q_out.push(0x22);
@@ -137,13 +143,15 @@ void BalboaSpa::read_serial() {
                 Q_out.push(0x00);
                 ESP_LOGD("Spa/debug/have_filtersettings", "requesting filter settings, #1");
                 have_filtersettings = 1;
-              } else {
+              } 
+              else {
                 // A Nothing to Send message is sent by a client immediately after a Clear to Send message if the client has no messages to send.
                 Q_out.push(id);
                 Q_out.push(0xBF);
                 Q_out.push(0x07);
               }
-            } else {
+            } 
+            else {
               // Send toggle commands
               ESP_LOGD("Spa/debug/SEND/id",String(id).c_str());
               ESP_LOGD("Spa/debug/SEND/send",String(send).c_str());

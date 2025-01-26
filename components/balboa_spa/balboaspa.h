@@ -30,7 +30,7 @@ class BalboaSpa : public uart::UARTDevice, public PollingComponent {
     SpaConfig get_current_config();
     SpaState get_current_state();
 
-    void set_temp(int temp);
+    void set_temp(float temp);
     void set_hour(int hour);
     void set_minute(int minute);
     void toggle_light();

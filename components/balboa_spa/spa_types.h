@@ -34,8 +34,8 @@ namespace balboa_spa {
         uint8_t circulation:1;
         uint8_t hour :5;
         uint8_t minutes :6;
-        double current_temp;
-        double target_temp;
+        float   current_temp;
+        float   target_temp;
     };
 
     struct SpaFaultLog {
