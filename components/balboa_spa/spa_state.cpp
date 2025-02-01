@@ -80,4 +80,17 @@ float SpaState::get_target_temp(){
 void SpaState::set_target_temp(float current_temp) {
     target_temperatures.push(current_temp);
 }
+
+uint8_t SpaState::get_heat_state(){
+    if(heat_states.isStable() == false){
+        return 254;
+    }
+
+    return target_temperatures.mode();
+}
+
+void SpaState::set_heat_state(uint8_t heat_state){
+    heat_states.push(heat_state);
+}
+
 }}

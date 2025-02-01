@@ -31,11 +31,13 @@ class SpaState {
         uint8_t blower :1;
         uint8_t light :1;
         uint8_t restmode:1;
-        uint8_t heat_state:2;
         uint8_t highrange:1;        
         uint8_t circulation:1;
         uint8_t hour :5;
         uint8_t minutes :6;
+
+        uint8_t get_heat_state();
+        void set_heat_state(uint8_t heat_state);
 
         float get_target_temp();
         void set_target_temp(float target_temp);
@@ -45,6 +47,7 @@ class SpaState {
     private:
         SpaValueHistory<float> current_temperatures;
         SpaValueHistory<float> target_temperatures;
+        SpaValueHistory<uint8_t> heat_states;
 };
 }  // namespace empty_uart_component
 }  // namespace esphome

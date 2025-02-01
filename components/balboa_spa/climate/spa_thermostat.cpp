@@ -46,18 +46,18 @@ void BalboaSpaThermostat::update() {
         update = true;
     }
 
-/*
-    if(spaState.heat_state > 0 && this->action != climate::CLIMATE_ACTION_HEATING)
-    {
-        this->action = climate::CLIMATE_ACTION_HEATING;
-        update = true;
-    }
-    else if(this->action != climate::CLIMATE_ACTION_IDLE)
+    uint8_t heat_state = spaState->get_heat_state();
+    if(heat_state == 0 && this->action != climate::CLIMATE_ACTION_IDLE)
     {
         this->action = climate::CLIMATE_ACTION_IDLE;
         update = true;
     }
-*/
+    else if(heat_state < 254 && this->action != climate::CLIMATE_ACTION_HEATING)
+    {
+        this->action = climate::CLIMATE_ACTION_HEATING;
+        update = true;
+    }
+
     if(spaState->restmode && this->mode != climate::CLIMATE_MODE_OFF)
     {
         this->mode = climate::CLIMATE_MODE_OFF;
