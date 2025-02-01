@@ -36,12 +36,15 @@ class SpaState {
         uint8_t circulation:1;
         uint8_t hour :5;
         uint8_t minutes :6;
-        float   target_temp;
+
+        float get_target_temp();
+        void set_target_temp(float target_temp);
 
         float get_current_temp();
         void set_current_temp(float current_temp);
     private:
-        SpaValueHistory<float> temperatures;
+        SpaValueHistory<float> current_temperatures;
+        SpaValueHistory<float> target_temperatures;
 };
 }  // namespace empty_uart_component
 }  // namespace esphome

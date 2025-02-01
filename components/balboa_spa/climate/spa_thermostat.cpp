@@ -31,9 +31,9 @@ void BalboaSpaThermostat::update() {
     yield();
     SpaState* spaState = spa->get_current_state();
     bool update = false;
-    float target_temp = spaState->target_temp;
+    float target_temp = spaState->get_target_temp();
 
-    if(this->target_temperature != target_temp)
+    if(target_temp > 0 && this->target_temperature != target_temp)
     {
         this->target_temperature = target_temp;
         update = true;

@@ -57,16 +57,27 @@ template <typename T> T SpaValueHistory<T>::mode(){
 }
 
 float SpaState::get_current_temp(){
-    if(temperatures.isStable() == false)
+    if(current_temperatures.isStable() == false)
     {
         return 0;
     }
     
-    return temperatures.mode();
+    return current_temperatures.mode();
 }
 
 void SpaState::set_current_temp(float current_temp){
-    temperatures.push(current_temp);
+    current_temperatures.push(current_temp);
 }
 
+float SpaState::get_target_temp(){
+    if(target_temperatures.isStable() == false){
+        return 0;
+    }
+
+    return target_temperatures.mode();
+}
+
+void SpaState::set_target_temp(float current_temp) {
+    target_temperatures.push(current_temp);
+}
 }}
