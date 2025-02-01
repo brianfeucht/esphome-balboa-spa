@@ -5,7 +5,9 @@
 
 #include "spa_types.h"
 #include "spa_config.h"
+#include "spa_state.h"
 #include <CircularBuffer.hpp>
+#include <string>
 
 namespace esphome {
 namespace balboa_spa {
@@ -29,7 +31,7 @@ class BalboaSpa : public uart::UARTDevice, public PollingComponent {
     float get_setup_priority() const override;
 
     SpaConfig get_current_config();
-    SpaState get_current_state();
+    SpaState* get_current_state();
 
     void set_temp(float temp);
     void set_hour(int hour);

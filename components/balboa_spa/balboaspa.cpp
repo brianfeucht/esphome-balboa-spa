@@ -1,3 +1,4 @@
+#include <string>
 #include "esphome.h"
 #include "esphome/core/log.h"
 #include "balboaspa.h"
@@ -22,7 +23,7 @@ void BalboaSpa::update() {
 float BalboaSpa::get_setup_priority() const { return esphome::setup_priority::LATE; }
 
 SpaConfig BalboaSpa::get_current_config() { return spaConfig; }
-SpaState BalboaSpa::get_current_state() { return spaState; }
+SpaState* BalboaSpa::get_current_state() { return &spaState; }
 
 void BalboaSpa::set_temp(float temp)
 {
