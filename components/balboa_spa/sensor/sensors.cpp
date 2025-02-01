@@ -20,7 +20,7 @@ void BalboaSpaSensors::update() {
             sensor_state_value = spaState->circulation;
             break;
         default:
-             ESP_LOGD("Spa/Seneors/UnknownSensorType", sensor_type);
+             ESP_LOGD("Spa/Sensors/UnknownSensorType", String(sensor_type, 0).c_str());
             // Unknown enum value. Ignore
             return;
     }

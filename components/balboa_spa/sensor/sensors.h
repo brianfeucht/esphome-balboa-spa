@@ -9,10 +9,10 @@ namespace balboa_spa {
 
 class BalboaSpaSensors : public PollingComponent, public sensor::Sensor {
 public:
-  enum class BalboaSpaSensorType{
-    BLOWER,
-    HIGHRANGE,
-    CIRCULATION,
+  enum class BalboaSpaSensorType : uint8_t{
+    BLOWER = 1,
+    HIGHRANGE = 2,
+    CIRCULATION = 3,
   };
 
 public:
