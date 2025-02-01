@@ -1,4 +1,4 @@
-#include "stdint.h"
+#include <stdint.h>
 #include <string>
 
 #ifndef SPA_CONFIG_H
@@ -6,7 +6,8 @@
 
 namespace esphome {
 namespace balboa_spa {
-    struct SpaConfig {
+struct SpaConfig {
+    public:
         uint8_t pump1 :2; //this could be 1=1 speed; 2=2 speeds
         uint8_t pump2 :2;
         uint8_t pump3 :2;
@@ -21,7 +22,7 @@ namespace balboa_spa {
         uint8_t aux1 :1;
         uint8_t aux2 :1;
         uint8_t temp_scale :1; //1 -> Farenheit, 0-> Celcius
-    };
+};
 
 }  // namespace empty_uart_component
 }  // namespace esphome
