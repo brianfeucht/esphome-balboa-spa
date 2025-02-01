@@ -326,6 +326,7 @@ void BalboaSpa::read_serial() {
     if(d != 0)
     {
       spaState.set_target_temp(d);
+      ESP_LOGD("Spa/temperature/target", String(d, 2).c_str());
     }
 
     // 7:Flag Byte 2 - Actual temperature
@@ -348,7 +349,7 @@ void BalboaSpa::read_serial() {
 
     if(d != 0)
     {
-      spaState.set_current_temp(d);   
+      spaState.set_current_temp(d);
       ESP_LOGD("Spa/temperature/state", String(d, 2).c_str());
     }
 
