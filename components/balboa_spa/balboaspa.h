@@ -4,6 +4,7 @@
 #include "esphome/components/uart/uart.h"
 
 #include "spa_types.h"
+#include "spa_config.h"
 #include <CircularBuffer.hpp>
 
 namespace esphome {
