@@ -323,7 +323,10 @@ void BalboaSpa::read_serial() {
       d = (Q_in[25] - 32.0) * 5.0/9.0;
     }
 
-    if(d != 0)
+    // Ignore values which are outside what is allowed
+    if(d != 0 && 
+       d >= ESPHOME_BALBOASPA_MIN_TEMPERATURE && 
+       d <= ESPHOME_BALBOASPA_MAX_TEMPERATURE)
     {
       spaState.set_target_temp(d);
       ESP_LOGD("Spa/temperature/target", String(d, 2).c_str());
