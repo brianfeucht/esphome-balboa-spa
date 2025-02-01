@@ -348,10 +348,9 @@ void BalboaSpa::read_serial() {
       d = 0;
     }
 
-    if(d != spaState.current_temp)
+    if(d != 0)
     {
-      newState = true;
-      spaState.current_temp = d;      
+      spaState.set_current_temp(d);   
       ESP_LOGD("Spa/temperature/state", String(d, 2).c_str());
     }
 
