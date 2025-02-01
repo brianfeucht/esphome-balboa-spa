@@ -40,3 +40,13 @@ climate:
       min_temperature: 62 °F    # min: 17
       max_temperature: 105 °F    # max: 30
       temperature_step: 0.5 °F  # min: 0.5
+
+sensor:
+  - platform: balboa_spa
+    balboa_spa_id: test_spa
+    blower:
+      name: Blower
+    highrange:
+      name: High Range
+    circulation:
+      name: Circulation
