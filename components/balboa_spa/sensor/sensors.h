@@ -17,18 +17,13 @@ public:
 
 public:
   BalboaSpaSensors() : PollingComponent(1000) {}
-  void setup() override;
-  void dump_config() override;
   void update() override;
-
-  void set_sensor_id(uint8_t sensor_id) { this->sensor_id_ = sensor_id; }
 
   void set_parent(BalboaSpa *parent) { spa = parent; }
   void set_sensor_type(BalboaSpaSensorType _type) { sensor_type = _type;  }
 
   private:
     BalboaSpa *spa;
-    uint8_t sensor_id_{0};
     BalboaSpaSensorType sensor_type;
 };
 

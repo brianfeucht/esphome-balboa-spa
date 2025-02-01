@@ -3,11 +3,6 @@
 
 namespace esphome {
 namespace balboa_spa {
-
-void BalboaSpaSensors::setup() {
-
-}
-
 void BalboaSpaSensors::update() {
     SpaState* spaState = spa->get_current_state();
 
@@ -33,10 +28,5 @@ void BalboaSpaSensors::update() {
     {
         this->publish_state(sensor_state_value);
     }
-}
-
-void BalboaSpaSensors::dump_config() {
-  LOG_SENSOR("", "Balboa Spa Sensor", this);
-  ESP_LOGCONFIG(TAG, "  Sensor has datapoint ID %u", this->sensor_id_);
 }
 }}
