@@ -58,12 +58,13 @@ void BalboaSpaThermostat::update() {
         update = true;
     }
 
-    if(spaState->restmode && this->mode != climate::CLIMATE_MODE_OFF)
+    uint8_t rest_mode = spaState->get_rest_mode();
+    if(rest_mode == 1 && this->mode != climate::CLIMATE_MODE_OFF)
     {
         this->mode = climate::CLIMATE_MODE_OFF;
         update = true;
     }
-    else if(this->mode != climate::CLIMATE_MODE_HEAT)
+    else if(rest_mode == 0 && this->mode != climate::CLIMATE_MODE_HEAT)
     {
         this-> mode = climate::CLIMATE_MODE_HEAT;
         update = true;

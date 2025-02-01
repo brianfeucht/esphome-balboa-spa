@@ -93,4 +93,16 @@ void SpaState::set_heat_state(uint8_t heat_state){
     heat_states.push(heat_state);
 }
 
+uint8_t SpaState::get_rest_mode(){
+    if(rest_modes.isStable() == false){
+        return 254;
+    }
+
+    return rest_modes.mode();
+}
+
+void SpaState::set_rest_mode(uint8_t rest_mode){
+    rest_modes.push(rest_mode);
+}
+
 }}

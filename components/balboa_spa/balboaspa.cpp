@@ -372,12 +372,7 @@ void BalboaSpa::read_serial() {
     }
 
     d = Q_in[10];
-    if(d != spaState.restmode)
-    {
-      newState = true;
-      spaState.restmode = d ;      
-      ESP_LOGD("Spa/restmode/state", String(d, 0).c_str());
-    }
+    spaState.set_rest_mode(d);
     
     // 15:Flags Byte 10 / Heat status, Temp Range
     d = bitRead(Q_in[15], 4);
