@@ -1,3 +1,4 @@
+#include <string>
 #include "esphome/core/log.h"
 #include "sensors.h"
 
