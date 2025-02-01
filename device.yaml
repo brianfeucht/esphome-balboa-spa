@@ -1,7 +1,7 @@
 # this is just a simple test device setup that's used to compile and test the examples
 
 esphome:
-    name: balboa_spa_test
+    name: balboa-spa-test
     build_path: .build/balboa_spa_test
 
 esp32:
