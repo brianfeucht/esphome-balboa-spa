@@ -7,12 +7,11 @@
 namespace esphome {
 namespace balboa_spa {
 
-class BalboaSpaThermostat : public climate::Climate, public PollingComponent {
+class BalboaSpaThermostat : public climate::Climate {
  public:
-  // Update thermostat status from UART device every second
-  BalboaSpaThermostat();
+  BalboaSpaThermostat() {};
 
-  void update() override;
+  void update(SpaState* spaState);
   void set_parent(BalboaSpa *parent);
 
  protected:

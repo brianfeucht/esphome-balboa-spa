@@ -6,8 +6,6 @@
 namespace esphome {
 namespace balboa_spa {
 
-BalboaSpaThermostat::BalboaSpaThermostat() : PollingComponent(1000) {}
-
 climate::ClimateTraits BalboaSpaThermostat::traits()
 {
     auto traits = climate::ClimateTraits();
@@ -25,11 +23,13 @@ climate::ClimateTraits BalboaSpaThermostat::traits()
     }
  }
 
-void BalboaSpaThermostat::set_parent(BalboaSpa *parent) { spa = parent; }
+void BalboaSpaThermostat::set_parent(BalboaSpa *parent) {
+    spa = parent;
+    parent->register_listener([this](SpaState* spaState){ this->update(spaState); });
+}
 
-void BalboaSpaThermostat::update() {
+void BalboaSpaThermostat::update(SpaState* spaState) {
     yield();
-    SpaState* spaState = spa->get_current_state();
     bool update = false;
     float target_temp = spaState->get_target_temp();
 
@@ -39,6 +39,7 @@ void BalboaSpaThermostat::update() {
         update = true;
     }
 
+    yield();
     float current_temp = spaState->get_current_temp();
     if(current_temp > 0 && this->current_temperature != current_temp)
     {
@@ -46,6 +47,7 @@ void BalboaSpaThermostat::update() {
         update = true;
     }
 
+    yield();
     uint8_t heat_state = spaState->get_heat_state();
     if(heat_state == 0 && this->action != climate::CLIMATE_ACTION_IDLE)
     {
@@ -58,6 +60,7 @@ void BalboaSpaThermostat::update() {
         update = true;
     }
 
+    yield();
     uint8_t rest_mode = spaState->get_rest_mode();
     if(rest_mode == 1 && this->mode != climate::CLIMATE_MODE_OFF)
     {
