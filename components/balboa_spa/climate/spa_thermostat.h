@@ -7,7 +7,7 @@
 namespace esphome {
 namespace balboa_spa {
 
-class BalboaSpaThermostat : public climate::Climate {
+class BalboaSpaThermostat : public climate::Climate, public Component {
  public:
   BalboaSpaThermostat() {};
 
