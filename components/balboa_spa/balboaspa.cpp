@@ -350,7 +350,9 @@ void BalboaSpa::read_serial() {
       d = 0;
     }
 
-    if(d != 0)
+    // it isn't possible for this value to be above boiling
+    // probably a smaller limit here, but should filter out more bad data
+    if(d != 0 && d < 100)
     {
       spaState.set_current_temp(d);
       ESP_LOGD("Spa/temperature/state", String(d, 2).c_str());
