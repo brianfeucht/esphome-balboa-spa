@@ -9,6 +9,8 @@ void BalboaSpaSensors::update() {
 
     uint8_t sensor_state_value;
 
+    ESP_LOGD("Spa/Sensors/UnknownSensorType", String((uint8_t)sensor_type, 0).c_str());
+
     switch (sensor_type)
     {
         case BalboaSpaSensorType::BLOWER:
@@ -21,7 +23,6 @@ void BalboaSpaSensors::update() {
             sensor_state_value = spaState->circulation;
             break;
         default:
-             ESP_LOGD("Spa/Sensors/UnknownSensorType", String((uint8_t)sensor_type, 0).c_str());
             // Unknown enum value. Ignore
             return;
     }
