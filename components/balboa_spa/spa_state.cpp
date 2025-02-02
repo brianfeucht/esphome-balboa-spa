@@ -5,6 +5,7 @@ namespace balboa_spa {
 
 template <typename T> uint8_t SpaValueHistory<T>::size(){ return value_history.size(); }
 template <typename T> void SpaValueHistory<T>::push(T value) { value_history.push(value); }
+template <typename T> T SpaValueHistory<T>::last() { return value_history.last(); }
 
 template <typename T> bool SpaValueHistory<T>::isStable(){
      return value_history.size() > ESPHOME_BALBOASPA_MEASUREMENT_COUNT_UNTIL_STABLE;
@@ -61,7 +62,7 @@ float SpaState::get_current_temp(){
     {
         return 0;
     }
-    
+
     return current_temperatures.mode();
 }
 
@@ -89,6 +90,14 @@ uint8_t SpaState::get_heat_state(){
     return target_temperatures.mode();
 }
 
+uint8_t SpaState::get_last_heat_state(){
+    if(heat_states.size() > 0){
+        return heat_states.last();
+    }
+
+    return 254;
+}
+
 void SpaState::set_heat_state(uint8_t heat_state){
     heat_states.push(heat_state);
 }
@@ -99,6 +108,14 @@ uint8_t SpaState::get_rest_mode(){
     }
 
     return rest_modes.mode();
+}
+
+uint8_t SpaState::get_last_rest_mode(){
+    if(rest_modes.size() > 0){
+        return rest_modes.last();
+    }
+
+    return 254;
 }
 
 void SpaState::set_rest_mode(uint8_t rest_mode){

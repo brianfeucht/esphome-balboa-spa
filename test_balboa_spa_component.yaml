@@ -50,3 +50,7 @@ sensor:
       name: High Range
     circulation:
       name: Circulation
+    restmode:
+      name: Rest Mode
+    heatstate:
+      name: Heat State

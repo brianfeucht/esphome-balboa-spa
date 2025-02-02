@@ -16,6 +16,7 @@ template <typename T> class SpaValueHistory{
         uint8_t size();
         void push(T value);
         T mode();
+        T last();
         bool isStable();
     private:
         uint8_t measurements_to_keep = ESPHOME_BALBOASPA_MEASUREMENT_POOL_SIZE;
@@ -36,9 +37,11 @@ class SpaState {
         uint8_t minutes :6;
 
         uint8_t get_rest_mode();
+        uint8_t get_last_rest_mode();
         void set_rest_mode(uint8_t restmode);
 
         uint8_t get_heat_state();
+        uint8_t get_last_heat_state();
         void set_heat_state(uint8_t heat_state);
 
         float get_target_temp();
