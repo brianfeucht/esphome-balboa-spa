@@ -2,19 +2,17 @@
 
 namespace esphome {
 namespace balboa_spa {
-
-Jet2Switch::Jet2Switch() : PollingComponent(1000) {}
-
-void Jet2Switch::update() {
-    SpaState* spaState = spa->get_current_state();
-
+void Jet2Switch::update(SpaState* spaState) {
     if(this->state != spaState->jet2)
     {
         this->publish_state(spaState->jet2);
     }
 }
 
-void Jet2Switch::set_parent(BalboaSpa *parent) { spa = parent; }
+void Jet2Switch::set_parent(BalboaSpa *parent) {
+    spa = parent;
+    parent->register_listener([this](SpaState* spaState){ this->update(spaState); });
+}
 
 void Jet2Switch::write_state(bool state)  { 
     SpaState* spaState = spa->get_current_state();

@@ -7,10 +7,10 @@
 namespace esphome {
 namespace balboa_spa {
 
-class Jet2Switch : public PollingComponent, public switch_::Switch {
+class Jet2Switch : public switch_::Switch {
  public:
-  Jet2Switch();
-  void update() override;
+  Jet2Switch() {};
+  void update(SpaState* spaState);
   void set_parent(BalboaSpa *parent);
 
   protected:

@@ -19,6 +19,7 @@ void BalboaSpa::update() {
       read_serial();
     }
 
+    yield();
     // Run through listeners
     for (auto &listener : this->listeners_) {
       listener(&spaState);
