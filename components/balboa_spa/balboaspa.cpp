@@ -23,6 +23,7 @@ void BalboaSpa::update() {
     // Run through listeners
     for (auto &listener : this->listeners_) {
       listener(&spaState);
+      yield();
     }
 }
 
