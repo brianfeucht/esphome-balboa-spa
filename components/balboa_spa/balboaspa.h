@@ -40,6 +40,8 @@ class BalboaSpa : public uart::UARTDevice, public PollingComponent {
     void toggle_jet1() ;
     void toggle_jet2();
 
+    void register_listener(const std::function<void(SpaState*)> &func) {this->listeners_.push_back(func);}
+
   private:
     CircularBuffer<uint8_t, 35> Q_in;
     CircularBuffer<uint8_t, 35> Q_out;
@@ -51,6 +53,8 @@ class BalboaSpa : public uart::UARTDevice, public PollingComponent {
     uint8_t setminute = 0x00;
     uint8_t id = 0x00;
     unsigned long lastrx = 0;
+
+    std::vector<std::function<void(SpaState*)>> listeners_;
 
     char have_config = 0; //stages: 0-> want it; 1-> requested it; 2-> got it; 3-> further processed it
     char have_faultlog = 0; //stages: 0-> want it; 1-> requested it; 2-> got it; 3-> further processed it

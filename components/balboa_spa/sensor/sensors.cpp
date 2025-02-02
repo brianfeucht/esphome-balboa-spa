@@ -4,9 +4,12 @@
 
 namespace esphome {
 namespace balboa_spa {
-void BalboaSpaSensors::update() {
-    SpaState* spaState = spa->get_current_state();
 
+void BalboaSpaSensors::set_parent(BalboaSpa *parent) {
+    parent->register_listener([this](SpaState* spaState){ this->update(spaState); });
+}
+
+void BalboaSpaSensors::update(SpaState* spaState) {
     uint8_t sensor_state_value;
 
     ESP_LOGD("Spa/Sensors/UnknownSensorType", String((uint8_t)sensor_type, 0).c_str());

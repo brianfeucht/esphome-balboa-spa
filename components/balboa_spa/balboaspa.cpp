@@ -18,6 +18,11 @@ void BalboaSpa::update() {
     while (available()) {
       read_serial();
     }
+
+    // Run through listeners
+    for (auto &listener : this->listeners_) {
+      listener(&spaState);
+    }
 }
 
 float BalboaSpa::get_setup_priority() const { return esphome::setup_priority::LATE; }
