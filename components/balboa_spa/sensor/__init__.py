@@ -37,7 +37,6 @@ async def to_code(config):
     for sensor_type in [CONF_BLOWER, CONF_HIGHRANGE, CONF_CIRCULATION]:
         if conf := config.get(sensor_type):
             var = await sensor.new_sensor(conf)
-            await cg.register_parented(var, parent)
             cg.add(var.set_parent(parent))
             sensor_type_value = getattr(SpaSensorTypeEnum, sensor_type.upper())
             cg.add(var.set_sensor_type(sensor_type_value))

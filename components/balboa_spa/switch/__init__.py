@@ -49,5 +49,4 @@ async def to_code(config):
     for switch_type in [CONF_JET1, CONF_JET2, CONF_LIGHTS]:
         if conf := config.get(switch_type):
             sw_var = await switch.new_switch(conf)
-            await cg.register_parented(sw_var, parent)
             cg.add(sw_var.set_parent(parent))
