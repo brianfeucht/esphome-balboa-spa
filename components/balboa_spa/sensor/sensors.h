@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #include "esphome/components/sensor/sensor.h"
 #include "../balboaspa.h"
 
