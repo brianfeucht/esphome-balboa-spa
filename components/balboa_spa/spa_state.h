@@ -4,7 +4,7 @@
 #ifndef SPA_STATE_H
 #define SPA_STATE_H
 
-static const uint8_t ESPHOME_BALBOASPA_MEASUREMENT_POOL_SIZE = 10;
+static const uint8_t ESPHOME_BALBOASPA_MEASUREMENT_POOL_SIZE = 30;
 static const uint8_t ESPHOME_BALBOASPA_MEASUREMENT_COUNT_UNTIL_STABLE = 5;
 
 namespace esphome {
