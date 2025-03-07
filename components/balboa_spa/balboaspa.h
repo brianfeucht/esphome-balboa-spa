@@ -18,7 +18,7 @@ namespace balboa_spa {
 
 static const uint8_t ESPHOME_BALBOASPA_MIN_TEMPERATURE = 26;
 static const uint8_t ESPHOME_BALBOASPA_MAX_TEMPERATURE = 40;
-static const float   ESPHOME_BALBOASPA_POLLING_INTERVAL = 250; // frequency to poll uart device
+static const float   ESPHOME_BALBOASPA_POLLING_INTERVAL = 50; // frequency to poll uart device
 
 #define STRON String("ON").c_str()
 #define STROFF String("OFF").c_str()
