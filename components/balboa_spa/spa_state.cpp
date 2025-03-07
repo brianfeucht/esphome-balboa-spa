@@ -87,7 +87,7 @@ uint8_t SpaState::get_heat_state(){
         return 254;
     }
 
-    return target_temperatures.mode();
+    return heat_states.mode();
 }
 
 uint8_t SpaState::get_last_heat_state(){
