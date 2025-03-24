@@ -1,8 +1,8 @@
 # this is just a simple test device setup that's used to compile and test the examples
 
 esphome:
-    name: balboa-spa-test
-    build_path: .build/balboa_spa_test
+    name: balboa-spa-test-esp32
+    build_path: .build/balboa_spa_test_esp32
 
 esp32:
   board: lolin_s2_mini

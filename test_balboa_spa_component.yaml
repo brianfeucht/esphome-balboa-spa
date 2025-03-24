@@ -1,9 +1,6 @@
 # this configuration file has all empty custom components set up.
 # use 'esphome test_empty.yaml compile' to build. 
 
-packages:
-  device: !include device.yaml # include our test device setup
-
 external_components:
   - source:
       type: local
@@ -11,16 +8,6 @@ external_components:
 
 balboa_spa:
   id: test_spa
-
-uart:
-  id: spa_uart_bus
-  tx_pin: GPIO37
-  rx_pin: GPIO39
-  data_bits: 8
-  parity: NONE
-  stop_bits: 1
-  baud_rate: 115200
-  rx_buffer_size: 128
 
 switch:
   - platform: balboa_spa
