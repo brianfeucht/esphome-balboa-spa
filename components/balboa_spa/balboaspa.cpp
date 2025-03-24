@@ -92,16 +92,17 @@ void BalboaSpa::read_serial() {
 
         // Unregistered or yet in progress
         if (id == 0) {
-          ESP_LOGD("Spa/node/id", "Unregistered");
-          //if (Q_in[2] == 0xFE) print_msg(Q_in);
-          print_msg(Q_in);
+          if (Q_in[2] == 0xFE) {
+            print_msg(Q_in);
+            ESP_LOGD("Spa/node/id", "Unregistered");
+          }
           // FE BF 02:got new client ID
           if (Q_in[2] == 0xFE && Q_in[4] == 0x02) {
             id = Q_in[5];
             if (id > 0x2F) id = 0x2F;
             ESP_LOGD("Spa/node/id", "Got ID, acknowledging");
             ID_ack();
-            ESP_LOGD("Spa/node/id", String(id).c_str());
+            ESP_LOGD("Spa/node/id", "%s", String(id).c_str());
           }
 
           // FE BF 00:Any new clients?
@@ -263,7 +264,7 @@ void BalboaSpa::read_serial() {
       write(Q_out[i]);
     }
 
-    //print_msg(Q_out);
+    print_msg(Q_out);
 
     flush();
 
@@ -276,11 +277,13 @@ void BalboaSpa::read_serial() {
     String s;
     //for (i = 0; i < (Q_in[1] + 2); i++) {
     for (i = 0; i < data.size(); i++) {
-      x = Q_in[i];
-      if (x < 0x0A) s += "0";
+      x = data[i];
+      if (x < 0x10) s += "0";
       s += String(x, HEX);
       s += " ";
     }
+    ESP_LOGD("Spa/debug/print_msg", "%s", s.c_str());
+    //ESP_LOG_BUFFER_HEX_LEVEL("Spa/debug/print_msg", data, sizeof(data), ESP_LOG_DEBUG);
     yield();
   }
 
@@ -300,20 +303,20 @@ void BalboaSpa::read_serial() {
     spaConfig.aux1 = ((Q_in[9] & 0x01) != 0);
     spaConfig.aux2 = ((Q_in[9] & 0x02) != 0);
     spaConfig.temp_scale = Q_in[3] & 0x01; //Read temperature scale - 0 -> Farenheit, 1-> Celcius
-    ESP_LOGD("Spa/config/pumps1", String(spaConfig.pump1).c_str());
-    ESP_LOGD("Spa/config/pumps2", String(spaConfig.pump2).c_str());
-    ESP_LOGD("Spa/config/pumps3", String(spaConfig.pump3).c_str());
-    ESP_LOGD("Spa/config/pumps4", String(spaConfig.pump4).c_str());
-    ESP_LOGD("Spa/config/pumps5", String(spaConfig.pump5).c_str());
-    ESP_LOGD("Spa/config/pumps6", String(spaConfig.pump6).c_str());
-    ESP_LOGD("Spa/config/light1", String(spaConfig.light1).c_str());
-    ESP_LOGD("Spa/config/light2", String(spaConfig.light2).c_str());
-    ESP_LOGD("Spa/config/circ", String(spaConfig.circ).c_str());
-    ESP_LOGD("Spa/config/blower", String(spaConfig.blower).c_str());
-    ESP_LOGD("Spa/config/mister", String(spaConfig.mister).c_str());
-    ESP_LOGD("Spa/config/aux1", String(spaConfig.aux1).c_str());
-    ESP_LOGD("Spa/config/aux2", String(spaConfig.aux2).c_str());
-    ESP_LOGD("Spa/config/temp_scale", String(spaConfig.temp_scale).c_str());
+    ESP_LOGD("Spa/config/pumps1", "%s", String(spaConfig.pump1).c_str());
+    ESP_LOGD("Spa/config/pumps2", "%s", String(spaConfig.pump2).c_str());
+    ESP_LOGD("Spa/config/pumps3", "%s", String(spaConfig.pump3).c_str());
+    ESP_LOGD("Spa/config/pumps4", "%s", String(spaConfig.pump4).c_str());
+    ESP_LOGD("Spa/config/pumps5", "%s", String(spaConfig.pump5).c_str());
+    ESP_LOGD("Spa/config/pumps6", "%s", String(spaConfig.pump6).c_str());
+    ESP_LOGD("Spa/config/light1", "%s", String(spaConfig.light1).c_str());
+    ESP_LOGD("Spa/config/light2", "%s", String(spaConfig.light2).c_str());
+    ESP_LOGD("Spa/config/circ", "%s", String(spaConfig.circ).c_str());
+    ESP_LOGD("Spa/config/blower", "%s", String(spaConfig.blower).c_str());
+    ESP_LOGD("Spa/config/mister", "%s", String(spaConfig.mister).c_str());
+    ESP_LOGD("Spa/config/aux1", "%s", String(spaConfig.aux1).c_str());
+    ESP_LOGD("Spa/config/aux2", "%s", String(spaConfig.aux2).c_str());
+    ESP_LOGD("Spa/config/temp_scale", "%s", String(spaConfig.temp_scale).c_str());
     have_config = 2;
   }
 
@@ -336,7 +339,7 @@ void BalboaSpa::read_serial() {
        d <= ESPHOME_BALBOASPA_MAX_TEMPERATURE)
     {
       spaState.set_target_temp(d);
-      ESP_LOGD("Spa/temperature/target", String(d, 2).c_str());
+      ESP_LOGD("Spa/temperature/target", "%s", String(d, 2).c_str());
     }
 
     // 7:Flag Byte 2 - Actual temperature
@@ -362,7 +365,7 @@ void BalboaSpa::read_serial() {
     if(d != 0 && d < 100)
     {
       spaState.set_current_temp(d);
-      ESP_LOGD("Spa/temperature/state", String(d, 2).c_str());
+      ESP_LOGD("Spa/temperature/state", "%s", String(d, 2).c_str());
     }
 
     // REMARK Move upper publish to HERE to get 0 for unknown temperature
@@ -379,7 +382,7 @@ void BalboaSpa::read_serial() {
     {
       // Do not trigger a new state for clock
       // newState = true;
-      // ESP_LOGD("Spa/time/state", s.c_str());
+      // ESP_LOGD("Spa/time/state", "%s", s.c_str());
       spaState.hour = sethour;
       spaState.minutes = setminute;
     }
@@ -395,7 +398,7 @@ void BalboaSpa::read_serial() {
     if (d != spaState.highrange) 
     {
       newState = true;
-      ESP_LOGD("Spa/highrange/state", String(d, 0).c_str()); //LOW
+      ESP_LOGD("Spa/highrange/state", "%s", String(d, 0).c_str()); //LOW
       spaState.highrange = d;
     }
 
@@ -404,7 +407,7 @@ void BalboaSpa::read_serial() {
     if (d != spaState.jet1) 
     {
       newState = true;
-      ESP_LOGD("Spa/jet_1/state", String(d, 0).c_str());
+      ESP_LOGD("Spa/jet_1/state", "%s", String(d, 0).c_str());
       spaState.jet1 = d;
     } 
 
@@ -412,7 +415,7 @@ void BalboaSpa::read_serial() {
     if (d != spaState.jet2) 
     {
       newState = true;
-      ESP_LOGD("Spa/jet_2/state", String(d, 0).c_str());
+      ESP_LOGD("Spa/jet_2/state", "%s", String(d, 0).c_str());
       spaState.jet2 = d;
     }
 
@@ -421,7 +424,7 @@ void BalboaSpa::read_serial() {
     if (d != spaState.circulation)
     {
       newState = true;
-      ESP_LOGD("Spa/circ/state", String(d, 0).c_str());
+      ESP_LOGD("Spa/circ/state", "%s", String(d, 0).c_str());
       spaState.circulation = d;
     }
 
@@ -429,7 +432,7 @@ void BalboaSpa::read_serial() {
     if (d != spaState.blower) 
     {
       newState = true;
-      ESP_LOGD("Spa/blower/state", String(d, 0).c_str());
+      ESP_LOGD("Spa/blower/state", "%s", String(d, 0).c_str());
       spaState.blower = d;      
     }
 
@@ -438,7 +441,7 @@ void BalboaSpa::read_serial() {
     if (d != spaState.light) 
     {
       newState = true;
-      ESP_LOGD("Spa/light/state",  String(d, 0).c_str());
+      ESP_LOGD("Spa/light/state", "%s",  String(d, 0).c_str());
       spaState.light = d;
     }
 
@@ -474,7 +477,7 @@ void BalboaSpa::read_serial() {
     d += String(spaFilterSettings.filt1DurationMinute);
 
     payld = "{\"start\":\""+s+"\",\"duration\":\""+d+"\"}";
-    ESP_LOGD("Spa/filter1/state", payld.c_str());
+    ESP_LOGD("Spa/filter1/state", "%s", payld.c_str());
 
     //Filter 2 time conversion
     if (spaFilterSettings.filt2Hour < 10) s = "0"; else s = "";
@@ -486,11 +489,11 @@ void BalboaSpa::read_serial() {
     d += String(spaFilterSettings.filt2DurationHour) + ":";
     if (spaFilterSettings.filt2DurationMinute < 10) d += "0";
     d += String(spaFilterSettings.filt2DurationMinute);
-    if ((int)(spaFilterSettings.filt2Enable) == 1) ESP_LOGD("Spa/filter2_enabled/state", STRON); else ESP_LOGD("Spa/filter2_enabled/state", STROFF);
+    if ((int)(spaFilterSettings.filt2Enable) == 1) ESP_LOGD("Spa/filter2_enabled/state", "%s", STRON); else ESP_LOGD("Spa/filter2_enabled/state", "%s", STROFF);
 
 
     payld = "{\"start\":\""+s+"\",\"duration\":\""+d+"\"}";
-    ESP_LOGD("Spa/filter2/state", payld.c_str());
+    ESP_LOGD("Spa/filter2/state", "%s", payld.c_str());
 
     have_filtersettings = 2;
   }
@@ -564,13 +567,13 @@ void BalboaSpa::read_serial() {
     spaFaultLog.daysAgo = Q_in[8];
     spaFaultLog.hour = Q_in[9];
     spaFaultLog.minutes = Q_in[10];
-    ESP_LOGD("Spa/fault/Entries", String(spaFaultLog.totEntry).c_str());
-    ESP_LOGD("Spa/fault/Entry", String(spaFaultLog.currEntry).c_str());
-    ESP_LOGD("Spa/fault/Code", String(spaFaultLog.faultCode).c_str());
-    ESP_LOGD("Spa/fault/Message", spaFaultLog.faultMessage.c_str());
-    ESP_LOGD("Spa/fault/DaysAgo", String(spaFaultLog.daysAgo).c_str());
-    ESP_LOGD("Spa/fault/Hours", String(spaFaultLog.hour).c_str());
-    ESP_LOGD("Spa/fault/Minutes", String(spaFaultLog.minutes).c_str());
+    ESP_LOGD("Spa/fault/Entries", "%s", String(spaFaultLog.totEntry).c_str());
+    ESP_LOGD("Spa/fault/Entry", "%s", String(spaFaultLog.currEntry).c_str());
+    ESP_LOGD("Spa/fault/Code", "%s", String(spaFaultLog.faultCode).c_str());
+    ESP_LOGD("Spa/fault/Message", "%s", spaFaultLog.faultMessage.c_str());
+    ESP_LOGD("Spa/fault/DaysAgo", "%s", String(spaFaultLog.daysAgo).c_str());
+    ESP_LOGD("Spa/fault/Hours", "%s", String(spaFaultLog.hour).c_str());
+    ESP_LOGD("Spa/fault/Minutes", "%s", String(spaFaultLog.minutes).c_str());
     have_faultlog = 2;
     //ESP_LOGD("Spa/debug/have_faultlog", "have the faultlog, #2");
   }
