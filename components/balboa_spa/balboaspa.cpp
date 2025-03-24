@@ -94,20 +94,20 @@ void BalboaSpa::read_serial() {
         if (id == 0) {
           if (Q_in[2] == 0xFE) {
             print_msg(Q_in);
-            ESP_LOGD("Spa/node/id", "Unregistered");
+            ESP_LOGD("Spa/node/id", "%s", "Unregistered");
           }
           // FE BF 02:got new client ID
           if (Q_in[2] == 0xFE && Q_in[4] == 0x02) {
             id = Q_in[5];
             if (id > 0x2F) id = 0x2F;
-            ESP_LOGD("Spa/node/id", "Got ID, acknowledging");
+            ESP_LOGD("Spa/node/id", "%s", "Got ID, acknowledging");
             ID_ack();
             ESP_LOGD("Spa/node/id", "%s", String(id).c_str());
           }
 
           // FE BF 00:Any new clients?
           if (Q_in[2] == 0xFE && Q_in[4] == 0x00) {
-            ESP_LOGD("Spa/node/id", "Requesting ID");
+            ESP_LOGD("Spa/node/id", "%s", "Requesting ID");
             ID_request();
           }
         } 
@@ -137,7 +137,7 @@ void BalboaSpa::read_serial() {
                 Q_out.push(0x00);
                 Q_out.push(0x00);
                 Q_out.push(0x01);
-                ESP_LOGD("Spa/config/status", "Getting config");
+                ESP_LOGD("Spa/config/status", "%s", "Getting config");
                 have_config = 1;
               } 
               else if (have_faultlog == 0) { // Get the fault log
@@ -148,7 +148,7 @@ void BalboaSpa::read_serial() {
                 Q_out.push(0xFF);
                 Q_out.push(0x00);
                 have_faultlog = 1;
-                ESP_LOGD("Spa/debug/have_faultlog", "requesting fault log, #1");
+                ESP_LOGD("Spa/debug/have_faultlog", "%s", "requesting fault log, #1");
               } 
               else if ((have_filtersettings == 0) && (have_faultlog == 2)) { // Get the filter cycles log once we have the faultlog
                 Q_out.push(id);
@@ -157,7 +157,7 @@ void BalboaSpa::read_serial() {
                 Q_out.push(0x01);
                 Q_out.push(0x00);
                 Q_out.push(0x00);
-                ESP_LOGD("Spa/debug/have_filtersettings", "requesting filter settings, #1");
+                ESP_LOGD("Spa/debug/have_filtersettings", "%s", "requesting filter settings, #1");
                 have_filtersettings = 1;
               } 
               else {
@@ -191,7 +191,7 @@ void BalboaSpa::read_serial() {
           }
         } else if (Q_in[2] == id && Q_in[4] == 0x23) { // FF AF 23:Filter Cycle Message - Packet index offset 5
           if (last_state_crc != Q_in[Q_in[1]]) {
-            ESP_LOGD("Spa/debug/have_faultlog", "decoding filter settings");
+            ESP_LOGD("Spa/debug/have_faultlog", "%s", "decoding filter settings");
             decodeFilterSettings();
           }
         } else {
@@ -288,7 +288,7 @@ void BalboaSpa::read_serial() {
   }
 
   void BalboaSpa::decodeSettings() {
-    ESP_LOGD("Spa/config/status", "Got config");
+    ESP_LOGD("Spa/config/status", "%s", "Got config");
     spaConfig.pump1 = Q_in[5] & 0x03;
     spaConfig.pump2 = (Q_in[5] & 0x0C) >> 2;
     spaConfig.pump3 = (Q_in[5] & 0x30) >> 4;
