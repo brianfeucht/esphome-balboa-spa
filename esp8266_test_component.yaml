@@ -1,0 +1,16 @@
+
+packages:
+  device: !include esp8266_device.yaml # include our test device setup
+
+<<: !include test_balboa_spa_component.yaml
+
+
+uart:
+  id: spa_uart_bus
+  tx_pin: GPIO1
+  rx_pin: GPIO3
+  data_bits: 8
+  parity: NONE
+  stop_bits: 1
+  baud_rate: 115200
+  rx_buffer_size: 128
