@@ -313,7 +313,7 @@ void BalboaSpa::read_serial() {
     ESP_LOGD("Spa/config/mister", "%d", spaConfig.mister);
     ESP_LOGD("Spa/config/aux1",   "%d", spaConfig.aux1  );
     ESP_LOGD("Spa/config/aux2",   "%d", spaConfig.aux2  );
-    ESP_LOGD("Spa/config/temp_scale","%D" spaConfig.temp_scale);
+    ESP_LOGD("Spa/config/temp_scale", "%d", spaConfig.temp_scale);
     have_config = 2;
   }
 
@@ -404,7 +404,7 @@ void BalboaSpa::read_serial() {
     if (d != spaState.jet1) 
     {
       newState = true;
-      ESP_LOGD("Spa/jet_1/state", , "%.0f", d);
+      ESP_LOGD("Spa/jet_1/state", "%.0f", d);
       spaState.jet1 = d;
     } 
 
@@ -412,7 +412,7 @@ void BalboaSpa::read_serial() {
     if (d != spaState.jet2) 
     {
       newState = true;
-      ESP_LOGD("Spa/jet_2/state", , "%.0f", d);
+      ESP_LOGD("Spa/jet_2/state", "%.0f", d);
       spaState.jet2 = d;
     }
 
@@ -421,7 +421,7 @@ void BalboaSpa::read_serial() {
     if (d != spaState.circulation)
     {
       newState = true;
-      ESP_LOGD("Spa/circ/state", , "%.0f", d);
+      ESP_LOGD("Spa/circ/state", "%.0f", d);
       spaState.circulation = d;
     }
 
@@ -429,7 +429,7 @@ void BalboaSpa::read_serial() {
     if (d != spaState.blower) 
     {
       newState = true;
-      ESP_LOGD("Spa/blower/state", , "%.0f", d);
+      ESP_LOGD("Spa/blower/state", "%.0f", d);
       spaState.blower = d;      
     }
 
@@ -438,7 +438,7 @@ void BalboaSpa::read_serial() {
     if (d != spaState.light) 
     {
       newState = true;
-      ESP_LOGD("Spa/light/state",  , "%.0f", d);
+      ESP_LOGD("Spa/light/state","%.0f", d);
       spaState.light = d;
     }
 
