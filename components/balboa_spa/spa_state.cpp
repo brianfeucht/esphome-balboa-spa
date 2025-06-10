@@ -8,18 +8,20 @@ template <typename T> void SpaValueHistory<T>::push(T value) { value_history.pus
 template <typename T> T SpaValueHistory<T>::last() { return value_history.last(); }
 
 template <typename T> bool SpaValueHistory<T>::isStable(){
-     return value_history.size() > ESPHOME_BALBOASPA_MEASUREMENT_COUNT_UNTIL_STABLE;
+     return value_history.size() > stable_threshold;
 }
 
 template <typename T> T SpaValueHistory<T>::mode(){
     int size = value_history.size();
     T arr[size];
     value_history.copyToArray(arr);
-    
+
+    int values_to_check = size > measurements_to_keep ? measurements_to_keep : size;
+
     // bubble sort array
-    for (int i = 0; i < size - 1; i++) {
+    for (int i = 0; i < values_to_check - 1; i++) {
         // Compare adjacent elements and swap them if they are in the wrong order
-        for (int j = 0; j < size - i - 1; j++) {
+        for (int j = 0; j < values_to_check - i - 1; j++) {
             if (arr[j] > arr[j + 1]) {
                 int temp = arr[j];
                 arr[j] = arr[j + 1];
@@ -32,7 +34,7 @@ template <typename T> T SpaValueHistory<T>::mode(){
     int curr_count = 1;
     int max_count = 1;
     // Iterate through the array to find the mode
-    for (int i = 1; i < size; ++i) 
+    for (int i = 1; i < values_to_check; ++i)
     {
         if (arr[i] == arr[i - 1]) {
             ++curr_count;
@@ -51,7 +53,7 @@ template <typename T> T SpaValueHistory<T>::mode(){
 
     // Check if the last element forms the mode
     if (curr_count > max_count) {
-        mode = arr[size - 1];
+        mode = arr[values_to_check - 1];
     }
 
     return mode;
@@ -120,6 +122,20 @@ uint8_t SpaState::get_last_rest_mode(){
 
 void SpaState::set_rest_mode(uint8_t rest_mode){
     rest_modes.push(rest_mode);
+}
+
+void SpaState::set_state_pool_size(uint8_t pool_size) {
+    current_temperatures.measurements_to_keep = pool_size;
+    target_temperatures.measurements_to_keep = pool_size;
+    heat_states.measurements_to_keep = pool_size;
+    rest_modes.measurements_to_keep = pool_size;
+}
+
+void SpaState::set_state_pool_stable_threshold(uint8_t stable_threshold){
+    current_temperatures.stable_threshold = stable_threshold;
+    target_temperatures.stable_threshold = stable_threshold;
+    heat_states.stable_threshold = stable_threshold;
+    rest_modes.stable_threshold = stable_threshold;
 }
 
 }}

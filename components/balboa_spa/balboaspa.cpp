@@ -74,6 +74,14 @@ void BalboaSpa::toggle_jet2() {
     send = 0x05;
 }
 
+void BalboaSpa::set_state_pool_size(uint8_t pool_size) {
+  spaState.set_state_pool_size(pool_size);
+}
+
+void BalboaSpa::set_state_pool_stable_threshold(uint8_t stable_threshold) {
+  spaState.set_state_pool_stable_threshold(stable_threshold);
+}
+
 void BalboaSpa::read_serial() {
       x = read();
       Q_in.push(x);

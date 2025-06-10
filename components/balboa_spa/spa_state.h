@@ -18,9 +18,10 @@ template <typename T> class SpaValueHistory{
         T mode();
         T last();
         bool isStable();
-    private:
-        uint8_t measurements_to_keep = ESPHOME_BALBOASPA_MEASUREMENT_POOL_SIZE;
 
+        uint8_t measurements_to_keep = ESPHOME_BALBOASPA_MEASUREMENT_POOL_SIZE;
+        uint8_t stable_threshold = ESPHOME_BALBOASPA_MEASUREMENT_COUNT_UNTIL_STABLE;
+    private:
         CircularBuffer<T, ESPHOME_BALBOASPA_MEASUREMENT_POOL_SIZE> value_history;
 };
 
@@ -31,7 +32,7 @@ class SpaState {
         uint8_t jet2 :2;
         uint8_t blower :1;
         uint8_t light :1;
-        uint8_t highrange:1;        
+        uint8_t highrange:1;
         uint8_t circulation:1;
         uint8_t hour :5;
         uint8_t minutes :6;
@@ -49,6 +50,9 @@ class SpaState {
 
         float get_current_temp();
         void set_current_temp(float current_temp);
+
+        void set_state_pool_size(uint8_t pool_size);
+        void set_state_pool_stable_threshold(uint8_t stable_threshold);
     private:
         SpaValueHistory<float> current_temperatures;
         SpaValueHistory<float> target_temperatures;
