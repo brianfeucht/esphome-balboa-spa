@@ -14,11 +14,12 @@ AUTO_LOAD = ["climate"]
 
 BalboaSpaThermostat = balboa_spa_ns.class_('BalboaSpaThermostat', cg.Component, climate.Climate)
 
-CONFIG_SCHEMA = climate.CLIMATE_SCHEMA.extend(
+CONFIG_SCHEMA = (
+    climate.climate_schema(BalboaSpaThermostat).extend(
     {
         cv.GenerateID(): cv.declare_id(BalboaSpaThermostat),
         cv.GenerateID(CONF_SPA_ID): cv.use_id(BalboaSpa),
-    }
+    })
 )
 
 async def to_code(config):
