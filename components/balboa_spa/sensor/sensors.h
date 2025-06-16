@@ -11,15 +11,19 @@ namespace balboa_spa {
 class BalboaSpaSensors : public sensor::Sensor {
 public:
   enum class BalboaSpaSensorType : uint8_t{
-    BLOWER = 1,
-    HIGHRANGE = 2,
-    CIRCULATION = 3,
-    RESTMODE = 4,
-    HEATSTATE = 5,
+    UNKNOWN = 0,
+    BLOWER,
+    HIGHRANGE,
+    CIRCULATION,
+    RESTMODE,
+    HEATSTATE,
+    CONNECTED,
+    SENSOR_A,
+    SENSOR_B
   };
 
 public:
-  BalboaSpaSensors() {};
+  BalboaSpaSensors();
   void update(SpaState* spaState);
 
   void set_parent(BalboaSpa *parent);
@@ -27,6 +31,8 @@ public:
 
   private:
     BalboaSpaSensorType sensor_type;
+    BalboaSpa *spa;
+    uint32_t lastUpdate;
 };
 
 }  // namespace balboa_spa
