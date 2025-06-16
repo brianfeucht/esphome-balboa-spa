@@ -2,35 +2,33 @@
 
 #include <string>
 
-#include "esphome/components/sensor/sensor.h"
+#include "esphome/components/binary_sensor/binary_sensor.h"
 #include "../balboaspa.h"
 
 namespace esphome {
 namespace balboa_spa {
 
-class BalboaSpaSensors : public sensor::Sensor {
+class BalboaSpaBinarySensors : public binary_sensor::BinarySensor {
 public:
-  enum class BalboaSpaSensorType : uint8_t{
+  enum class BalboaSpaBinarySensorType : uint8_t{
     UNKNOWN = 0,
     BLOWER,
     HIGHRANGE,
     CIRCULATION,
     RESTMODE,
     HEATSTATE,
-    CONNECTED,
-    SENSOR_A,
-    SENSOR_B
+    CONNECTED
   };
 
 public:
-  BalboaSpaSensors();
+  BalboaSpaBinarySensors();
   void update(SpaState* spaState);
 
   void set_parent(BalboaSpa *parent);
-  void set_sensor_type(BalboaSpaSensorType _type) { sensor_type = _type;  }
+  void set_sensor_type(const BalboaSpaBinarySensorType _type) { sensor_type = _type;  }
 
   private:
-    BalboaSpaSensorType sensor_type;
+    BalboaSpaBinarySensorType sensor_type;
     BalboaSpa *spa;
     uint32_t lastUpdate;
 };

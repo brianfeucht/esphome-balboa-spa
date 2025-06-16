@@ -2,12 +2,15 @@
 
 #include "esphome/core/component.h"
 #include "esphome/components/uart/uart.h"
+#include "esphome/core/log.h"
 
 #include "spa_types.h"
 #include "spa_config.h"
 #include "spa_state.h"
-#include <CircularBuffer.hpp>
+#include "CircularBuffer.h"
 #include <string>
+#include <iostream>
+#include <sstream>
 
 namespace esphome {
 namespace balboa_spa {
@@ -16,12 +19,12 @@ namespace balboa_spa {
 // https://github.com/espressif/arduino-esp32/blob/496b8411773243e1ad88a68652d6982ba2366d6b/cores/esp32/Arduino.h#L99
 #define bitRead(value, bit)            (((value) >> (bit)) & 0x01)
 
-static const uint8_t ESPHOME_BALBOASPA_MIN_TEMPERATURE = 26;
+static const uint8_t ESPHOME_BALBOASPA_MIN_TEMPERATURE = 7;
 static const uint8_t ESPHOME_BALBOASPA_MAX_TEMPERATURE = 40;
 static const float   ESPHOME_BALBOASPA_POLLING_INTERVAL = 50; // frequency to poll uart device
 
-#define STRON String("ON").c_str()
-#define STROFF String("OFF").c_str()
+#define STRON "ON"
+#define STROFF "OFF"
 
 class BalboaSpa : public uart::UARTDevice, public PollingComponent {
   public:
@@ -34,17 +37,22 @@ class BalboaSpa : public uart::UARTDevice, public PollingComponent {
     SpaState* get_current_state();
 
     void set_temp(float temp);
+    void set_highrange(bool high);
     void set_hour(int hour);
     void set_minute(int minute);
+    void set_time(uint8_t h, uint8_t m);
     void toggle_light();
-    void toggle_jet1() ;
+    void toggle_jet1();
     void toggle_jet2();
+    void toggle_jet3();
+    void toggle_blower();
+    bool is_communicating();
 
     void register_listener(const std::function<void(SpaState*)> &func) {this->listeners_.push_back(func);}
 
   private:
-    CircularBuffer<uint8_t, 35> Q_in;
-    CircularBuffer<uint8_t, 35> Q_out;
+    CircularBuffer<uint8_t, 100> Q_in;
+    CircularBuffer<uint8_t, 100> Q_out;
     uint8_t x, i, j;
     uint8_t last_state_crc = 0x00;
     uint8_t send = 0x00;
@@ -52,7 +60,7 @@ class BalboaSpa : public uart::UARTDevice, public PollingComponent {
     uint8_t sethour = 0x00;
     uint8_t setminute = 0x00;
     uint8_t id = 0x00;
-    unsigned long lastrx = 0;
+    uint32_t lastrx = 0;
 
     std::vector<std::function<void(SpaState*)>> listeners_;
 
@@ -67,14 +75,13 @@ class BalboaSpa : public uart::UARTDevice, public PollingComponent {
     SpaFaultLog spaFaultLog;
     SpaFilterSettings spaFilterSettings;
 
-    void read_serial();
-    void update_sensors();
+    bool read_serial();
 
-    uint8_t crc8(CircularBuffer<uint8_t, 35> &data);
+    uint8_t crc8(CircularBuffer<uint8_t, 100> &data, bool ignore_delimiter=false);
     void ID_request();
     void ID_ack();
     void rs485_send();
-    void print_msg(CircularBuffer<uint8_t, 35> &data);
+    void print_msg(CircularBuffer<uint8_t, 100> &data);
     void decodeSettings();
     void decodeState();
     void decodeFilterSettings();

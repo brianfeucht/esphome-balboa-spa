@@ -5,6 +5,7 @@ from esphome.components import switch
 from esphome.const import (
     ICON_FAN,
     ICON_LIGHTBULB,
+    ICON_GRAIN
 )
 
 from .. import (
@@ -17,11 +18,15 @@ DEPENDENCIES = ["balboa_spa"]
 
 Jet1Switch = balboa_spa_ns.class_("Jet1Switch", switch.Switch)
 Jet2Switch = balboa_spa_ns.class_("Jet2Switch", switch.Switch)
+Jet3Switch = balboa_spa_ns.class_("Jet3Switch", switch.Switch)
 LightsSwitch = balboa_spa_ns.class_("LightsSwitch", switch.Switch)
+BlowerSwitch = balboa_spa_ns.class_("BlowerSwitch", switch.Switch)
 
 CONF_JET1 = "jet1"
 CONF_JET2 = "jet2"
+CONF_JET3 = "jet3"
 CONF_LIGHTS = "light"
+CONF_BLOWER = "blower"
 
 CONFIG_SCHEMA = cv.Schema(
     {
@@ -36,9 +41,19 @@ CONFIG_SCHEMA = cv.Schema(
             icon=ICON_FAN,
             default_restore_mode="DISABLED",
         ),
+        cv.Optional(CONF_JET3): switch.switch_schema(
+            Jet3Switch,
+            icon=ICON_FAN,
+            default_restore_mode="DISABLED",
+        ),
         cv.Optional(CONF_LIGHTS): switch.switch_schema(
             LightsSwitch,
             icon=ICON_LIGHTBULB,
+            default_restore_mode="DISABLED",
+        ),
+        cv.Optional(CONF_BLOWER): switch.switch_schema(
+            BlowerSwitch,
+            icon=ICON_GRAIN,
             default_restore_mode="DISABLED",
         ),
     })
@@ -46,7 +61,7 @@ CONFIG_SCHEMA = cv.Schema(
 async def to_code(config):
     parent = await cg.get_variable(config[CONF_SPA_ID])
 
-    for switch_type in [CONF_JET1, CONF_JET2, CONF_LIGHTS]:
+    for switch_type in [CONF_JET1, CONF_JET2, CONF_JET3, CONF_LIGHTS, CONF_BLOWER]:
         if conf := config.get(switch_type):
             sw_var = await switch.new_switch(conf)
             cg.add(sw_var.set_parent(parent))
