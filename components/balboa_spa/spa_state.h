@@ -1,10 +1,11 @@
 #include <stdint.h>
-#include <CircularBuffer.hpp>
+#include "CircularBuffer.h"
+#include "esphome/core/optional.h"
 
 #ifndef SPA_STATE_H
 #define SPA_STATE_H
 
-static const uint8_t ESPHOME_BALBOASPA_MEASUREMENT_POOL_SIZE = 20;
+static const uint8_t ESPHOME_BALBOASPA_MEASUREMENT_POOL_SIZE = 10;
 static const uint8_t ESPHOME_BALBOASPA_MEASUREMENT_COUNT_UNTIL_STABLE = 5;
 
 namespace esphome {
@@ -26,15 +27,22 @@ template <typename T> class SpaValueHistory{
 
 class SpaState {
     public:
-        SpaState() {}
+        SpaState();
         uint8_t jet1 :2;
         uint8_t jet2 :2;
+        uint8_t jet3 :2;
         uint8_t blower :1;
         uint8_t light :1;
         uint8_t highrange:1;        
         uint8_t circulation:1;
         uint8_t hour :5;
         uint8_t minutes :6;
+
+        uint8_t spa_state_byte0;
+        uint8_t hold_minutes;
+
+        float sensor_a;
+        float sensor_b;
 
         uint8_t get_rest_mode();
         uint8_t get_last_rest_mode();
@@ -44,10 +52,10 @@ class SpaState {
         uint8_t get_last_heat_state();
         void set_heat_state(uint8_t heat_state);
 
-        float get_target_temp();
+        optional<float> get_target_temp();
         void set_target_temp(float target_temp);
 
-        float get_current_temp();
+        optional<float> get_current_temp();
         void set_current_temp(float current_temp);
     private:
         SpaValueHistory<float> current_temperatures;

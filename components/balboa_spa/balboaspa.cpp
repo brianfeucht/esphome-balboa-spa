@@ -1,6 +1,3 @@
-#include <string>
-#include "esphome.h"
-#include "esphome/core/log.h"
 #include "balboaspa.h"
 
 namespace esphome {
@@ -14,14 +11,23 @@ void BalboaSpa::setup() {
 }
 
 void BalboaSpa::update() {
-    yield();
+  uint32_t now = millis();
+
+    if ( lastrx + 10000 < now ){
+      ESP_LOGW(TAG, "No new message since %d Seconds! Mark as dead!", (now - lastrx) / 1000 );
+      status_set_error("No Communication with Balboa Mainboard!");
+      id = 0;
+    } else if (status_has_error()) {
+      status_clear_error();
+    }
+  
     while (available()) {
       read_serial();
     }
 
     yield();
     // Run through listeners
-    for (auto &listener : this->listeners_) {
+    for (const auto &listener : this->listeners_) {
       listener(&spaState);
       yield();
     }
@@ -34,32 +40,45 @@ SpaState* BalboaSpa::get_current_state() { return &spaState; }
 
 void BalboaSpa::set_temp(float temp)
 {
-    if(spaConfig.temp_scale == 1){
-      temp = ((temp * 9.0) / 5.0) + 32;
-    }
-    else
-    {
-      temp = temp * 2.0;
+    if (temp <= ESPHOME_BALBOASPA_MIN_TEMPERATURE || temp >= ESPHOME_BALBOASPA_MAX_TEMPERATURE) {
+      ESP_LOGW(TAG, "Temperature %f is outside of valid range (min=%d, max=%d)", ESPHOME_BALBOASPA_MIN_TEMPERATURE, ESPHOME_BALBOASPA_MAX_TEMPERATURE);
+      return;
     }
 
-    if (temp >= ESPHOME_BALBOASPA_MIN_TEMPERATURE || temp <= ESPHOME_BALBOASPA_MAX_TEMPERATURE) {
-      settemp = temp;
-      send = 0xff;
-    }
+    settemp = (spaConfig.temp_scale == 1) ? temp * 2 : temp ;
+    send = 0xff;
+}
+
+void BalboaSpa::set_highrange(bool high){
+  ESP_LOGD(TAG, "highrange=%d to %d requested", spaState.highrange, high);
+  if (high != spaState.highrange){
+    send = 0x50;
+  }
 }
 
 void BalboaSpa::set_hour(int hour) {
-    if(hour >= 0 || hour <= 23) {
+    if(hour >= 0 && hour <= 23) {
         sethour = hour;
         send = 0x21;
     }
 }
 
 void BalboaSpa::set_minute(int minute) {
-    if(minute >= 0 || minute <= 59) {
+    if(minute >= 0 && minute <= 59) {
         setminute = minute;
         send = 0x21;
     }
+}
+
+void BalboaSpa::set_time(uint8_t hour, uint8_t minute){
+  ESP_LOGI(TAG, "Update time from %d:%d to %d:%d", spaState.hour, spaState.minutes, hour, minute);
+  if(hour <= 23) {
+        sethour = hour;
+  }
+  if(minute <= 59) {
+        setminute = minute;
+  }
+  send = 0x21;
 }
 
 void BalboaSpa::toggle_light() {
@@ -74,25 +93,56 @@ void BalboaSpa::toggle_jet2() {
     send = 0x05;
 }
 
-void BalboaSpa::read_serial() {
-      x = read();
-      Q_in.push(x);
+void BalboaSpa::toggle_jet3() {
+    send = 0x06;
+}
+
+void BalboaSpa::toggle_blower() {
+    send = 0x0C;
+}
+
+bool BalboaSpa::read_serial() {
+      if (!read_byte(&x)){
+        return false;
+      }
+      bool packet_read=false;
       
       // Drop until SOF is seen
-      if (Q_in.first() != 0x7E) {
+      if (Q_in.first() != 0x7E && x != 0x7E) {
         Q_in.clear();
+        return false;
       } 
         
       // Double SOF-marker, drop last one
-      if (Q_in[1] == 0x7E && Q_in.size() > 1) Q_in.pop();
+      if ( Q_in.size() >= 2 && Q_in[1] == 0x7E) {
+        Q_in.pop();
+        return false;
+      }
+
+      Q_in.push(x);
 
       // Complete package
       //if (x == 0x7E && Q_in[0] == 0x7E && Q_in[1] != 0x7E) {
-      if (x == 0x7E && Q_in.size() > 2) {
+      if (x == 0x7E && Q_in.size() > 2 && Q_in.size() >= Q_in[1] + 2) {
+
+        if (Q_in.size() - 2 < Q_in[1]){
+          ESP_LOGD(TAG, "packet_size: %d, recv_size: %d", Q_in[1], Q_in.size());
+          ESP_LOGD(TAG, "%s", "Packet incomplete!");
+          Q_in.clear();
+          return false;
+        }
+
+        auto crc = this->crc8(Q_in, 1);
+        auto pcrc = Q_in[Q_in[1] ];
+        if ( crc != pcrc ) {
+          ESP_LOGD(TAG, "CRC %d != Packet crc %d end=0x%X", crc, pcrc, Q_in[Q_in[1] + 1]);
+          Q_in.clear();
+          return false;
+        }
 
         // Unregistered or yet in progress
         if (id == 0) {
-          ESP_LOGD("Spa/node/id", "Unregistered");
+          ESP_LOGD("Spa/node/id", "%s", "Unregistered");
           //if (Q_in[2] == 0xFE) print_msg(Q_in);
           print_msg(Q_in);
           // FE BF 02:got new client ID
@@ -106,9 +156,10 @@ void BalboaSpa::read_serial() {
 
           // FE BF 00:Any new clients?
           if (Q_in[2] == 0xFE && Q_in[4] == 0x00) {
-            ESP_LOGD("Spa/node/id", "Requesting ID");
+            ESP_LOGD("Spa/node/id", "%s", "Requesting ID");
             ID_request();
           }
+          packet_read = true;
         } 
         else if (Q_in[2] == id && Q_in[4] == 0x06) 
         { // we have an ID, do clever stuff
@@ -126,7 +177,7 @@ void BalboaSpa::read_serial() {
               Q_out.push(0xBF);
               Q_out.push(0x20);
               Q_out.push(settemp);
-            } 
+            }
             else if (send == 0x00) 
             {
               if (have_config == 0) { // Get configuration of the hot tub
@@ -136,7 +187,7 @@ void BalboaSpa::read_serial() {
                 Q_out.push(0x00);
                 Q_out.push(0x00);
                 Q_out.push(0x01);
-                ESP_LOGD("Spa/config/status", "Getting config");
+                ESP_LOGD("Spa/config/status", "%s", "Getting config");
                 have_config = 1;
               } 
               else if (have_faultlog == 0) { // Get the fault log
@@ -147,7 +198,7 @@ void BalboaSpa::read_serial() {
                 Q_out.push(0xFF);
                 Q_out.push(0x00);
                 have_faultlog = 1;
-                ESP_LOGD("Spa/debug/have_faultlog", "requesting fault log, #1");
+                ESP_LOGD("Spa/debug/have_faultlog", "%s", "requesting fault log, #1");
               } 
               else if ((have_filtersettings == 0) && (have_faultlog == 2)) { // Get the filter cycles log once we have the faultlog
                 Q_out.push(id);
@@ -156,7 +207,7 @@ void BalboaSpa::read_serial() {
                 Q_out.push(0x01);
                 Q_out.push(0x00);
                 Q_out.push(0x00);
-                ESP_LOGD("Spa/debug/have_filtersettings", "requesting filter settings, #1");
+                ESP_LOGD("Spa/debug/have_filtersettings", "%s", "requesting filter settings, #1");
                 have_filtersettings = 1;
               } 
               else {
@@ -167,6 +218,7 @@ void BalboaSpa::read_serial() {
               }
             } 
             else {
+              ESP_LOGD(TAG, "Send toggle command 0x%X", send);
               Q_out.push(id);
               Q_out.push(0xBF);
               Q_out.push(0x11);
@@ -176,22 +228,27 @@ void BalboaSpa::read_serial() {
 
             rs485_send();
             send = 0x00;
+            packet_read = true;
         } else if (Q_in[2] == id && Q_in[4] == 0x2E) {
           if (last_state_crc != Q_in[Q_in[1]]) {
             decodeSettings();
+            packet_read = true;
           }
         } else if (Q_in[2] == id && Q_in[4] == 0x28) {
           if (last_state_crc != Q_in[Q_in[1]]) {
             decodeFault();
+            packet_read = true;
           }
         } else if (Q_in[2] == 0xFF && Q_in[4] == 0x13) { // FF AF 13:Status Update - Packet index offset 5
           if (last_state_crc != Q_in[Q_in[1]]) {
             decodeState();
+            packet_read = true;
           }
         } else if (Q_in[2] == id && Q_in[4] == 0x23) { // FF AF 23:Filter Cycle Message - Packet index offset 5
           if (last_state_crc != Q_in[Q_in[1]]) {
-            ESP_LOGD("Spa/debug/have_faultlog", "decoding filter settings");
+            ESP_LOGD("Spa/debug/have_faultlog","%s", "decoding filter settings");
             decodeFilterSettings();
+            packet_read = true;
           }
         } else {
           // DEBUG for finding meaning
@@ -200,21 +257,22 @@ void BalboaSpa::read_serial() {
         }
 
         // Clean up queue
-        yield();
+        //yield();
         Q_in.clear();
       }
       lastrx = millis();
+      return packet_read;
   }
 
 
-  uint8_t BalboaSpa::crc8(CircularBuffer<uint8_t, 35> &data) {
+  uint8_t BalboaSpa::crc8(CircularBuffer<uint8_t, 100> &data, bool ignore_delimiter) {
     unsigned long crc;
-    int i, bit;
-    uint8_t length = data.size();
+    int bit;
+    uint8_t length = ignore_delimiter ? data.size() - 2 : data.size() ;
 
     crc = 0x02;
-    for ( i = 0 ; i < length ; i++ ) {
-      crc ^= data[i];
+    for ( size_t index = ignore_delimiter ; index < length ; index++ ) {
+      crc ^= data[index];
       for ( bit = 0 ; bit < 8 ; bit++ ) {
         if ( (crc & 0x80) != 0 ) {
           crc <<= 1;
@@ -272,20 +330,20 @@ void BalboaSpa::read_serial() {
     Q_out.clear();
   }
 
-  void BalboaSpa::print_msg(CircularBuffer<uint8_t, 35> &data) {
-    String s;
+  void BalboaSpa::print_msg(CircularBuffer<uint8_t, 100> &data) {
+    std::stringstream s;
     //for (i = 0; i < (Q_in[1] + 2); i++) {
     for (i = 0; i < data.size(); i++) {
       x = Q_in[i];
-      if (x < 0x0A) s += "0";
-      s += String(x, HEX);
-      s += " ";
+      if (x < 0x0A) s << "0";
+      s << std::hex << x;
+      s << " ";
     }
     yield();
   }
 
   void BalboaSpa::decodeSettings() {
-    ESP_LOGD("Spa/config/status", "Got config");
+    ESP_LOGD("Spa/config/status", "%s", "Got config");
     spaConfig.pump1 = Q_in[5] & 0x03;
     spaConfig.pump2 = (Q_in[5] & 0x0C) >> 2;
     spaConfig.pump3 = (Q_in[5] & 0x30) >> 4;
@@ -318,17 +376,12 @@ void BalboaSpa::read_serial() {
   }
 
   void BalboaSpa::decodeState() {
-    String s;
-    double d = 0.0;
-    double c = 0.0;
-    bool newState = false;
+    float d = 0.0;
+    uint8_t bit = 0;
 
     // 25:Flag Byte 20 - Set Temperature
-    if (spaConfig.temp_scale == 0) {
-      d = Q_in[25] / 2.0;
-    } else if (spaConfig.temp_scale == 1){
-      d = (Q_in[25] - 32.0) * 5.0/9.0;
-    }
+    d = (spaConfig.temp_scale == 1) ? Q_in[25] / 2.0f : d = Q_in[25];
+    ESP_LOGD(TAG, "Temperature raw=%d, x/2=%f°C scale=%d", Q_in[7], Q_in[7]/2.0f, spaConfig.temp_scale);
 
     // Ignore values which are outside what is allowed
     if(d != 0 && 
@@ -340,27 +393,20 @@ void BalboaSpa::read_serial() {
     }
 
     // 7:Flag Byte 2 - Actual temperature
-    if (Q_in[7] != 0xFF) 
-    {
+    if (Q_in[7] != 0xFF) {
+      ESP_LOGD(TAG, "Temperature raw=%d, x/2=%f°C scale=%d", Q_in[7], Q_in[7]/2.0f, spaConfig.temp_scale);
       if (spaConfig.temp_scale == 0) {
-        d = Q_in[7] / 2.0;
+        d = Q_in[7];
       } else if (spaConfig.temp_scale == 1){
-        d = (Q_in[7] - 32.0) * 5.0/9.0;
+        d = Q_in[7] / 2.0f;
       }
-
-      if (c > 0) {
-        if ((d > c * 1.2) || (d < c * 0.8)) d = c; //remove spurious readings greater or less than 20% away from previous read
-      }
-
-      c = d;
     } else {
-      d = 0;
+      d = NAN;
     }
 
     // it isn't possible for this value to be above boiling
     // probably a smaller limit here, but should filter out more bad data
-    if(d != 0 && d < 100)
-    {
+    if(d != 0 && d < 100) {
       spaState.set_current_temp(d);
       ESP_LOGD("Spa/temperature/state", "%.2f", d);
     }
@@ -368,11 +414,19 @@ void BalboaSpa::read_serial() {
     // REMARK Move upper publish to HERE to get 0 for unknown temperature
 
     // 8:Flag Byte 3 Hour & 9:Flag Byte 4 Minute => Time
-    if (Q_in[8] < 10) s = "0"; else s = "";
+
+    spaState.spa_state_byte0 = Q_in[5];
+    if (spaState.spa_state_byte0 == 0x05){
+      spaState.hold_minutes = Q_in[12];
+    }else{
+      ESP_LOGD(TAG, "SensorA: raw: %d, x/2 :%f scale: %d", Q_in[12], Q_in[12] / 2.0f, spaConfig.temp_scale);
+      ESP_LOGD(TAG, "SensorB: raw: %d, x/2 :%f scale: %d", Q_in[13], Q_in[13] / 2.0f, spaConfig.temp_scale);
+
+      spaState.sensor_a = Q_in[12] / 2.0f;
+      spaState.sensor_b = Q_in[13] / 2.0f;
+    }
+
     sethour = Q_in[8];
-    s += String(Q_in[8]) + ":";
-    if (Q_in[9] < 10) s += "0";
-    s += String(Q_in[9]);
     setminute = Q_in[9];
 
     if(sethour != spaState.hour || setminute != spaState.minutes)
@@ -384,62 +438,57 @@ void BalboaSpa::read_serial() {
       spaState.minutes = setminute;
     }
 
-    d = Q_in[10];
-    spaState.set_rest_mode(d);
+    bit = Q_in[10];
+    spaState.set_rest_mode(bit);
     
     // 15:Flags Byte 10 / Heat status, Temp Range
-    d = bitRead(Q_in[15], 4);
-    spaState.set_heat_state(d);
+    bit = bitRead(Q_in[15], 4);
+    ESP_LOGD(TAG, "Heatstate=%d", bit);
+    spaState.set_heat_state(bit);
 
-    d = bitRead(Q_in[15], 2);
-    if (d != spaState.highrange) 
-    {
-      newState = true;
-      ESP_LOGD("Spa/highrange/state", "%.0f", d); //LOW
-      spaState.highrange = d;
+    bit = bitRead(Q_in[15], 2);
+    if (d != spaState.highrange) {
+      ESP_LOGD("Spa/highrange/state", "%d", bit); //LOW
+      spaState.highrange = bit;
     }
 
     // 16:Flags Byte 11
-    d = bitRead(Q_in[16], 1);
-    if (d != spaState.jet1) 
-    {
-      newState = true;
-      ESP_LOGD("Spa/jet_1/state", "%.0f", d);
-      spaState.jet1 = d;
+    bit = bitRead(Q_in[16], 0) + bitRead(Q_in[16], 1);
+    if (d != spaState.jet1) {
+      ESP_LOGD("Spa/jet_1/state", "%d", bit);
+      spaState.jet1 = bit;
     } 
 
-    d = bitRead(Q_in[16], 3);
-    if (d != spaState.jet2) 
-    {
-      newState = true;
-      ESP_LOGD("Spa/jet_2/state", "%.0f", d);
-      spaState.jet2 = d;
+    bit = bitRead(Q_in[16], 2) + bitRead(Q_in[16], 3);
+    if (d != spaState.jet2) {
+      ESP_LOGD("Spa/jet_2/state", "%d", bit);
+      spaState.jet2 = bit;
+    }
+
+    bit = bitRead(Q_in[16], 4) + bitRead(Q_in[16], 5);
+    if (d != spaState.jet3) {
+      ESP_LOGD("Spa/jet_3/state", "%d", bit);
+      spaState.jet3 = bit;
     }
 
     // 18:Flags Byte 13
-    d = bitRead(Q_in[18], 1);
-    if (d != spaState.circulation)
-    {
-      newState = true;
-      ESP_LOGD("Spa/circ/state", "%.0f", d);
-      spaState.circulation = d;
+    bit = bitRead(Q_in[18], 1);
+    if (d != spaState.circulation){
+      ESP_LOGD("Spa/circ/state", "%d", bit);
+      spaState.circulation = bit;
     }
 
-    d = bitRead(Q_in[18], 2);
-    if (d != spaState.blower) 
-    {
-      newState = true;
-      ESP_LOGD("Spa/blower/state", "%.0f", d);
-      spaState.blower = d;      
+    bit = bitRead(Q_in[18], 2);
+    if (d != spaState.blower) {
+      ESP_LOGD("Spa/blower/state", "%d", bit);
+      spaState.blower = bit;      
     }
 
-    d = Q_in[19] == 0x03;
+    bit = Q_in[19] == 0x03;
     // 19:Flags Byte 14
-    if (d != spaState.light) 
-    {
-      newState = true;
-      ESP_LOGD("Spa/light/state","%.0f", d);
-      spaState.light = d;
+    if (d != spaState.light) {
+      ESP_LOGD("Spa/light/state","%d", bit);
+      spaState.light = bit;
     }
 
     // TODO: callback on newState
@@ -448,10 +497,6 @@ void BalboaSpa::read_serial() {
   }
 
   void BalboaSpa::decodeFilterSettings() {
-    String s;
-    String d;
-    String payld;
-
     spaFilterSettings.filt1Hour = Q_in[5];
     spaFilterSettings.filt1Minute = Q_in[6];
     spaFilterSettings.filt1DurationHour = Q_in[7];
@@ -463,34 +508,17 @@ void BalboaSpa::read_serial() {
     spaFilterSettings.filt2DurationMinute = Q_in[12];
 
     //Filter 1 time conversion
-    if (spaFilterSettings.filt1Hour < 10) s = "0"; else s = "";
-    s = String(spaFilterSettings.filt1Hour) + ":";
-    if (spaFilterSettings.filt1Minute < 10) s += "0";
-    s += String(spaFilterSettings.filt1Minute);
-
-    if (spaFilterSettings.filt1DurationHour < 10) d = "0"; else d = "";
-    d = String(spaFilterSettings.filt1DurationHour) + ":";
-    if (spaFilterSettings.filt1DurationMinute < 10) d += "0";
-    d += String(spaFilterSettings.filt1DurationMinute);
-
-    payld = "{\"start\":\""+s+"\",\"duration\":\""+d+"\"}";
-    ESP_LOGD("Spa/filter1/state", payld.c_str());
+    static PROGMEM const char *format_string = R"({"start":"%.2i:%.2i","duration":"%.2i:%.2i"} )";
+    const auto paylen = std::snprintf(nullptr, 0, format_string, spaFilterSettings.filt1Hour, spaFilterSettings.filt1Minute, spaFilterSettings.filt1DurationHour, spaFilterSettings.filt1DurationMinute);
+ 
+    char payload[paylen+1] = {0};
+    std::snprintf(payload, paylen, format_string, spaFilterSettings.filt1Hour, spaFilterSettings.filt1Minute, spaFilterSettings.filt1DurationHour, spaFilterSettings.filt1DurationMinute);
+    ESP_LOGD("Spa/filter1/state", payload);
 
     //Filter 2 time conversion
-    if (spaFilterSettings.filt2Hour < 10) s = "0"; else s = "";
-    s += String(spaFilterSettings.filt2Hour) + ":";
-    if (spaFilterSettings.filt2Minute < 10) s += "0";
-    s += String(spaFilterSettings.filt2Minute);
-
-    if (spaFilterSettings.filt2DurationHour < 10) d = "0"; else d = "";
-    d += String(spaFilterSettings.filt2DurationHour) + ":";
-    if (spaFilterSettings.filt2DurationMinute < 10) d += "0";
-    d += String(spaFilterSettings.filt2DurationMinute);
-    if ((int)(spaFilterSettings.filt2Enable) == 1) ESP_LOGD("Spa/filter2_enabled/state", STRON); else ESP_LOGD("Spa/filter2_enabled/state", STROFF);
-
-
-    payld = "{\"start\":\""+s+"\",\"duration\":\""+d+"\"}";
-    ESP_LOGD("Spa/filter2/state", payld.c_str());
+    ESP_LOGD("Spa/filter2_enabled/state", spaFilterSettings.filt2Enable == 1 ? STRON : STROFF);
+    std::snprintf(payload, paylen, format_string, spaFilterSettings.filt2Hour, spaFilterSettings.filt2Minute, spaFilterSettings.filt2DurationHour, spaFilterSettings.filt2DurationMinute);
+    ESP_LOGD("Spa/filter2/state", payload);
 
     have_filtersettings = 2;
   }
@@ -567,13 +595,17 @@ void BalboaSpa::read_serial() {
     ESP_LOGD("Spa/fault/Entries", "%d", spaFaultLog.totEntry);
     ESP_LOGD("Spa/fault/Entry",   "%d", spaFaultLog.currEntry);
     ESP_LOGD("Spa/fault/Code",    "%d", spaFaultLog.faultCode);
-    ESP_LOGD("Spa/fault/Message", spaFaultLog.faultMessage.c_str());
+    ESP_LOGD("Spa/fault/Message", "%s", spaFaultLog.faultMessage.c_str());
     ESP_LOGD("Spa/fault/DaysAgo", "%d", spaFaultLog.daysAgo);
     ESP_LOGD("Spa/fault/Hours",   "%d", spaFaultLog.hour);
     ESP_LOGD("Spa/fault/Minutes", "%d", spaFaultLog.minutes);
     have_faultlog = 2;
     //ESP_LOGD("Spa/debug/have_faultlog", "have the faultlog, #2");
   }
+
+bool BalboaSpa::is_communicating(){
+  return id != 0;
+}
 
 }  // namespace balboa_spa
 }  // namespace esphome
