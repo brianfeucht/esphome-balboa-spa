@@ -49,14 +49,14 @@ void BalboaSpa::set_temp(float temp)
 }
 
 void BalboaSpa::set_hour(int hour) {
-    if(hour >= 0 || hour <= 23) {
+    if(hour >= 0 && hour <= 23) {
         sethour = hour;
         send = 0x21;
     }
 }
 
 void BalboaSpa::set_minute(int minute) {
-    if(minute >= 0 || minute <= 59) {
+    if(minute >= 0 && minute <= 59) {
         setminute = minute;
         send = 0x21;
     }
