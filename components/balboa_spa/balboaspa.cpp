@@ -21,7 +21,7 @@ void BalboaSpa::update() {
 
     yield();
     // Run through listeners
-    for (auto &listener : this->listeners_) {
+    for (const auto &listener : this->listeners_) {
       listener(&spaState);
       yield();
     }
