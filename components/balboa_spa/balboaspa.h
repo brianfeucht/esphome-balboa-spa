@@ -40,6 +40,8 @@ class BalboaSpa : public uart::UARTDevice, public PollingComponent {
     void toggle_jet1() ;
     void toggle_jet2();
 
+    bool is_communicating();
+
     void register_listener(const std::function<void(SpaState*)> &func) {this->listeners_.push_back(func);}
 
   private:
