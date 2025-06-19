@@ -575,5 +575,8 @@ void BalboaSpa::read_serial() {
     //ESP_LOGD("Spa/debug/have_faultlog", "have the faultlog, #2");
   }
 
+  bool BalboaSpa::is_communicating(){
+    return id != 0;
+  }
 }  // namespace balboa_spa
 }  // namespace esphome
