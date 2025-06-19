@@ -74,6 +74,14 @@ void BalboaSpa::toggle_jet2() {
     send = 0x05;
 }
 
+void BalboaSpa::toggle_jet3() {
+    send = 0x06;
+}
+
+void BalboaSpa::toggle_blower() {
+    send = 0x0C;
+}
+
 void BalboaSpa::read_serial() {
       x = read();
       Q_in.push(x);

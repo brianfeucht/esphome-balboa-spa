@@ -16,8 +16,12 @@ switch:
       name: Jet1
     jet2:
       name: Jet2
+    jet3:
+      name: Jet3
     light:
       name: Lights
+    blower:
+      name: Blower
 
 climate:
   - platform: balboa_spa
