@@ -56,7 +56,7 @@ class BalboaSpa : public uart::UARTDevice, public PollingComponent {
     uint8_t sethour = 0x00;
     uint8_t setminute = 0x00;
     uint8_t id = 0x00;
-    unsigned long lastrx = 0;
+    uint32_t lastrx = 0;
 
     std::vector<std::function<void(SpaState*)>> listeners_;
 
