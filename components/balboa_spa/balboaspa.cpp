@@ -368,7 +368,7 @@ void BalboaSpa::read_serial() {
        d >= ESPHOME_BALBOASPA_MIN_TEMPERATURE && 
        d <= ESPHOME_BALBOASPA_MAX_TEMPERATURE)
     {
-      spaState.set_target_temp(d);
+      spaState.target_temp = d;
       ESP_LOGD("Spa/temperature/target", "%.2f", d);
     }
 
@@ -394,7 +394,7 @@ void BalboaSpa::read_serial() {
     // probably a smaller limit here, but should filter out more bad data
     if(d != 0 && d < 100)
     {
-      spaState.set_current_temp(d);
+      spaState.current_temp = d;
       ESP_LOGD("Spa/temperature/state", "%.2f", d);
     }
 
@@ -418,11 +418,11 @@ void BalboaSpa::read_serial() {
     }
 
     d = Q_in[10];
-    spaState.set_rest_mode(d);
+    spaState.rest_mode = d;
     
     // 15:Flags Byte 10 / Heat status, Temp Range
     d = bitRead(Q_in[15], 4);
-    spaState.set_heat_state(d);
+    spaState.heat_state = d;
 
     d = bitRead(Q_in[15], 2);
     if (d != spaState.highrange) 
