@@ -31,7 +31,7 @@ void BalboaSpaThermostat::set_parent(BalboaSpa *parent) {
 void BalboaSpaThermostat::update(SpaState* spaState) {
     yield();
     bool update = false;
-    float target_temp = spaState->get_target_temp();
+    float target_temp = spaState->target_temp;
 
     if(target_temp > 0 && this->target_temperature != target_temp)
     {
@@ -40,7 +40,7 @@ void BalboaSpaThermostat::update(SpaState* spaState) {
     }
 
     yield();
-    float current_temp = spaState->get_current_temp();
+    float current_temp = spaState->current_temp;
     if(current_temp > 0 && this->current_temperature != current_temp)
     {
         this->current_temperature = current_temp;
@@ -48,7 +48,7 @@ void BalboaSpaThermostat::update(SpaState* spaState) {
     }
 
     yield();
-    uint8_t heat_state = spaState->get_heat_state();
+    uint8_t heat_state = spaState->heat_state;
     if(heat_state == 0 && this->action != climate::CLIMATE_ACTION_IDLE)
     {
         this->action = climate::CLIMATE_ACTION_IDLE;
@@ -61,7 +61,7 @@ void BalboaSpaThermostat::update(SpaState* spaState) {
     }
 
     yield();
-    uint8_t rest_mode = spaState->get_rest_mode();
+    uint8_t rest_mode = spaState->rest_mode;
     if(rest_mode == 1 && this->mode != climate::CLIMATE_MODE_OFF)
     {
         this->mode = climate::CLIMATE_MODE_OFF;

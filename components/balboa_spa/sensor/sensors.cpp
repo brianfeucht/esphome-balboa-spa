@@ -23,7 +23,7 @@ void BalboaSpaSensors::update(SpaState* spaState) {
             sensor_state_value = spaState->circulation;
             break;
         case BalboaSpaSensorType::RESTMODE:
-            sensor_state_value = spaState->get_last_rest_mode();
+            sensor_state_value = spaState->rest_mode;
             if(sensor_state_value == 254)
             {
                 // This indicate no value
@@ -31,7 +31,7 @@ void BalboaSpaSensors::update(SpaState* spaState) {
             }
             break;
         case BalboaSpaSensorType::HEATSTATE:
-            sensor_state_value = spaState->get_last_heat_state();
+            sensor_state_value = spaState->heat_state;
             if(sensor_state_value == 254)
             {
                 // no value

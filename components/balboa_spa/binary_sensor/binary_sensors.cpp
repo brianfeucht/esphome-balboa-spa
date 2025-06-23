@@ -29,7 +29,7 @@ void BalboaSpaBinarySensors::update(SpaState* spaState) {
             sensor_state_value = spaState->circulation;
             break;
         case BalboaSpaBinarySensorType::RESTMODE:
-            d = spaState->get_last_rest_mode();
+            d = spaState->rest_mode;
             sensor_state_value = d;
             if(d == 254) {
                 // This indicate no value
@@ -37,7 +37,7 @@ void BalboaSpaBinarySensors::update(SpaState* spaState) {
             }
             break;
         case BalboaSpaBinarySensorType::HEATSTATE:
-            d = spaState->get_last_heat_state();
+            d = spaState->heat_state;
             sensor_state_value = d;
             if(d == 254) {
                 // no value
