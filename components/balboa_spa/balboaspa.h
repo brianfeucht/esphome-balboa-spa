@@ -74,7 +74,7 @@ class BalboaSpa : public uart::UARTDevice, public PollingComponent {
     void read_serial();
     void update_sensors();
 
-    uint8_t crc8(CircularBuffer<uint8_t, 100> &data);
+    uint8_t crc8(CircularBuffer<uint8_t, 100> &data, bool ignore_delimiter);
     void ID_request();
     void ID_ack();
     void rs485_send();
