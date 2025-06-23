@@ -14,16 +14,22 @@ void BalboaSpa::setup() {
 }
 
 void BalboaSpa::update() {
-    yield();
+    uint32_t now = millis();
+    if(lastrx + 10000 < now ){
+      ESP_LOGW(TAG, "No new message since %d Seconds! Mark as dead!", (now - lastrx) / 1000 );
+      status_set_error("No Communication with Balboa Mainboard!");
+      id = 0;
+    } else if (status_has_error()) {
+      status_clear_error();
+    }
+
     while (available()) {
       read_serial();
     }
 
-    yield();
     // Run through listeners
     for (const auto &listener : this->listeners_) {
       listener(&spaState);
-      yield();
     }
 }
 
