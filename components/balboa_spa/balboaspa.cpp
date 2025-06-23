@@ -221,7 +221,7 @@ void BalboaSpa::read_serial() {
   }
 
 
-  uint8_t BalboaSpa::crc8(CircularBuffer<uint8_t, 35> &data) {
+  uint8_t BalboaSpa::crc8(CircularBuffer<uint8_t, 100> &data) {
     unsigned long crc;
     int i, bit;
     uint8_t length = data.size();
@@ -286,7 +286,7 @@ void BalboaSpa::read_serial() {
     Q_out.clear();
   }
 
-  void BalboaSpa::print_msg(CircularBuffer<uint8_t, 35> &data) {
+  void BalboaSpa::print_msg(CircularBuffer<uint8_t, 100> &data) {
     String s;
     //for (i = 0; i < (Q_in[1] + 2); i++) {
     for (i = 0; i < data.size(); i++) {

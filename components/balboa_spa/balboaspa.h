@@ -20,8 +20,8 @@ static const uint8_t ESPHOME_BALBOASPA_MIN_TEMPERATURE = 7;
 static const uint8_t ESPHOME_BALBOASPA_MAX_TEMPERATURE = 40;
 static const float   ESPHOME_BALBOASPA_POLLING_INTERVAL = 50; // frequency to poll uart device
 
-#define STRON String("ON").c_str()
-#define STROFF String("OFF").c_str()
+#define STRON "ON"
+#define STROFF "OFF"
 
 class BalboaSpa : public uart::UARTDevice, public PollingComponent {
   public:
@@ -47,8 +47,8 @@ class BalboaSpa : public uart::UARTDevice, public PollingComponent {
     void register_listener(const std::function<void(SpaState*)> &func) {this->listeners_.push_back(func);}
 
   private:
-    CircularBuffer<uint8_t, 35> Q_in;
-    CircularBuffer<uint8_t, 35> Q_out;
+    CircularBuffer<uint8_t, 100> Q_in;
+    CircularBuffer<uint8_t, 100> Q_out;
     uint8_t x, i, j;
     uint8_t last_state_crc = 0x00;
     uint8_t send = 0x00;
@@ -74,11 +74,11 @@ class BalboaSpa : public uart::UARTDevice, public PollingComponent {
     void read_serial();
     void update_sensors();
 
-    uint8_t crc8(CircularBuffer<uint8_t, 35> &data);
+    uint8_t crc8(CircularBuffer<uint8_t, 100> &data);
     void ID_request();
     void ID_ack();
     void rs485_send();
-    void print_msg(CircularBuffer<uint8_t, 35> &data);
+    void print_msg(CircularBuffer<uint8_t, 100> &data);
     void decodeSettings();
     void decodeState();
     void decodeFilterSettings();
