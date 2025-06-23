@@ -11,8 +11,8 @@ class SpaState {
         SpaState() {
             rest_mode = 254;
             heat_state = 254;
-            target_temp = 0;
-            current_temp = 0;
+            target_temp = NAN;
+            current_temp = NAN;
         }
         uint8_t jet1 :2;
         uint8_t jet2 :2;
