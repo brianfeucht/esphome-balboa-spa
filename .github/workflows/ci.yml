@@ -21,6 +21,11 @@ jobs:
         with:
           yaml-file: esp32_test_component.yaml
           version: stable
+      - name: ESPHome ESP32 IDF
+        uses: esphome/build-action@v7.0.0
+        with:
+          yaml-file: esp32idf_test_component.yaml
+          version: stable
       - name: ESPHome ESP8266
         uses: esphome/build-action@v7.0.0
         with:
