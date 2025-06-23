@@ -19,9 +19,3 @@ def to_code(config):
 
     yield cg.register_component(var, config)
     yield uart.register_uart_device(var, config)
-
-    cg.add_library(
-        name="CircularBuffer",
-        repository="https://github.com/rlogiacco/CircularBuffer",
-        version="1.4.0"
-    )

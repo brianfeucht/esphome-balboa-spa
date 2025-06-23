@@ -6,7 +6,7 @@
 #include "spa_types.h"
 #include "spa_config.h"
 #include "spa_state.h"
-#include <CircularBuffer.hpp>
+#include "CircularBuffer.h"
 #include <string>
 
 namespace esphome {
