@@ -9,7 +9,10 @@ namespace balboa_spa {
 
 class BalboaSpaThermostat : public climate::Climate, public Component {
  public:
-  BalboaSpaThermostat() {};
+  BalboaSpaThermostat() {
+    spa = nullptr;
+    lastUpdate = 0;
+  };
 
   void update(SpaState* spaState);
   void set_parent(BalboaSpa *parent);
@@ -20,6 +23,7 @@ class BalboaSpaThermostat : public climate::Climate, public Component {
 
  private:
   BalboaSpa *spa;
+  uint32_t lastUpdate;
 };
 
 }  // namespace balboa_spa

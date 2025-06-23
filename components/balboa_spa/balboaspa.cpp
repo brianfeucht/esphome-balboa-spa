@@ -51,6 +51,13 @@ void BalboaSpa::set_temp(float temp)
     }
 }
 
+void BalboaSpa::set_highrange(bool high){
+  ESP_LOGD(TAG, "highrange=%d to %d requested", spaState.highrange, high);
+  if (high != spaState.highrange){
+    send = 0x50;
+  }
+}
+
 void BalboaSpa::set_hour(int hour) {
     if(hour >= 0 && hour <= 23) {
         sethour = hour;
