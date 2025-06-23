@@ -350,7 +350,6 @@ void BalboaSpa::read_serial() {
   void BalboaSpa::decodeState() {
     double d = 0.0;
     double c = 0.0;
-    uint8_t bit = 0;
 
     // 25:Flag Byte 20 - Set Temperature
     if (spaConfig.temp_scale == 0) {
@@ -410,57 +409,56 @@ void BalboaSpa::read_serial() {
       spaState.minutes = setminute;
     }
 
-    bit = Q_in[10];
-    spaState.rest_mode = bit;
+    d = Q_in[10];
+    spaState.rest_mode = d;
     
     // 15:Flags Byte 10 / Heat status, Temp Range
-    bit = bitRead(Q_in[15], 4);
-    ESP_LOGD(TAG, "Heatstate=%d", bit);
-    spaState.heat_state = bit;
+    d = bitRead(Q_in[15], 4);
+    spaState.heat_state = d;
 
-    bit = bitRead(Q_in[15], 2);
-    if (d != spaState.highrange) {
-      ESP_LOGD("Spa/highrange/state", "%d", bit); //LOW
-      spaState.highrange = bit;
+    d = bitRead(Q_in[15], 2);
+    if (d != spaState.highrange) 
+    {
+      ESP_LOGD("Spa/highrange/state", "%.0f", d); //LOW
+      spaState.highrange = d;
     }
 
     // 16:Flags Byte 11
-    bit = bitRead(Q_in[16], 0) + bitRead(Q_in[16], 1);
-    if (d != spaState.jet1) {
-      ESP_LOGD("Spa/jet_1/state", "%d", bit);
-      spaState.jet1 = bit;
+    d = bitRead(Q_in[16], 1);
+    if (d != spaState.jet1) 
+    {
+      ESP_LOGD("Spa/jet_1/state", "%.0f", d);
+      spaState.jet1 = d;
     } 
 
-    bit = bitRead(Q_in[16], 2) + bitRead(Q_in[16], 3);
-    if (d != spaState.jet2) {
-      ESP_LOGD("Spa/jet_2/state", "%d", bit);
-      spaState.jet2 = bit;
-    }
-
-    bit = bitRead(Q_in[16], 4) + bitRead(Q_in[16], 5);
-    if (d != spaState.jet3) {
-      ESP_LOGD("Spa/jet_3/state", "%d", bit);
-      spaState.jet3 = bit;
+    d = bitRead(Q_in[16], 3);
+    if (d != spaState.jet2) 
+    {
+      ESP_LOGD("Spa/jet_2/state", "%.0f", d);
+      spaState.jet2 = d;
     }
 
     // 18:Flags Byte 13
-    bit = bitRead(Q_in[18], 1);
-    if (d != spaState.circulation){
-      ESP_LOGD("Spa/circ/state", "%d", bit);
-      spaState.circulation = bit;
+    d = bitRead(Q_in[18], 1);
+    if (d != spaState.circulation)
+    {
+      ESP_LOGD("Spa/circ/state", "%.0f", d);
+      spaState.circulation = d;
     }
 
-    bit = bitRead(Q_in[18], 2);
-    if (d != spaState.blower) {
-      ESP_LOGD("Spa/blower/state", "%d", bit);
-      spaState.blower = bit;
+    d = bitRead(Q_in[18], 2);
+    if (d != spaState.blower) 
+    {
+      ESP_LOGD("Spa/blower/state", "%.0f", d);
+      spaState.blower = d;      
     }
 
-    bit = Q_in[19] == 0x03;
+    d = Q_in[19] == 0x03;
     // 19:Flags Byte 14
-    if (d != spaState.light) {
-      ESP_LOGD("Spa/light/state","%d", bit);
-      spaState.light = bit;
+    if (d != spaState.light) 
+    {
+      ESP_LOGD("Spa/light/state","%.0f", d);
+      spaState.light = d;
     }
 
     // TODO: callback on newState
