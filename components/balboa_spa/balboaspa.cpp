@@ -1,6 +1,3 @@
-#include <string>
-#include "esphome.h"
-#include "esphome/core/log.h"
 #include "balboaspa.h"
 
 namespace esphome {
@@ -306,13 +303,13 @@ void BalboaSpa::read_serial() {
   }
 
   void BalboaSpa::print_msg(CircularBuffer<uint8_t, 100> &data) {
-    String s;
+    std::stringstream s;
     //for (i = 0; i < (Q_in[1] + 2); i++) {
     for (i = 0; i < data.size(); i++) {
       x = Q_in[i];
-      if (x < 0x0A) s += "0";
-      s += String(x, HEX);
-      s += " ";
+      if (x < 0x0A) s << "0";
+      s << std::hex << x;
+      s << " ";
     }
     yield();
   }
@@ -351,10 +348,9 @@ void BalboaSpa::read_serial() {
   }
 
   void BalboaSpa::decodeState() {
-    String s;
     double d = 0.0;
     double c = 0.0;
-    bool newState = false;
+    uint8_t bit = 0;
 
     // 25:Flag Byte 20 - Set Temperature
     if (spaConfig.temp_scale == 0) {
@@ -401,11 +397,8 @@ void BalboaSpa::read_serial() {
     // REMARK Move upper publish to HERE to get 0 for unknown temperature
 
     // 8:Flag Byte 3 Hour & 9:Flag Byte 4 Minute => Time
-    if (Q_in[8] < 10) s = "0"; else s = "";
+
     sethour = Q_in[8];
-    s += String(Q_in[8]) + ":";
-    if (Q_in[9] < 10) s += "0";
-    s += String(Q_in[9]);
     setminute = Q_in[9];
 
     if(sethour != spaState.hour || setminute != spaState.minutes)
@@ -417,62 +410,57 @@ void BalboaSpa::read_serial() {
       spaState.minutes = setminute;
     }
 
-    d = Q_in[10];
-    spaState.rest_mode = d;
+    bit = Q_in[10];
+    spaState.rest_mode = bit;
     
     // 15:Flags Byte 10 / Heat status, Temp Range
-    d = bitRead(Q_in[15], 4);
-    spaState.heat_state = d;
+    bit = bitRead(Q_in[15], 4);
+    ESP_LOGD(TAG, "Heatstate=%d", bit);
+    spaState.heat_state = bit;
 
-    d = bitRead(Q_in[15], 2);
-    if (d != spaState.highrange) 
-    {
-      newState = true;
-      ESP_LOGD("Spa/highrange/state", "%.0f", d); //LOW
-      spaState.highrange = d;
+    bit = bitRead(Q_in[15], 2);
+    if (d != spaState.highrange) {
+      ESP_LOGD("Spa/highrange/state", "%d", bit); //LOW
+      spaState.highrange = bit;
     }
 
     // 16:Flags Byte 11
-    d = bitRead(Q_in[16], 1);
-    if (d != spaState.jet1) 
-    {
-      newState = true;
-      ESP_LOGD("Spa/jet_1/state", "%.0f", d);
-      spaState.jet1 = d;
+    bit = bitRead(Q_in[16], 0) + bitRead(Q_in[16], 1);
+    if (d != spaState.jet1) {
+      ESP_LOGD("Spa/jet_1/state", "%d", bit);
+      spaState.jet1 = bit;
     } 
 
-    d = bitRead(Q_in[16], 3);
-    if (d != spaState.jet2) 
-    {
-      newState = true;
-      ESP_LOGD("Spa/jet_2/state", "%.0f", d);
-      spaState.jet2 = d;
+    bit = bitRead(Q_in[16], 2) + bitRead(Q_in[16], 3);
+    if (d != spaState.jet2) {
+      ESP_LOGD("Spa/jet_2/state", "%d", bit);
+      spaState.jet2 = bit;
+    }
+
+    bit = bitRead(Q_in[16], 4) + bitRead(Q_in[16], 5);
+    if (d != spaState.jet3) {
+      ESP_LOGD("Spa/jet_3/state", "%d", bit);
+      spaState.jet3 = bit;
     }
 
     // 18:Flags Byte 13
-    d = bitRead(Q_in[18], 1);
-    if (d != spaState.circulation)
-    {
-      newState = true;
-      ESP_LOGD("Spa/circ/state", "%.0f", d);
-      spaState.circulation = d;
+    bit = bitRead(Q_in[18], 1);
+    if (d != spaState.circulation){
+      ESP_LOGD("Spa/circ/state", "%d", bit);
+      spaState.circulation = bit;
     }
 
-    d = bitRead(Q_in[18], 2);
-    if (d != spaState.blower) 
-    {
-      newState = true;
-      ESP_LOGD("Spa/blower/state", "%.0f", d);
-      spaState.blower = d;      
+    bit = bitRead(Q_in[18], 2);
+    if (d != spaState.blower) {
+      ESP_LOGD("Spa/blower/state", "%d", bit);
+      spaState.blower = bit;
     }
 
-    d = Q_in[19] == 0x03;
+    bit = Q_in[19] == 0x03;
     // 19:Flags Byte 14
-    if (d != spaState.light) 
-    {
-      newState = true;
-      ESP_LOGD("Spa/light/state","%.0f", d);
-      spaState.light = d;
+    if (d != spaState.light) {
+      ESP_LOGD("Spa/light/state","%d", bit);
+      spaState.light = bit;
     }
 
     // TODO: callback on newState
@@ -481,10 +469,6 @@ void BalboaSpa::read_serial() {
   }
 
   void BalboaSpa::decodeFilterSettings() {
-    String s;
-    String d;
-    String payld;
-
     spaFilterSettings.filt1Hour = Q_in[5];
     spaFilterSettings.filt1Minute = Q_in[6];
     spaFilterSettings.filt1DurationHour = Q_in[7];
@@ -496,34 +480,17 @@ void BalboaSpa::read_serial() {
     spaFilterSettings.filt2DurationMinute = Q_in[12];
 
     //Filter 1 time conversion
-    if (spaFilterSettings.filt1Hour < 10) s = "0"; else s = "";
-    s = String(spaFilterSettings.filt1Hour) + ":";
-    if (spaFilterSettings.filt1Minute < 10) s += "0";
-    s += String(spaFilterSettings.filt1Minute);
-
-    if (spaFilterSettings.filt1DurationHour < 10) d = "0"; else d = "";
-    d = String(spaFilterSettings.filt1DurationHour) + ":";
-    if (spaFilterSettings.filt1DurationMinute < 10) d += "0";
-    d += String(spaFilterSettings.filt1DurationMinute);
-
-    payld = "{\"start\":\""+s+"\",\"duration\":\""+d+"\"}";
-    ESP_LOGD("Spa/filter1/state", payld.c_str());
+    static PROGMEM const char *format_string = R"({"start":"%.2i:%.2i","duration":"%.2i:%.2i"} )";
+    const auto paylen = std::snprintf(nullptr, 0, format_string, spaFilterSettings.filt1Hour, spaFilterSettings.filt1Minute, spaFilterSettings.filt1DurationHour, spaFilterSettings.filt1DurationMinute);
+ 
+    char payload[paylen+1] = {0};
+    std::snprintf(payload, paylen, format_string, spaFilterSettings.filt1Hour, spaFilterSettings.filt1Minute, spaFilterSettings.filt1DurationHour, spaFilterSettings.filt1DurationMinute);
+    ESP_LOGD("Spa/filter1/state", payload);
 
     //Filter 2 time conversion
-    if (spaFilterSettings.filt2Hour < 10) s = "0"; else s = "";
-    s += String(spaFilterSettings.filt2Hour) + ":";
-    if (spaFilterSettings.filt2Minute < 10) s += "0";
-    s += String(spaFilterSettings.filt2Minute);
-
-    if (spaFilterSettings.filt2DurationHour < 10) d = "0"; else d = "";
-    d += String(spaFilterSettings.filt2DurationHour) + ":";
-    if (spaFilterSettings.filt2DurationMinute < 10) d += "0";
-    d += String(spaFilterSettings.filt2DurationMinute);
-    if ((int)(spaFilterSettings.filt2Enable) == 1) ESP_LOGD("Spa/filter2_enabled/state", STRON); else ESP_LOGD("Spa/filter2_enabled/state", STROFF);
-
-
-    payld = "{\"start\":\""+s+"\",\"duration\":\""+d+"\"}";
-    ESP_LOGD("Spa/filter2/state", payld.c_str());
+    ESP_LOGD("Spa/filter2_enabled/state", spaFilterSettings.filt2Enable == 1 ? STRON : STROFF);
+    std::snprintf(payload, paylen, format_string, spaFilterSettings.filt2Hour, spaFilterSettings.filt2Minute, spaFilterSettings.filt2DurationHour, spaFilterSettings.filt2DurationMinute);
+    ESP_LOGD("Spa/filter2/state", payload);
 
     have_filtersettings = 2;
   }

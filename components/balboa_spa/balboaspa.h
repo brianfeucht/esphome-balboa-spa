@@ -2,12 +2,15 @@
 
 #include "esphome/core/component.h"
 #include "esphome/components/uart/uart.h"
+#include "esphome/core/log.h"
 
 #include "spa_types.h"
 #include "spa_config.h"
 #include "spa_state.h"
 #include "CircularBuffer.h"
 #include <string>
+#include <iostream>
+#include <sstream>
 
 namespace esphome {
 namespace balboa_spa {
