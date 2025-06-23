@@ -89,20 +89,45 @@ void BalboaSpa::toggle_blower() {
 }
 
 void BalboaSpa::read_serial() {
-      x = read();
+      if (!read_byte(&x)){
+        return;
+      }
+
+      bool packet_read=false;
       Q_in.push(x);
       
       // Drop until SOF is seen
-      if (Q_in.first() != 0x7E) {
+      if (Q_in.first() != 0x7E && x != 0x7E) {
         Q_in.clear();
+        return;
       } 
         
       // Double SOF-marker, drop last one
-      if (Q_in[1] == 0x7E && Q_in.size() > 1) Q_in.pop();
+      if ( Q_in.size() >= 2 && Q_in[1] == 0x7E) {
+        Q_in.pop();
+        return;
+      }
+
+      Q_in.push(x);
 
       // Complete package
       //if (x == 0x7E && Q_in[0] == 0x7E && Q_in[1] != 0x7E) {
-      if (x == 0x7E && Q_in.size() > 2) {
+     if (x == 0x7E && Q_in.size() > 2 && Q_in.size() >= Q_in[1] + 2) {
+
+        if (Q_in.size() - 2 < Q_in[1]){
+          ESP_LOGD(TAG, "packet_size: %d, recv_size: %d", Q_in[1], Q_in.size());
+          ESP_LOGD(TAG, "%s", "Packet incomplete!");
+          Q_in.clear();
+          return;
+        }
+
+        auto crc = this->crc8(Q_in, true);
+        auto pcrc = Q_in[Q_in[1] ];
+        if ( crc != pcrc ) {
+          ESP_LOGD(TAG, "CRC %d != Packet crc %d end=0x%X", crc, pcrc, Q_in[Q_in[1] + 1]);
+          Q_in.clear();
+          return;
+        }
 
         // Unregistered or yet in progress
         if (id == 0) {
@@ -214,21 +239,19 @@ void BalboaSpa::read_serial() {
         }
 
         // Clean up queue
-        yield();
         Q_in.clear();
       }
       lastrx = millis();
   }
 
-
-  uint8_t BalboaSpa::crc8(CircularBuffer<uint8_t, 100> &data) {
+  uint8_t BalboaSpa::crc8(CircularBuffer<uint8_t, 100> &data, bool ignore_delimiter) {
     unsigned long crc;
-    int i, bit;
-    uint8_t length = data.size();
+    int bit;
+    uint8_t length = ignore_delimiter ? data.size() - 2 : data.size() ;
 
     crc = 0x02;
-    for ( i = 0 ; i < length ; i++ ) {
-      crc ^= data[i];
+    for ( size_t index = ignore_delimiter ; index < length ; index++ ) {
+      crc ^= data[index];
       for ( bit = 0 ; bit < 8 ; bit++ ) {
         if ( (crc & 0x80) != 0 ) {
           crc <<= 1;
@@ -239,7 +262,6 @@ void BalboaSpa::read_serial() {
         }
       }
     }
-
     return crc ^ 0x02;
   }
 
@@ -267,7 +289,7 @@ void BalboaSpa::read_serial() {
     Q_out.unshift(Q_out.size() + 2);
 
     // Add CRC
-    Q_out.push(crc8(Q_out));
+    Q_out.push(crc8(Q_out, false));
 
     // Wrap telegram in SOF/EOF
     Q_out.unshift(0x7E);
