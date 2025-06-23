@@ -93,15 +93,12 @@ void BalboaSpa::read_serial() {
         return;
       }
 
-      bool packet_read=false;
-      Q_in.push(x);
-      
       // Drop until SOF is seen
       if (Q_in.first() != 0x7E && x != 0x7E) {
         Q_in.clear();
         return;
       } 
-        
+
       // Double SOF-marker, drop last one
       if ( Q_in.size() >= 2 && Q_in[1] == 0x7E) {
         Q_in.pop();
