@@ -16,7 +16,7 @@ namespace balboa_spa {
 // https://github.com/espressif/arduino-esp32/blob/496b8411773243e1ad88a68652d6982ba2366d6b/cores/esp32/Arduino.h#L99
 #define bitRead(value, bit)            (((value) >> (bit)) & 0x01)
 
-static const uint8_t ESPHOME_BALBOASPA_MIN_TEMPERATURE = 26;
+static const uint8_t ESPHOME_BALBOASPA_MIN_TEMPERATURE = 7;
 static const uint8_t ESPHOME_BALBOASPA_MAX_TEMPERATURE = 40;
 static const float   ESPHOME_BALBOASPA_POLLING_INTERVAL = 50; // frequency to poll uart device
 
