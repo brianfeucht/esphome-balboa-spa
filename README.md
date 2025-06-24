@@ -4,10 +4,10 @@ This project is based on the UART reader from [Dakoriki/ESPHome-Balboa-Spa](http
 
 There are a ton of these implementations on Github.  None of the ones I could find implemented the external component pattern as prescribed by EspHome.  So I create this one.  
 
-Climate, sensors, and switches are all optional.  So you only need to import what you want with your implementation.
+Climate, binary sensors, sensors, and switches are all optional.  So you only need to import what you want with your implementation.
 
 TODO:
-There is still a bit of clean up and tweaking to be done.  I often see sensor values jump around, often to invalid state.  I suspect this is either due to the polling frequency or uart config.  Or it might just be due to the noisy nature of running next two heaters and pumps.
+I am seeing a ton of CRC errors when reading data on my spa.  This might be invalid UART config (baud, buffer, etc). Or it might just be due to the noisy nature of running next two heaters and pumps.
 
 ```
 esphome:
@@ -91,8 +91,8 @@ binary_sensor:
     connected:
       name: Connected
 ```
-ESP WebUI
+### ESP WebUI
 ![image](https://github.com/user-attachments/assets/af602be2-da9e-4880-8fb8-e7f7f9122977)
 
-Home Assistant UI
+### Home Assistant UI
 ![image](https://github.com/user-attachments/assets/a37a7e08-94b2-4231-83ca-0ffc4646fbfa)
