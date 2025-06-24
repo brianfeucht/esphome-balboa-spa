@@ -445,6 +445,13 @@ void BalboaSpa::read_serial() {
       spaState.jet2 = d;
     }
 
+    d = bitRead(Q_in[16], 5);
+    if (d != spaState.jet3) 
+    {
+      ESP_LOGD("Spa/jet_3/state", "%.0f", d);
+      spaState.jet3 = d;
+    }
+
     // 18:Flags Byte 13
     d = bitRead(Q_in[18], 1);
     if (d != spaState.circulation)
