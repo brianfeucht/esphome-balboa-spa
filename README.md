@@ -37,7 +37,7 @@ uart:
 
 balboa_spa:
   id: spa
-  
+
 switch:
   - platform: balboa_spa
     balboa_spa_id: spa
@@ -45,18 +45,21 @@ switch:
       name: Jet1
     jet2:
       name: Jet2
+    jet3:
+      name: Jet3
     light:
       name: Lights
+    blower:
+      name: Blower
 
 climate:
   - platform: balboa_spa
     balboa_spa_id: spa
-    name: Thermostat
+    name: "Spa Thermostat"
     visual:
-      min_temperature: 62 °F    # min: 17
-      max_temperature: 105 °F    # max: 30
-      temperature_step: 1.0 °F  # min: 0.5
-
+      min_temperature: 62 °F    # min: 7 C
+      max_temperature: 105 °F    # max: 30 C
+      temperature_step: 0.5 °F  # min: 0.5 C
 
 sensor:
   - platform: balboa_spa
@@ -71,6 +74,22 @@ sensor:
       name: Rest Mode
     heatstate:
       name: Heat State
+
+binary_sensor:
+  - platform: balboa_spa
+    balboa_spa_id: spa
+    blower:
+      name: Blower
+    highrange:
+      name: High Range
+    circulation:
+      name: Circulation Pump
+    restmode:
+      name: Rest Mode
+    heatstate:
+      name: Heat State
+    connected:
+      name: Connected
 ```
 ESP WebUI
 ![image](https://github.com/user-attachments/assets/af602be2-da9e-4880-8fb8-e7f7f9122977)
