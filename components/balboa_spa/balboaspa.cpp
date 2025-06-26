@@ -37,18 +37,20 @@ SpaState* BalboaSpa::get_current_state() { return &spaState; }
 
 void BalboaSpa::set_temp(float temp)
 {
-    if(spaConfig.temp_scale == 1){
-      temp = ((temp * 9.0) / 5.0) + 32;
-    }
-    else
-    {
-      temp = temp * 2.0;
-    }
-
-    if (temp >= ESPHOME_BALBOASPA_MIN_TEMPERATURE || temp <= ESPHOME_BALBOASPA_MAX_TEMPERATURE) {
-      settemp = temp;
+    /*
+      https://github.com/ccutrer/balboa_worldwide_app/wiki#flags-byte-9
+      Bits	Flag	Values
+      0	Temperature Scale	0=1°F, 1=0.5°C
+    */
+    if(spaConfig.temp_scale == 1 && temp >= ESPHOME_BALBOASPA_MIN_TEMPERATURE_C && temp <= ESPHOME_BALBOASPA_MAX_TEMPERATURE_C){
+      settemp = temp * 2;
       send = 0xff;
-    }
+    } else if (spaConfig.temp_scale == 0 && temp >= ESPHOME_BALBOASPA_MIN_TEMPERATURE_F && temp <= ESPHOME_BALBOASPA_MAX_TEMPERATURE_F ){
+      settemp = temp;
+       send = 0xff;
+     } else {
+       ESP_LOGW(TAG, "set_temp(%f): is too high or too low!", temp);
+     }
 }
 
 void BalboaSpa::set_highrange(bool high){
@@ -359,28 +361,30 @@ void BalboaSpa::read_serial() {
     double c = 0.0;
 
     // 25:Flag Byte 20 - Set Temperature
-    if (spaConfig.temp_scale == 0) {
-      d = Q_in[25] / 2.0;
-    } else if (spaConfig.temp_scale == 1){
-      d = (Q_in[25] - 32.0) * 5.0/9.0;
-    }
+     if (spaConfig.temp_scale == 0) {
+      d = Q_in[25];
+     } else if (spaConfig.temp_scale == 1){
+      d = Q_in[25] / 2.0f;
+     }
 
     // Ignore values which are outside what is allowed
-    if(d != 0 && 
-       d >= ESPHOME_BALBOASPA_MIN_TEMPERATURE && 
-       d <= ESPHOME_BALBOASPA_MAX_TEMPERATURE)
+    if ((spaConfig.temp_scale == 0 &&
+       d >= ESPHOME_BALBOASPA_MIN_TEMPERATURE_F &&
+       d <= ESPHOME_BALBOASPA_MAX_TEMPERATURE_F) || (spaConfig.temp_scale == 1 &&
+       d >= ESPHOME_BALBOASPA_MIN_TEMPERATURE_C &&
+       d <= ESPHOME_BALBOASPA_MAX_TEMPERATURE_C))
     {
       spaState.target_temp = d;
       ESP_LOGD("Spa/temperature/target", "%.2f", d);
     }
 
     // 7:Flag Byte 2 - Actual temperature
-    if (Q_in[7] != 0xFF) 
+    if (Q_in[7] != 0xFF)
     {
-      if (spaConfig.temp_scale == 0) {
-        d = Q_in[7] / 2.0;
+       if (spaConfig.temp_scale == 0) {
+        d = Q_in[7];
       } else if (spaConfig.temp_scale == 1){
-        d = (Q_in[7] - 32.0) * 5.0/9.0;
+         d = Q_in[7] / 2.0;
       }
 
       if (c > 0) {
