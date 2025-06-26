@@ -14,11 +14,14 @@ AUTO_LOAD = ["climate"]
 
 BalboaSpaThermostat = balboa_spa_ns.class_('BalboaSpaThermostat', cg.Component, climate.Climate)
 
+SHOW_AS_F = "as_f"
+
 CONFIG_SCHEMA = (
     climate.climate_schema(BalboaSpaThermostat).extend(
     {
         cv.GenerateID(): cv.declare_id(BalboaSpaThermostat),
         cv.GenerateID(CONF_SPA_ID): cv.use_id(BalboaSpa),
+        cv.Optional(SHOW_AS_F, default=False): cv.boolean,
     })
 )
 
@@ -30,3 +33,4 @@ async def to_code(config):
 
     parent = await cg.get_variable(config[CONF_SPA_ID])
     cg.add(var.set_parent(parent))
+    cg.add(var.set_is_f(config[SHOW_AS_F]))

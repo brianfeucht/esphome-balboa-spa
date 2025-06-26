@@ -21,7 +21,12 @@ climate::ClimateTraits BalboaSpaThermostat::traits()
     bool has_temp = call.get_target_temperature().has_value();
     bool has_preset = call.get_preset().has_value();
     if(has_temp){
-        spa->set_temp(*call.get_target_temperature());
+        auto temp = *call.get_target_temperature();
+
+        if (this->is_f){
+            temp = (temp - 32.0) * (5.0/9.0);
+        }
+        spa->set_temp(temp);
     }
     if (has_preset){
         spa->set_highrange( *call.get_preset() == climate::ClimatePreset::CLIMATE_PRESET_HOME );
@@ -47,10 +52,16 @@ void BalboaSpaThermostat::update(SpaState* spaState) {
     }
 
     float target_temp = spaState->target_temp;
+    if (this->is_f && !std::isnan(target_temp)){
+        target_temp = target_temp * (9.0/5.0) + 32.0;
+    }
     update = is_diff_no_nan(target_temp, this->target_temperature) || update;
     this->target_temperature = !std::isnan(target_temp) ? target_temp : this->target_temperature;
 
     auto ct = spaState->current_temp;
+    if (this->is_f && !std::isnan(ct)){
+        ct = ct * (9.0/5.0) + 32.0;
+    }
     update = is_diff_no_nan(ct, this->current_temperature) || update;
     this->current_temperature = !std::isnan(ct) ? ct : this->current_temperature; 
 
@@ -73,6 +84,10 @@ void BalboaSpaThermostat::update(SpaState* spaState) {
         this->publish_state();
         this->lastUpdate = millis();
     }
+}
+
+void BalboaSpaThermostat::set_is_f(bool is_f) {
+    this->is_f = is_f;
 }
 
 }
