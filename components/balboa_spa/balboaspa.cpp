@@ -38,17 +38,13 @@ SpaState* BalboaSpa::get_current_state() { return &spaState; }
 void BalboaSpa::set_temp(float temp)
 {
     if(spaConfig.temp_scale == 1){
-      temp = ((temp * 9.0) / 5.0) + 32;
+      temp = temp * 2.0;
     }
     else
     {
-      temp = temp * 2.0;
+      temp = temp;
     }
-
-    if (temp >= ESPHOME_BALBOASPA_MIN_TEMPERATURE || temp <= ESPHOME_BALBOASPA_MAX_TEMPERATURE) {
-      settemp = temp;
-      send = 0xff;
-    }
+    send = 0xff;
 }
 
 void BalboaSpa::set_highrange(bool high){
@@ -360,9 +356,9 @@ void BalboaSpa::read_serial() {
 
     // 25:Flag Byte 20 - Set Temperature
     if (spaConfig.temp_scale == 0) {
-      d = Q_in[25] / 2.0;
+      d = Q_in[25];
     } else if (spaConfig.temp_scale == 1){
-      d = (Q_in[25] - 32.0) * 5.0/9.0;
+      d = Q_in[25] * 2;
     }
 
     // Ignore values which are outside what is allowed
@@ -378,9 +374,9 @@ void BalboaSpa::read_serial() {
     if (Q_in[7] != 0xFF) 
     {
       if (spaConfig.temp_scale == 0) {
-        d = Q_in[7] / 2.0;
+        d = Q_in[7];
       } else if (spaConfig.temp_scale == 1){
-        d = (Q_in[7] - 32.0) * 5.0/9.0;
+        d = Q_in[7] / 2;
       }
 
       if (c > 0) {
