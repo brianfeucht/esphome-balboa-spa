@@ -8,6 +8,8 @@ external_components:
 
 balboa_spa:
   id: test_spa
+  spa_temp_scale: F
+  esphome_temp_scale: C
 
 switch:
   - platform: balboa_spa
