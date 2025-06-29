@@ -367,7 +367,7 @@ void BalboaSpa::read_serial() {
        d <= ESPHOME_BALBOASPA_MAX_TEMPERATURE)
     {
       spaState.target_temp = d;
-      ESP_LOGD("Spa/temperature/target", "%.2f - %.0f", d, spaConfig.temp_scale);
+      ESP_LOGD(TAG, "Spa/temperature/target: %.2f - %d", d, spaConfig.temp_scale);
     }
 
     // 7:Flag Byte 2 - Actual temperature
@@ -393,7 +393,7 @@ void BalboaSpa::read_serial() {
     if(d != 0 && d < 100)
     {
       spaState.current_temp = d;
-      ESP_LOGD("Spa/temperature/state", "%.2f - %.0f", d, spaConfig.temp_scale);
+      ESP_LOGD(TAG, "Spa/temperature/state: %.2f - %d", d, spaConfig.temp_scale);
     }
 
     // REMARK Move upper publish to HERE to get 0 for unknown temperature
