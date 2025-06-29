@@ -393,14 +393,14 @@ void BalboaSpa::read_serial() {
        temp_read <= ESPHOME_BALBOASPA_MAX_TEMPERATURE_C)
     {
       spaState.target_temp = temp_read;
-      ESP_LOGD(TAG, "Spa/temperature/target: %.2f C", d, spaConfig.temp_scale);
+      ESP_LOGD(TAG, "Spa/temperature/target: %.2f C", temp_read);
     }
     else if (esphome_temp_scale == TEMP_SCALE::F &&
        temp_read >= ESPHOME_BALBOASPA_MIN_TEMPERATURE_F && 
        temp_read <= ESPHOME_BALBOASPA_MAX_TEMPERATURE_F)
     {
       spaState.target_temp = convert_c_to_f(temp_read);
-      ESP_LOGD(TAG, "Spa/temperature/target: %.2f F", d, spaConfig.temp_scale);
+      ESP_LOGD(TAG, "Spa/temperature/target: %.2f F", temp_read);
     }
     else {
       ESP_LOGW(TAG, "Spa/temperature/target INVALID %2.f %.2f %d %d", 
@@ -419,12 +419,12 @@ void BalboaSpa::read_serial() {
       if(esphome_temp_scale == TEMP_SCALE::C)
       {
         spaState.current_temp = temp_read;
-        ESP_LOGD(TAG, "Spa/temperature/current: %.2f C", d, spaConfig.temp_scale);
+        ESP_LOGD(TAG, "Spa/temperature/current: %.2f C", temp_read);
       }
       else if (esphome_temp_scale == TEMP_SCALE::F)
       {
         spaState.current_temp = convert_c_to_f(temp_read);
-        ESP_LOGD(TAG, "Spa/temperature/current: %.2f F", d, spaConfig.temp_scale);
+        ESP_LOGD(TAG, "Spa/temperature/current: %.2f F", temp_read);
       }
       else {
         ESP_LOGW(TAG, "Spa/temperature/current INVALID %2.f %.2f %d %d", 
