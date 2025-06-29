@@ -37,6 +37,8 @@ uart:
 
 balboa_spa:
   id: spa
+  # Set this to C or F based on the units your spa is configured for
+  spa_temp_scale: F
 
 switch:
   - platform: balboa_spa
