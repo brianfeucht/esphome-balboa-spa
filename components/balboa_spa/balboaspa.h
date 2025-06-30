@@ -19,12 +19,21 @@ namespace balboa_spa {
 // https://github.com/espressif/arduino-esp32/blob/496b8411773243e1ad88a68652d6982ba2366d6b/cores/esp32/Arduino.h#L99
 #define bitRead(value, bit)            (((value) >> (bit)) & 0x01)
 
-static const uint8_t ESPHOME_BALBOASPA_MIN_TEMPERATURE = 7;
-static const uint8_t ESPHOME_BALBOASPA_MAX_TEMPERATURE = 40;
+static const uint8_t ESPHOME_BALBOASPA_MIN_TEMPERATURE_C = 7;
+static const uint8_t ESPHOME_BALBOASPA_MAX_TEMPERATURE_C = 40;
+static const uint8_t ESPHOME_BALBOASPA_MIN_TEMPERATURE_F = 60;
+static const uint8_t ESPHOME_BALBOASPA_MAX_TEMPERATURE_F = 104;
+
 static const float   ESPHOME_BALBOASPA_POLLING_INTERVAL = 50; // frequency to poll uart device
 
 #define STRON "ON"
 #define STROFF "OFF"
+
+enum TEMP_SCALE : uint8_t {
+  UNDEFINED = 254,
+  F = 0,
+  C = 1
+};
 
 class BalboaSpa : public uart::UARTDevice, public PollingComponent {
   public:
@@ -46,6 +55,9 @@ class BalboaSpa : public uart::UARTDevice, public PollingComponent {
     void toggle_blower();
     void set_highrange(bool high);
 
+    void set_spa_temp_scale(TEMP_SCALE scale);
+    void set_esphome_temp_scale(TEMP_SCALE scale);
+
     bool is_communicating();
 
     void register_listener(const std::function<void(SpaState*)> &func) {this->listeners_.push_back(func);}
@@ -61,6 +73,11 @@ class BalboaSpa : public uart::UARTDevice, public PollingComponent {
     uint8_t setminute = 0x00;
     uint8_t id = 0x00;
     uint32_t lastrx = 0;
+
+    TEMP_SCALE spa_temp_scale = TEMP_SCALE::UNDEFINED;
+    TEMP_SCALE esphome_temp_scale = TEMP_SCALE::C;
+    float convert_c_to_f(float c);
+    float convert_f_to_c(float f);
 
     std::vector<std::function<void(SpaState*)>> listeners_;
 

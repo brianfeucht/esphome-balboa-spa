@@ -37,18 +37,38 @@ SpaState* BalboaSpa::get_current_state() { return &spaState; }
 
 void BalboaSpa::set_temp(float temp)
 {
-    if(spaConfig.temp_scale == 1){
-      temp = ((temp * 9.0) / 5.0) + 32;
-    }
-    else
+    float target_temp = 0.0;
+
+    if(esphome_temp_scale == TEMP_SCALE::C &&
+       temp >= ESPHOME_BALBOASPA_MIN_TEMPERATURE_C &&
+       temp <= ESPHOME_BALBOASPA_MAX_TEMPERATURE_C)
     {
-      temp = temp * 2.0;
+        target_temp = temp;
+    }
+    else if(esphome_temp_scale == TEMP_SCALE::F &&
+       temp >= ESPHOME_BALBOASPA_MIN_TEMPERATURE_F &&
+       temp <= ESPHOME_BALBOASPA_MAX_TEMPERATURE_F)
+    {
+        target_temp = convert_f_to_c(temp);
+    }
+    else {
+      ESP_LOGW(TAG, "set_temp(%f): is INVALID! %d", temp, esphome_temp_scale);
+      return;
     }
 
-    if (temp >= ESPHOME_BALBOASPA_MIN_TEMPERATURE || temp <= ESPHOME_BALBOASPA_MAX_TEMPERATURE) {
-      settemp = temp;
-      send = 0xff;
+    if(spa_temp_scale == TEMP_SCALE::C)
+    {
+      settemp = target_temp * 2;
     }
+    else if(spa_temp_scale == TEMP_SCALE::F){
+      settemp = convert_c_to_f(target_temp);
+    }
+    else {
+      ESP_LOGW(TAG, "set_temp(%f): spa_temp_scale not set. Ignoring %d", temp, spa_temp_scale);
+      return;
+    }
+
+    send = 0xff;
 }
 
 void BalboaSpa::set_highrange(bool high){
@@ -352,55 +372,65 @@ void BalboaSpa::read_serial() {
     ESP_LOGD("Spa/config/aux2",   "%d", spaConfig.aux2  );
     ESP_LOGD("Spa/config/temp_scale", "%d", spaConfig.temp_scale);
     have_config = 2;
+
+    if(spa_temp_scale == TEMP_SCALE::UNDEFINED){
+      spa_temp_scale = static_cast<TEMP_SCALE>(spaConfig.temp_scale);
+    }
   }
 
   void BalboaSpa::decodeState() {
-    double d = 0.0;
-    double c = 0.0;
-
     // 25:Flag Byte 20 - Set Temperature
-    if (spaConfig.temp_scale == 0) {
-      d = Q_in[25] / 2.0;
-    } else if (spaConfig.temp_scale == 1){
-      d = (Q_in[25] - 32.0) * 5.0/9.0;
+    double temp_read = 0.0;
+
+    if (spa_temp_scale == TEMP_SCALE::C) {
+      temp_read = Q_in[25] / 2;
+    } else if (spa_temp_scale == TEMP_SCALE::F) {
+      temp_read = convert_f_to_c(Q_in[25]);
     }
 
-    // Ignore values which are outside what is allowed
-    if(d != 0 && 
-       d >= ESPHOME_BALBOASPA_MIN_TEMPERATURE && 
-       d <= ESPHOME_BALBOASPA_MAX_TEMPERATURE)
+    if(esphome_temp_scale == TEMP_SCALE::C &&
+       temp_read >= ESPHOME_BALBOASPA_MIN_TEMPERATURE_C && 
+       temp_read <= ESPHOME_BALBOASPA_MAX_TEMPERATURE_C)
     {
-      spaState.target_temp = d;
-      ESP_LOGD("Spa/temperature/target", "%.2f", d);
+      spaState.target_temp = temp_read;
+      ESP_LOGD(TAG, "Spa/temperature/target: %.2f C", temp_read);
+    }
+    else if (esphome_temp_scale == TEMP_SCALE::F &&
+       temp_read >= ESPHOME_BALBOASPA_MIN_TEMPERATURE_F && 
+       temp_read <= ESPHOME_BALBOASPA_MAX_TEMPERATURE_F)
+    {
+      spaState.target_temp = convert_c_to_f(temp_read);
+      ESP_LOGD(TAG, "Spa/temperature/target: %.2f F", temp_read);
+    }
+    else {
+      ESP_LOGW(TAG, "Spa/temperature/target INVALID %2.f %.2f %d %d", 
+        Q_in[25], temp_read, spaConfig.temp_scale, esphome_temp_scale);
     }
 
     // 7:Flag Byte 2 - Actual temperature
     if (Q_in[7] != 0xFF) 
     {
-      if (spaConfig.temp_scale == 0) {
-        d = Q_in[7] / 2.0;
-      } else if (spaConfig.temp_scale == 1){
-        d = (Q_in[7] - 32.0) * 5.0/9.0;
+      if (spa_temp_scale == TEMP_SCALE::C) {
+        temp_read = Q_in[7] / 2;
+      } else if (spa_temp_scale == TEMP_SCALE::F) {
+        temp_read = convert_f_to_c(Q_in[7]);
       }
 
-      if (c > 0) {
-        if ((d > c * 1.2) || (d < c * 0.8)) d = c; //remove spurious readings greater or less than 20% away from previous read
+      if(esphome_temp_scale == TEMP_SCALE::C)
+      {
+        spaState.current_temp = temp_read;
+        ESP_LOGD(TAG, "Spa/temperature/current: %.2f C", temp_read);
       }
-
-      c = d;
-    } else {
-      d = 0;
+      else if (esphome_temp_scale == TEMP_SCALE::F)
+      {
+        spaState.current_temp = convert_c_to_f(temp_read);
+        ESP_LOGD(TAG, "Spa/temperature/current: %.2f F", temp_read);
+      }
+      else {
+        ESP_LOGW(TAG, "Spa/temperature/current INVALID %2.f %.2f %d %d", 
+          Q_in[7], temp_read, spaConfig.temp_scale, esphome_temp_scale);
+      }
     }
-
-    // it isn't possible for this value to be above boiling
-    // probably a smaller limit here, but should filter out more bad data
-    if(d != 0 && d < 100)
-    {
-      spaState.current_temp = d;
-      ESP_LOGD("Spa/temperature/state", "%.2f", d);
-    }
-
-    // REMARK Move upper publish to HERE to get 0 for unknown temperature
 
     // 8:Flag Byte 3 Hour & 9:Flag Byte 4 Minute => Time
 
@@ -416,14 +446,12 @@ void BalboaSpa::read_serial() {
       spaState.minutes = setminute;
     }
 
-    d = Q_in[10];
-    spaState.rest_mode = d;
+    spaState.rest_mode = Q_in[10];
     
     // 15:Flags Byte 10 / Heat status, Temp Range
-    d = bitRead(Q_in[15], 4);
-    spaState.heat_state = d;
+    spaState.heat_state = bitRead(Q_in[15], 4);
 
-    d = bitRead(Q_in[15], 2);
+    double d = bitRead(Q_in[15], 2);
     if (d != spaState.highrange) 
     {
       ESP_LOGD("Spa/highrange/state", "%.0f", d); //LOW
@@ -589,6 +617,22 @@ void BalboaSpa::read_serial() {
 
   bool BalboaSpa::is_communicating(){
     return id != 0;
+  }
+
+  void BalboaSpa::set_spa_temp_scale(TEMP_SCALE scale) {
+    spa_temp_scale = scale;
+  }
+
+  void BalboaSpa::set_esphome_temp_scale(TEMP_SCALE scale) {
+    esphome_temp_scale = scale;
+  }
+
+  float BalboaSpa::convert_c_to_f(float c) {
+    return (c * 9.0/5.0) + 32.0;
+  }
+
+  float BalboaSpa::convert_f_to_c(float f) {
+    return (f - 32.0) * 5.0/9.0;
   }
 }  // namespace balboa_spa
 }  // namespace esphome
