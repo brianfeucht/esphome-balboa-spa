@@ -383,7 +383,7 @@ void BalboaSpa::read_serial() {
     double temp_read = 0.0;
 
     if (spa_temp_scale == TEMP_SCALE::C) {
-      temp_read = Q_in[25] * 2;
+      temp_read = Q_in[25] / 2;
     } else if (spa_temp_scale == TEMP_SCALE::F) {
       temp_read = convert_f_to_c(Q_in[25]);
     }
@@ -411,7 +411,7 @@ void BalboaSpa::read_serial() {
     if (Q_in[7] != 0xFF) 
     {
       if (spa_temp_scale == TEMP_SCALE::C) {
-        temp_read = Q_in[7] * 2;
+        temp_read = Q_in[7] / 2;
       } else if (spa_temp_scale == TEMP_SCALE::F) {
         temp_read = convert_f_to_c(Q_in[7]);
       }
