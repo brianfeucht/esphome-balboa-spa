@@ -337,7 +337,7 @@ void BalboaSpa::decodeSettings() {
     spaConfig.mister = ((input_queue[9] & 0x30) != 0);
     spaConfig.aux1 = ((input_queue[9] & 0x01) != 0);
     spaConfig.aux2 = ((input_queue[9] & 0x02) != 0);
-    spaConfig.temp_scale = input_queue[3] & 0x01; //Read temperature scale - 0 -> Farenheit, 1-> Celcius
+    spaConfig.temperature_scale = input_queue[3] & 0x01; //Read temperature scale - 0 -> Farenheit, 1-> Celcius
     ESP_LOGD("Spa/config/pumps1", "%d", spaConfig.pump1);
     ESP_LOGD("Spa/config/pumps2", "%d", spaConfig.pump2);
     ESP_LOGD("Spa/config/pumps3", "%d", spaConfig.pump3);
@@ -351,11 +351,11 @@ void BalboaSpa::decodeSettings() {
     ESP_LOGD("Spa/config/mister", "%d", spaConfig.mister);
     ESP_LOGD("Spa/config/aux1", "%d", spaConfig.aux1);
     ESP_LOGD("Spa/config/aux2", "%d", spaConfig.aux2);
-    ESP_LOGD("Spa/config/temp_scale", "%d", spaConfig.temp_scale);
+    ESP_LOGD("Spa/config/temperature_scale", "%d", spaConfig.temperature_scale);
     config_request_status = 2;
 
     if (spa_temp_scale == TEMP_SCALE::UNDEFINED) {
-        spa_temp_scale = static_cast<TEMP_SCALE>(spaConfig.temp_scale);
+        spa_temp_scale = static_cast<TEMP_SCALE>(spaConfig.temperature_scale);
     }
 }
 
@@ -381,7 +381,7 @@ void BalboaSpa::decodeState() {
         ESP_LOGD(TAG, "Spa/temperature/target: %.2f F", temp_read);
     } else {
         ESP_LOGW(TAG, "Spa/temperature/target INVALID %2.f %.2f %d %d",
-                 input_queue[25], temp_read, spaConfig.temp_scale, esphome_temp_scale);
+                 input_queue[25], temp_read, spaConfig.temperature_scale, esphome_temp_scale);
     }
 
     // 7:Flag Byte 2 - Actual temperature
@@ -400,7 +400,7 @@ void BalboaSpa::decodeState() {
             ESP_LOGD(TAG, "Spa/temperature/current: %.2f F", temp_read);
         } else {
             ESP_LOGW(TAG, "Spa/temperature/current INVALID %2.f %.2f %d %d",
-                     input_queue[7], temp_read, spaConfig.temp_scale, esphome_temp_scale);
+                     input_queue[7], temp_read, spaConfig.temperature_scale, esphome_temp_scale);
         }
     }
 
@@ -473,107 +473,107 @@ void BalboaSpa::decodeState() {
 }
 
 void BalboaSpa::decodeFilterSettings() {
-    spaFilterSettings.filt1Hour = input_queue[5];
-    spaFilterSettings.filt1Minute = input_queue[6];
-    spaFilterSettings.filt1DurationHour = input_queue[7];
-    spaFilterSettings.filt1DurationMinute = input_queue[8];
-    spaFilterSettings.filt2Enable = bitRead(input_queue[9], 7); // check
-    spaFilterSettings.filt2Hour = input_queue[9] ^ (spaFilterSettings.filt2Enable << 7); // check
-    spaFilterSettings.filt2Minute = input_queue[10];
-    spaFilterSettings.filt2DurationHour = input_queue[11];
-    spaFilterSettings.filt2DurationMinute = input_queue[12];
+    spaFilterSettings.filter1_hour = input_queue[5];
+    spaFilterSettings.filter1_minute = input_queue[6];
+    spaFilterSettings.filter1_duration_hour = input_queue[7];
+    spaFilterSettings.filter1_duration_minute = input_queue[8];
+    spaFilterSettings.filter2_enable = bitRead(input_queue[9], 7); // check
+    spaFilterSettings.filter2_hour = input_queue[9] ^ (spaFilterSettings.filter2_enable << 7); // check
+    spaFilterSettings.filter2_minute = input_queue[10];
+    spaFilterSettings.filter2_duration_hour = input_queue[11];
+    spaFilterSettings.filter2_duration_minute = input_queue[12];
 
     //Filter 1 time conversion
     static PROGMEM const char *format_string = R"({"start":"%.2i:%.2i","duration":"%.2i:%.2i"} )";
-    const auto payload_length = std::snprintf(nullptr, 0, format_string, spaFilterSettings.filt1Hour, spaFilterSettings.filt1Minute, spaFilterSettings.filt1DurationHour, spaFilterSettings.filt1DurationMinute);
+    const auto payload_length = std::snprintf(nullptr, 0, format_string, spaFilterSettings.filter1_hour, spaFilterSettings.filter1_minute, spaFilterSettings.filter1_duration_hour, spaFilterSettings.filter1_duration_minute);
 
     char filter_payload[payload_length + 1];
     std::memset(filter_payload, 0, payload_length + 1);
-    std::snprintf(filter_payload, payload_length + 1, format_string, spaFilterSettings.filt1Hour, spaFilterSettings.filt1Minute, spaFilterSettings.filt1DurationHour, spaFilterSettings.filt1DurationMinute);
+    std::snprintf(filter_payload, payload_length + 1, format_string, spaFilterSettings.filter1_hour, spaFilterSettings.filter1_minute, spaFilterSettings.filter1_duration_hour, spaFilterSettings.filter1_duration_minute);
     ESP_LOGD("Spa/filter1/state", filter_payload);
 
     //Filter 2 time conversion
-    ESP_LOGD("Spa/filter2_enabled/state", spaFilterSettings.filt2Enable == 1 ? STRON : STROFF);
-    std::snprintf(filter_payload, payload_length + 1, format_string, spaFilterSettings.filt2Hour, spaFilterSettings.filt2Minute, spaFilterSettings.filt2DurationHour, spaFilterSettings.filt2DurationMinute);
+    ESP_LOGD("Spa/filter2_enabled/state", spaFilterSettings.filter2_enable == 1 ? STRON : STROFF);
+    std::snprintf(filter_payload, payload_length + 1, format_string, spaFilterSettings.filter2_hour, spaFilterSettings.filter2_minute, spaFilterSettings.filter2_duration_hour, spaFilterSettings.filter2_duration_minute);
     ESP_LOGD("Spa/filter2/state", filter_payload);
 
     filtersettings_request_status = 2;
 }
 
 void BalboaSpa::decodeFault() {
-    spaFaultLog.totEntry = input_queue[5];
-    spaFaultLog.currEntry = input_queue[6];
-    spaFaultLog.faultCode = input_queue[7];
-    switch (spaFaultLog.faultCode) { // this is a inelegant way to do it, a lookup table would be better
+    spaFaultLog.total_entries = input_queue[5];
+    spaFaultLog.current_entry = input_queue[6];
+    spaFaultLog.fault_code = input_queue[7];
+    switch (spaFaultLog.fault_code) { // this is a inelegant way to do it, a lookup table would be better
         case 15:
-            spaFaultLog.faultMessage = "Sensors are out of sync";
+            spaFaultLog.fault_message = "Sensors are out of sync";
             break;
         case 16:
-            spaFaultLog.faultMessage = "The water flow is low";
+            spaFaultLog.fault_message = "The water flow is low";
             break;
         case 17:
-            spaFaultLog.faultMessage = "The water flow has failed";
+            spaFaultLog.fault_message = "The water flow has failed";
             break;
         case 18:
-            spaFaultLog.faultMessage = "The settings have been reset";
+            spaFaultLog.fault_message = "The settings have been reset";
             break;
         case 19:
-            spaFaultLog.faultMessage = "Priming Mode";
+            spaFaultLog.fault_message = "Priming Mode";
             break;
         case 20:
-            spaFaultLog.faultMessage = "The clock has failed";
+            spaFaultLog.fault_message = "The clock has failed";
             break;
         case 21:
-            spaFaultLog.faultMessage = "The settings have been reset";
+            spaFaultLog.fault_message = "The settings have been reset";
             break;
         case 22:
-            spaFaultLog.faultMessage = "Program memory failure";
+            spaFaultLog.fault_message = "Program memory failure";
             break;
         case 26:
-            spaFaultLog.faultMessage = "Sensors are out of sync -- Call for service";
+            spaFaultLog.fault_message = "Sensors are out of sync -- Call for service";
             break;
         case 27:
-            spaFaultLog.faultMessage = "The heater is dry";
+            spaFaultLog.fault_message = "The heater is dry";
             break;
         case 28:
-            spaFaultLog.faultMessage = "The heater may be dry";
+            spaFaultLog.fault_message = "The heater may be dry";
             break;
         case 29:
-            spaFaultLog.faultMessage = "The water is too hot";
+            spaFaultLog.fault_message = "The water is too hot";
             break;
         case 30:
-            spaFaultLog.faultMessage = "The heater is too hot";
+            spaFaultLog.fault_message = "The heater is too hot";
             break;
         case 31:
-            spaFaultLog.faultMessage = "Sensor A Fault";
+            spaFaultLog.fault_message = "Sensor A Fault";
             break;
         case 32:
-            spaFaultLog.faultMessage = "Sensor B Fault";
+            spaFaultLog.fault_message = "Sensor B Fault";
             break;
         case 34:
-            spaFaultLog.faultMessage = "A pump may be stuck on";
+            spaFaultLog.fault_message = "A pump may be stuck on";
             break;
         case 35:
-            spaFaultLog.faultMessage = "Hot fault";
+            spaFaultLog.fault_message = "Hot fault";
             break;
         case 36:
-            spaFaultLog.faultMessage = "The GFCI test failed";
+            spaFaultLog.fault_message = "The GFCI test failed";
             break;
         case 37:
-            spaFaultLog.faultMessage = "Standby Mode (Hold Mode)";
+            spaFaultLog.fault_message = "Standby Mode (Hold Mode)";
             break;
         default:
-            spaFaultLog.faultMessage = "Unknown error";
+            spaFaultLog.fault_message = "Unknown error";
             break;
     }
-    spaFaultLog.daysAgo = input_queue[8];
+    spaFaultLog.days_ago = input_queue[8];
     spaFaultLog.hour = input_queue[9];
     spaFaultLog.minutes = input_queue[10];
-    ESP_LOGD("Spa/fault/Entries", "%d", spaFaultLog.totEntry);
-    ESP_LOGD("Spa/fault/Entry", "%d", spaFaultLog.currEntry);
-    ESP_LOGD("Spa/fault/Code", "%d", spaFaultLog.faultCode);
-    ESP_LOGD("Spa/fault/Message", spaFaultLog.faultMessage.c_str());
-    ESP_LOGD("Spa/fault/DaysAgo", "%d", spaFaultLog.daysAgo);
+    ESP_LOGD("Spa/fault/Entries", "%d", spaFaultLog.total_entries);
+    ESP_LOGD("Spa/fault/Entry", "%d", spaFaultLog.current_entry);
+    ESP_LOGD("Spa/fault/Code", "%d", spaFaultLog.fault_code);
+    ESP_LOGD("Spa/fault/Message", spaFaultLog.fault_message.c_str());
+    ESP_LOGD("Spa/fault/DaysAgo", "%d", spaFaultLog.days_ago);
     ESP_LOGD("Spa/fault/Hours", "%d", spaFaultLog.hour);
     ESP_LOGD("Spa/fault/Minutes", "%d", spaFaultLog.minutes);
     faultlog_request_status = 2;
