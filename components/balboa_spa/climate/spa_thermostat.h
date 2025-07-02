@@ -11,7 +11,7 @@ class BalboaSpaThermostat : public climate::Climate, public Component {
  public:
   BalboaSpaThermostat() {
     spa = nullptr;
-    lastUpdate = 0;
+    last_update_time = 0;
   };
 
   void update(SpaState* spaState);
@@ -23,7 +23,7 @@ class BalboaSpaThermostat : public climate::Climate, public Component {
 
  private:
   BalboaSpa *spa;
-  uint32_t lastUpdate;
+  uint32_t last_update_time;
 };
 
 }  // namespace balboa_spa

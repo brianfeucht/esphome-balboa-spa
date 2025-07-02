@@ -63,16 +63,16 @@ class BalboaSpa : public uart::UARTDevice, public PollingComponent {
     void register_listener(const std::function<void(SpaState*)> &func) {this->listeners_.push_back(func);}
 
   private:
-    CircularBuffer<uint8_t, 100> Q_in;
-    CircularBuffer<uint8_t, 100> Q_out;
-    uint8_t x, i, j;
+    CircularBuffer<uint8_t, 100> input_queue;
+    CircularBuffer<uint8_t, 100> output_queue;
+    uint8_t received_byte, loop_index, temp_index;
     uint8_t last_state_crc = 0x00;
-    uint8_t send = 0x00;
-    uint8_t settemp = 0x00;
-    uint8_t sethour = 0x00;
-    uint8_t setminute = 0x00;
-    uint8_t id = 0x00;
-    uint32_t lastrx = 0;
+    uint8_t send_command = 0x00;
+    uint8_t target_temperature = 0x00;
+    uint8_t target_hour = 0x00;
+    uint8_t target_minute = 0x00;
+    uint8_t client_id = 0x00;
+    uint32_t last_received_time = 0;
 
     TEMP_SCALE spa_temp_scale = TEMP_SCALE::UNDEFINED;
     TEMP_SCALE esphome_temp_scale = TEMP_SCALE::C;
@@ -81,11 +81,11 @@ class BalboaSpa : public uart::UARTDevice, public PollingComponent {
 
     std::vector<std::function<void(SpaState*)>> listeners_;
 
-    char have_config = 0; //stages: 0-> want it; 1-> requested it; 2-> got it; 3-> further processed it
-    char have_faultlog = 0; //stages: 0-> want it; 1-> requested it; 2-> got it; 3-> further processed it
-    char have_filtersettings = 0; //stages: 0-> want it; 1-> requested it; 2-> got it; 3-> further processed it
-    char faultlog_minutes = 0; //temp logic so we only get the fault log once per 5 minutes
-    char filtersettings_minutes = 0; //temp logic so we only get the filter settings once per 5 minutes
+    char config_request_status = 0; //stages: 0-> want it; 1-> requested it; 2-> got it; 3-> further processed it
+    char faultlog_request_status = 0; //stages: 0-> want it; 1-> requested it; 2-> got it; 3-> further processed it
+    char filtersettings_request_status = 0; //stages: 0-> want it; 1-> requested it; 2-> got it; 3-> further processed it
+    char faultlog_update_timer = 0; //temp logic so we only get the fault log once per 5 minutes
+    char filtersettings_update_timer = 0; //temp logic so we only get the filter settings once per 5 minutes
 
     SpaConfig spaConfig;
     SpaState spaState;
