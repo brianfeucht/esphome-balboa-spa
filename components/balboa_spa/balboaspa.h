@@ -52,6 +52,7 @@ class BalboaSpa : public uart::UARTDevice, public PollingComponent {
     void toggle_jet1();
     void toggle_jet2();
     void toggle_jet3();
+    void toggle_jet4();
     void toggle_blower();
     void set_highrange(bool high);
 

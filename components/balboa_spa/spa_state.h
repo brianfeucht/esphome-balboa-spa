@@ -17,6 +17,7 @@ class SpaState {
         uint8_t jet1 :2;
         uint8_t jet2 :2;
         uint8_t jet3 :2;
+        uint8_t jet4 :2;
         uint8_t blower :1;
         uint8_t light :1;
         uint8_t highrange:1;        
