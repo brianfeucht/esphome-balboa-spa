@@ -424,46 +424,46 @@ void BalboaSpa::decodeState() {
 
     double spa_component_state = bitRead(input_queue[15], 2);
     if (spa_component_state != spaState.highrange) {
-        ESP_LOGD("Spa/highrange/state", "%.0f", spa_component_state); //LOW
+        ESP_LOGD(TAG, "Spa/highrange/state: %.0f", spa_component_state); //LOW
         spaState.highrange = spa_component_state;
     }
 
     // 16:Flags Byte 11
     spa_component_state = bitRead(input_queue[16], 1);
     if (spa_component_state != spaState.jet1) {
-        ESP_LOGD("Spa/jet_1/state", "%.0f", spa_component_state);
+        ESP_LOGD(TAG, "Spa/jet_1/state: %.0f", spa_component_state);
         spaState.jet1 = spa_component_state;
     }
 
     spa_component_state = bitRead(input_queue[16], 3);
     if (spa_component_state != spaState.jet2) {
-        ESP_LOGD("Spa/jet_2/state", "%.0f", spa_component_state);
+        ESP_LOGD(TAG, "Spa/jet_2/state: %.0f", spa_component_state);
         spaState.jet2 = spa_component_state;
     }
 
     spa_component_state = bitRead(input_queue[16], 5);
     if (spa_component_state != spaState.jet3) {
-        ESP_LOGD("Spa/jet_3/state", "%.0f", spa_component_state);
+        ESP_LOGD(TAG, "Spa/jet_3/state: %.0f", spa_component_state);
         spaState.jet3 = spa_component_state;
     }
 
     // 18:Flags Byte 13
     spa_component_state = bitRead(input_queue[18], 1);
     if (spa_component_state != spaState.circulation) {
-        ESP_LOGD("Spa/circ/state", "%.0f", spa_component_state);
+        ESP_LOGD(TAG, "Spa/circ/state: %.0f", spa_component_state);
         spaState.circulation = spa_component_state;
     }
 
     spa_component_state = bitRead(input_queue[18], 2);
     if (spa_component_state != spaState.blower) {
-        ESP_LOGD("Spa/blower/state", "%.0f", spa_component_state);
+        ESP_LOGD(TAG, "Spa/blower/state: %.0f", spa_component_state);
         spaState.blower = spa_component_state;
     }
 
     spa_component_state = input_queue[19] == 0x03;
     // 19:Flags Byte 14
     if (spa_component_state != spaState.light) {
-        ESP_LOGD("Spa/light/state", "%.0f", spa_component_state);
+        ESP_LOGD(TAG, "Spa/light/state: %.0f", spa_component_state);
         spaState.light = spa_component_state;
     }
 
@@ -490,12 +490,12 @@ void BalboaSpa::decodeFilterSettings() {
     char filter_payload[payload_length + 1];
     std::memset(filter_payload, 0, payload_length + 1);
     std::snprintf(filter_payload, payload_length + 1, format_string, spaFilterSettings.filter1_hour, spaFilterSettings.filter1_minute, spaFilterSettings.filter1_duration_hour, spaFilterSettings.filter1_duration_minute);
-    ESP_LOGD("Spa/filter1/state", filter_payload);
+    ESP_LOGD(TAG, "Spa/filter1/state: %s", filter_payload);
 
     //Filter 2 time conversion
-    ESP_LOGD("Spa/filter2_enabled/state", spaFilterSettings.filter2_enable == 1 ? STRON : STROFF);
+    ESP_LOGD(TAG, "Spa/filter2_enabled/state: %s", spaFilterSettings.filter2_enable == 1 ? STRON : STROFF);
     std::snprintf(filter_payload, payload_length + 1, format_string, spaFilterSettings.filter2_hour, spaFilterSettings.filter2_minute, spaFilterSettings.filter2_duration_hour, spaFilterSettings.filter2_duration_minute);
-    ESP_LOGD("Spa/filter2/state", filter_payload);
+    ESP_LOGD(TAG, "Spa/filter2/state: %s", filter_payload);
 
     filtersettings_request_status = 2;
 }
@@ -569,13 +569,13 @@ void BalboaSpa::decodeFault() {
     spaFaultLog.days_ago = input_queue[8];
     spaFaultLog.hour = input_queue[9];
     spaFaultLog.minutes = input_queue[10];
-    ESP_LOGD("Spa/fault/Entries", "%d", spaFaultLog.total_entries);
-    ESP_LOGD("Spa/fault/Entry", "%d", spaFaultLog.current_entry);
-    ESP_LOGD("Spa/fault/Code", "%d", spaFaultLog.fault_code);
-    ESP_LOGD("Spa/fault/Message", spaFaultLog.fault_message.c_str());
-    ESP_LOGD("Spa/fault/DaysAgo", "%d", spaFaultLog.days_ago);
-    ESP_LOGD("Spa/fault/Hours", "%d", spaFaultLog.hour);
-    ESP_LOGD("Spa/fault/Minutes", "%d", spaFaultLog.minutes);
+    ESP_LOGD(TAG, "Spa/fault/Entries: %d", spaFaultLog.total_entries);
+    ESP_LOGD(TAG, "Spa/fault/Entry: %d", spaFaultLog.current_entry);
+    ESP_LOGD(TAG, "Spa/fault/Code: %d", spaFaultLog.fault_code);
+    ESP_LOGD(TAG, "Spa/fault/Message: %s", spaFaultLog.fault_message.c_str());
+    ESP_LOGD(TAG, "Spa/fault/DaysAgo: %d", spaFaultLog.days_ago);
+    ESP_LOGD(TAG, "Spa/fault/Hours: %d", spaFaultLog.hour);
+    ESP_LOGD(TAG, "Spa/fault/Minutes: %d", spaFaultLog.minutes);
     faultlog_request_status = 2;
     //ESP_LOGD("Spa/debug/faultlog_request_status", "have the faultlog, #2");
 }
