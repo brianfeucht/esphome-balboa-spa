@@ -9,7 +9,7 @@
 namespace esphome {
 namespace balboa_spa {
 
-    static const char *CIRCULAR_BUFFER_TAG = "CircularBuffer";
+    static const char *CIRCULAR_BUFFER_TAG = "BalboaSpa.CircularBuffer";
 
     template<typename T, size_t s>
     class CircularBuffer {
