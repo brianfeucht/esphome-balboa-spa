@@ -577,7 +577,7 @@ void BalboaSpa::decodeFault() {
     ESP_LOGD(TAG, "Spa/fault/Hours: %d", spaFaultLog.hour);
     ESP_LOGD(TAG, "Spa/fault/Minutes: %d", spaFaultLog.minutes);
     faultlog_request_status = 2;
-    //ESP_LOGD("Spa/debug/faultlog_request_status", "have the faultlog, #2");
+    //ESP_LOGD(TAG, "Spa/debug/faultlog_request_status: have the faultlog, #2");
 }
 
 bool BalboaSpa::is_communicating() {
