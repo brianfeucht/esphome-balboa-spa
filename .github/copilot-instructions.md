@@ -165,3 +165,170 @@ balboa_spa:
 - Include ESPHome configuration and logs for troubleshooting
 - Community contributions welcome following ESPHome standards
 - Test changes with real hardware before submitting PRs
+
+## AI Development Workflow & Best Practices
+
+### Session Management & Context
+- **Start with current state assessment**: Always check git status, recent commits, and file modifications before making changes
+- **Use semantic_search first**: Understand the codebase structure before making targeted changes
+- **Read files in large chunks**: Prefer reading 50+ lines at once rather than small sequential reads
+- **Check compilation frequently**: Verify changes compile successfully using `esphome compile <config>.yaml`
+- **Commit incrementally**: Make logical commits with descriptive messages for easier rollback and review
+
+### Effective Tool Usage Patterns
+- **grep_search for overview**: Use to get a high-level view of patterns across files
+- **file_search for discovery**: Find files by pattern when structure is unknown
+- **read_file for context**: Get sufficient context before making edits
+- **replace_string_in_file for precision**: Use when exact string match is needed
+- **insert_edit_into_file for flexibility**: Better for complex edits and new code
+
+### Code Modification Workflow
+1. **Assess**: Check current state and understand requirements
+2. **Search**: Find all affected files and understand patterns
+3. **Plan**: Identify the scope of changes needed
+4. **Execute**: Make changes systematically, file by file
+5. **Verify**: Check compilation and functionality
+6. **Document**: Commit with clear messages
+
+### Merge Conflict Resolution Strategy
+- **Fetch latest first**: Always check what's on main before merging
+- **Understand both sides**: Read the conflicting changes carefully
+- **Preserve intent**: Maintain the purpose of both sets of changes
+- **Test after merge**: Ensure compilation and functionality remain intact
+- **Clean up artifacts**: Remove any merge markers or duplicate code
+
+### Logging & Debugging Best Practices
+- **Consistent TAG usage**: Use static const char *TAG = "Component.subcomponent" pattern
+- **Standardized message format**: Follow "Category/subcategory: message" pattern
+- **Appropriate log levels**: DEBUG for state changes, WARN for issues, ERROR for failures
+- **Context in messages**: Include relevant data (values, states) in log output
+
+### Common Pitfalls & Solutions
+
+#### Variable-Length Arrays
+```cpp
+// WRONG - compiler warning
+auto payload_length = std::snprintf(nullptr, 0, format, args...);
+char buffer[payload_length + 1];  // VLA issue
+
+// CORRECT - check result first
+auto result = std::snprintf(nullptr, 0, format, args...);
+if (result > 0) {
+    char buffer[result + 1];
+    // Use buffer...
+}
+```
+
+#### Automated Replacements
+- **Avoid broad sed/awk**: Can corrupt code structure
+- **Use targeted replacements**: Focus on specific patterns
+- **Verify each change**: Check that automated changes are correct
+- **Fix corruption immediately**: Don't let broken code persist
+
+#### Git Workflow
+- **Check branch state**: Know what's committed vs. staged vs. modified
+- **Preserve working changes**: Stash or commit before major operations
+- **Clean merge strategy**: Resolve conflicts methodically
+- **Test post-merge**: Always verify compilation after merging
+
+### Performance Optimization
+- **Batch operations**: Group related file operations together
+- **Minimize tool calls**: Use fewer, more comprehensive operations
+- **Cache context**: Keep relevant information in memory during session
+- **Parallel where safe**: Use parallel operations for independent tasks
+
+### Documentation Standards
+- **Clear commit messages**: Describe what and why, not just what
+- **Update relevant docs**: Modify README, examples, or instructions as needed
+- **Code comments**: Explain complex logic, especially protocol handling
+- **PR descriptions**: Include technical details, testing, and benefits
+
+### Testing & Validation
+- **Compile all configurations**: Test ESP32, ESP8266, and IDF variants
+- **Check for warnings**: Address compiler warnings promptly
+- **Verify functionality**: Ensure no behavioral changes unless intended
+- **Run static analysis**: Look for potential issues in code patterns
+
+### Communication & Collaboration
+- **Explain decisions**: Document why certain approaches were chosen
+- **Provide alternatives**: Mention trade-offs and other options considered
+- **Include examples**: Show before/after code snippets
+- **Clear status updates**: Keep user informed of progress and blockers
+
+### Session-Specific Lessons Learned
+
+#### ESP_LOG* Macro Standardization
+- **Pattern recognition**: Use grep_search to find all instances before starting changes
+- **Systematic approach**: Update all files consistently rather than piecemeal
+- **Format standardization**: "Category/subcategory: message" with colon separator
+- **TAG constants**: Define once per file as `static const char *TAG = "Component.name"`
+
+#### Variable Naming Conventions (from main branch merge)
+- **Descriptive names**: `input_queue` vs `Q_in`, `client_id` vs `id`
+- **Consistent prefixes**: Use clear, unambiguous variable names
+- **Avoid abbreviations**: Prefer readability over brevity
+- **Context clarity**: Variable names should indicate their purpose
+
+#### Merge Conflict Resolution Experience
+- **Three-way understanding**: Original, main branch changes, working branch changes
+- **Preserve all improvements**: Don't lose either set of enhancements
+- **Manual verification**: Check each resolved conflict for correctness
+- **Post-merge testing**: Always compile and test after conflict resolution
+
+#### Code Quality Maintenance
+- **Compiler warnings**: Address immediately, don't accumulate technical debt
+- **Consistent formatting**: Maintain code style throughout changes
+- **Comment preservation**: Keep relevant comments, update outdated ones
+- **Error handling**: Maintain or improve error handling patterns
+
+#### Git Workflow Optimization
+- **Branch awareness**: Always know current branch and its state relative to remotes
+- **Logical commits**: Each commit should represent a complete, logical change
+- **Descriptive messages**: Commit messages should explain the intent and scope
+- **Clean history**: Avoid merge commits when possible, prefer rebasing for clean history
+
+#### Tool Usage Insights
+- **grep_search efficiency**: Faster than multiple read_file calls for pattern discovery
+- **replace_string_in_file precision**: Best for exact string replacements
+- **Context importance**: Include enough surrounding code for unambiguous matching
+- **Parallel operations**: Some operations can be batched for efficiency
+
+### Workflow Efficiency Patterns
+
+#### Discovery Phase (5-10% of time)
+1. **git status** - Understand current state
+2. **semantic_search** - Get high-level code overview  
+3. **grep_search** - Find specific patterns to modify
+4. **file_search** - Locate relevant files by pattern
+
+#### Planning Phase (10-15% of time)
+1. **Read key files** - Understand current implementation
+2. **Identify scope** - Determine all files that need changes
+3. **Plan approach** - Decide on systematic vs. targeted changes
+4. **Consider dependencies** - Account for variable renames, merges, etc.
+
+#### Execution Phase (60-70% of time)
+1. **Make changes systematically** - One concept or file type at a time
+2. **Test frequently** - Compile after major changes
+3. **Commit incrementally** - Logical checkpoints for rollback
+4. **Handle issues immediately** - Fix problems as they arise
+
+#### Validation Phase (15-20% of time)
+1. **Final compilation** - Test all configurations
+2. **Pattern verification** - Ensure consistency across all changes
+3. **Documentation update** - Record lessons learned
+4. **Clean up** - Remove temporary files, unused code
+
+#### Red Flags to Watch For
+- **Too many tool calls**: Indicates inefficient approach
+- **Repeated pattern searches**: Should batch discovery phase
+- **Compilation failures**: Fix immediately, don't accumulate
+- **Merge conflicts**: Address systematically, don't rush
+- **Inconsistent changes**: Standardize patterns across all files
+
+#### Success Indicators
+- **Clean git history**: Logical, well-described commits
+- **Successful compilation**: No errors or warnings
+- **Consistent patterns**: Same approach used throughout
+- **Preserved functionality**: No breaking changes
+- **Good documentation**: Clear commit messages and code comments
