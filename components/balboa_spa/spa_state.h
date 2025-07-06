@@ -28,7 +28,7 @@ class SpaState {
         float target_temp;
         float current_temp;
 };
-}  // namespace empty_uart_component
+}  // namespace balboa_spa
 }  // namespace esphome
 
 #endif
