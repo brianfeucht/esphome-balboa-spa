@@ -12,6 +12,12 @@ CONF_ESPHOME_TEMP_SCALE = "esphome_temp_scale"
 balboa_spa_ns = cg.esphome_ns.namespace('balboa_spa')
 BalboaSpa = balboa_spa_ns.class_('BalboaSpa', cg.Component, uart.UARTDevice)
 
+# Fan classes for multi-state jet control
+Jet1Fan = balboa_spa_ns.class_('Jet1Fan')
+Jet2Fan = balboa_spa_ns.class_('Jet2Fan')
+Jet3Fan = balboa_spa_ns.class_('Jet3Fan')
+Jet4Fan = balboa_spa_ns.class_('Jet4Fan')
+
 TEMP_SCALE = balboa_spa_ns.enum("TEMP_SCALE")
 TEMP_SCALES = {
  254: TEMP_SCALE.UNDEFINED,
