@@ -4,6 +4,8 @@
 namespace esphome {
 namespace balboa_spa {
 
+static const char *TAG = "BalboaSpa.binary_sensors";
+
 void BalboaSpaBinarySensors::set_parent(BalboaSpa *parent) {
     this->spa = parent;
     parent->register_listener([this](SpaState* spaState){ this->update(spaState); });
@@ -48,7 +50,7 @@ void BalboaSpaBinarySensors::update(SpaState* spaState) {
             sensor_state_value = spa->is_communicating();
             break;
         default:
-            ESP_LOGD("Spa/BSensors/UnknownSensorType", "SensorType Number: %d", sensor_type);
+            ESP_LOGD(TAG, "Spa/BSensors/UnknownSensorType: SensorType Number: %d", sensor_type);
             // Unknown enum value. Ignore
             return;
     }
