@@ -49,6 +49,8 @@ switch:
       name: Jet2
     jet3:
       name: Jet3
+    jet4:
+      name: Jet4
     light:
       name: Lights
     blower:

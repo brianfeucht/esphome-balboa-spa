@@ -100,6 +100,10 @@ void BalboaSpa::toggle_jet3() {
     send_command = 0x06;
 }
 
+void BalboaSpa::toggle_jet4() {
+    send_command = 0x07;
+}
+
 void BalboaSpa::toggle_blower() {
     send_command = 0x0C;
 }
@@ -412,7 +416,7 @@ void BalboaSpa::decodeState() {
     if (target_hour != spaState.hour || target_minute != spaState.minutes) {
         // Do not trigger a new state for clock
         // newState = true;
-        // ESP_LOGD("Spa/time/state", s.c_str());
+        // ESP_LOGD(TAG, "Spa/time/state %s", s.c_str());
         spaState.hour = target_hour;
         spaState.minutes = target_minute;
     }
@@ -445,6 +449,13 @@ void BalboaSpa::decodeState() {
     if (spa_component_state != spaState.jet3) {
         ESP_LOGD(TAG, "Spa/jet_3/state: %.0f", spa_component_state);
         spaState.jet3 = spa_component_state;
+    }
+
+    spa_component_state = bitRead(input_queue[16], 7);
+    if (spa_component_state != spaState.jet4)
+    {
+      ESP_LOGD(TAG, "Spa/jet_4/state: %.0f", spa_component_state);
+      spaState.jet4 = spa_component_state;
     }
 
     // 18:Flags Byte 13
