@@ -101,7 +101,7 @@ void BalboaSpa::toggle_jet3() {
 }
 
 void BalboaSpa::toggle_jet4() {
-    send = 0x07;
+    send_command = 0x07;
 }
 
 void BalboaSpa::toggle_blower() {
@@ -451,11 +451,11 @@ void BalboaSpa::decodeState() {
         spaState.jet3 = spa_component_state;
     }
 
-    d = bitRead(Q_in[16], 7);
-    if (d != spaState.jet4)
+    spa_component_state = bitRead(input_queue[16], 7);
+    if (spa_component_state != spaState.jet4)
     {
-      ESP_LOGD("Spa/jet_4/state", "%.0f", d);
-      spaState.jet4 = d;
+      ESP_LOGD("Spa/jet_4/state", "%.0f", spa_component_state);
+      spaState.jet4 = spa_component_state;
     }
 
     // 18:Flags Byte 13
