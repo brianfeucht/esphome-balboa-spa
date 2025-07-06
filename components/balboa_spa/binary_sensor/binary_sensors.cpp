@@ -18,7 +18,7 @@ void BalboaSpaBinarySensors::update(SpaState* spaState) {
         return;
     }
 
-    uint8_t d = 0;
+    uint8_t state_value = 0;
     switch (sensor_type)
     {
         case BalboaSpaBinarySensorType::BLOWER:
@@ -31,17 +31,17 @@ void BalboaSpaBinarySensors::update(SpaState* spaState) {
             sensor_state_value = spaState->circulation;
             break;
         case BalboaSpaBinarySensorType::RESTMODE:
-            d = spaState->rest_mode;
-            sensor_state_value = d;
-            if(d == 254) {
+            state_value = spaState->rest_mode;
+            sensor_state_value = state_value;
+            if(state_value == 254) {
                 // This indicate no value
                 return;
             }
             break;
         case BalboaSpaBinarySensorType::HEATSTATE:
-            d = spaState->heat_state;
-            sensor_state_value = d;
-            if(d == 254) {
+            state_value = spaState->heat_state;
+            sensor_state_value = state_value;
+            if(state_value == 254) {
                 // no value
                 return;
             }
@@ -55,16 +55,16 @@ void BalboaSpaBinarySensors::update(SpaState* spaState) {
             return;
     }
 
-    if(this->state != sensor_state_value || this->lastUpdate + 300000 < millis()) {
+    if(this->state != sensor_state_value || this->last_update_time + 300000 < millis()) {
         this->publish_state(sensor_state_value);
-        lastUpdate = millis();
+        last_update_time = millis();
     }
 }
 
 BalboaSpaBinarySensors::BalboaSpaBinarySensors() {
     spa = nullptr;
     sensor_type = BalboaSpaBinarySensorType::UNKNOWN;
-    lastUpdate = 0;
+    last_update_time = 0;
 }
 
 }}

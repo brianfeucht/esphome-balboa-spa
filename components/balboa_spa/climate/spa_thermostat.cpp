@@ -38,7 +38,7 @@ bool inline is_diff_no_nan(float a, float b){
 }
 
 void BalboaSpaThermostat::update(SpaState* spaState) {
-    bool update = false;
+    bool needs_update = false;
 
     if (!spa->is_communicating()){
         this->target_temperature = NAN;
@@ -47,31 +47,31 @@ void BalboaSpaThermostat::update(SpaState* spaState) {
     }
 
     float target_temp = spaState->target_temp;
-    update = is_diff_no_nan(target_temp, this->target_temperature) || update;
+    needs_update = is_diff_no_nan(target_temp, this->target_temperature) || needs_update;
     this->target_temperature = !std::isnan(target_temp) ? target_temp : this->target_temperature;
 
-    auto ct = spaState->current_temp;
-    update = is_diff_no_nan(ct, this->current_temperature) || update;
-    this->current_temperature = !std::isnan(ct) ? ct : this->current_temperature; 
+    auto current_temp = spaState->current_temp;
+    needs_update = is_diff_no_nan(current_temp, this->current_temperature) || needs_update;
+    this->current_temperature = !std::isnan(current_temp) ? current_temp : this->current_temperature; 
 
     auto new_action = spaState->heat_state == 1 ? climate::CLIMATE_ACTION_HEATING : climate::CLIMATE_ACTION_IDLE;
-    update = new_action != this->action || update;
+    needs_update = new_action != this->action || needs_update;
     this->action = new_action;
 
     auto new_mode = spaState->rest_mode == 1 ? climate::CLIMATE_MODE_OFF : climate::CLIMATE_MODE_HEAT;
-    update = new_mode != this->mode || update;
+    needs_update = new_mode != this->mode || needs_update;
     this->mode = new_mode;
 
     /* If highrange == 1 then the preset should be preset_home else eco */
-    auto pmode = spaState->highrange == 1 ? climate::ClimatePreset::CLIMATE_PRESET_HOME : climate::ClimatePreset::CLIMATE_PRESET_ECO;
-    update = pmode != this->preset || update;
-    this->preset = pmode;
+    auto preset_mode = spaState->highrange == 1 ? climate::ClimatePreset::CLIMATE_PRESET_HOME : climate::ClimatePreset::CLIMATE_PRESET_ECO;
+    needs_update = preset_mode != this->preset || needs_update;
+    this->preset = preset_mode;
 
-    update = this->lastUpdate + 300000 < millis() || update ;
+    needs_update = this->last_update_time + 300000 < millis() || needs_update ;
     
-    if(update) {
+    if(needs_update) {
         this->publish_state();
-        this->lastUpdate = millis();
+        this->last_update_time = millis();
     }
 }
 

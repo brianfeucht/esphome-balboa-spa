@@ -21,10 +21,10 @@ struct SpaConfig {
         uint8_t mister :1;
         uint8_t aux1 :1;
         uint8_t aux2 :1;
-        uint8_t temp_scale :1; //1 -> Farenheit, 0-> Celcius
+        uint8_t temperature_scale :1; //1 -> Farenheit, 0-> Celcius
 };
 
-}  // namespace empty_uart_component
+}  // namespace balboa_spa
 }  // namespace esphome
 
 #endif
