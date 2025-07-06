@@ -9,6 +9,8 @@
 namespace esphome {
 namespace balboa_spa {
 
+    static const char *CIRCULAR_BUFFER_TAG = "BalboaSpa.CircularBuffer";
+
     template<typename T, size_t s>
     class CircularBuffer {
         private:
@@ -71,7 +73,7 @@ namespace balboa_spa {
 
             T operator[](size_t index){
                 if (index >= this->size()){
-                    ESP_LOGE("CB", "INDEX %d out of bounds. size=%d", index, this->size());
+                    ESP_LOGE(CIRCULAR_BUFFER_TAG, "INDEX %d out of bounds. size=%d", index, this->size());
                     return T();
                 }
                 return backingQue.at(index);
