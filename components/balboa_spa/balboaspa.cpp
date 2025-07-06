@@ -523,14 +523,16 @@ void BalboaSpa::read_serial() {
     static PROGMEM const char *format_string = R"({"start":"%.2i:%.2i","duration":"%.2i:%.2i"} )";
     const auto paylen = std::snprintf(nullptr, 0, format_string, spaFilterSettings.filt1Hour, spaFilterSettings.filt1Minute, spaFilterSettings.filt1DurationHour, spaFilterSettings.filt1DurationMinute);
  
-    char payload[paylen+1] = {0};
-    std::snprintf(payload, paylen, format_string, spaFilterSettings.filt1Hour, spaFilterSettings.filt1Minute, spaFilterSettings.filt1DurationHour, spaFilterSettings.filt1DurationMinute);
-    ESP_LOGD(TAG, "Spa/filter1/state: %s", payload);
+    if (paylen > 0) {
+      char payload[paylen+1];
+      std::snprintf(payload, paylen+1, format_string, spaFilterSettings.filt1Hour, spaFilterSettings.filt1Minute, spaFilterSettings.filt1DurationHour, spaFilterSettings.filt1DurationMinute);
+      ESP_LOGD(TAG, "Spa/filter1/state: %s", payload);
 
-    //Filter 2 time conversion
-    ESP_LOGD(TAG, "Spa/filter2_enabled/state: %s", spaFilterSettings.filt2Enable == 1 ? STRON : STROFF);
-    std::snprintf(payload, paylen, format_string, spaFilterSettings.filt2Hour, spaFilterSettings.filt2Minute, spaFilterSettings.filt2DurationHour, spaFilterSettings.filt2DurationMinute);
-    ESP_LOGD(TAG, "Spa/filter2/state: %s", payload);
+      //Filter 2 time conversion
+      ESP_LOGD(TAG, "Spa/filter2_enabled/state: %s", spaFilterSettings.filt2Enable == 1 ? STRON : STROFF);
+      std::snprintf(payload, paylen+1, format_string, spaFilterSettings.filt2Hour, spaFilterSettings.filt2Minute, spaFilterSettings.filt2DurationHour, spaFilterSettings.filt2DurationMinute);
+      ESP_LOGD(TAG, "Spa/filter2/state: %s", payload);
+    }
 
     have_filtersettings = 2;
   }
