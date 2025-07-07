@@ -4,7 +4,58 @@ This project is based on the UART reader from [Dakoriki/ESPHome-Balboa-Spa](http
 
 There are a ton of these implementations on Github.  None of the ones I could find implemented the external component pattern as prescribed by EspHome.  So I create this one.  
 
-Climate, binary sensors, sensors, and switches are all optional.  So you only need to import what you want with your implementation.
+Climate, binary sensors, sensors, switches, and fans are all optional.  So you only need to import what you want with your implementation.
+
+### Features
+
+- **Climate Control**: Full thermostat functionality with temperature control
+- **Jet Control**: Two options for controlling jets:
+  - **Switch Platform**: Traditional on/off control (backward compatible)
+  - **Fan Platform**: 3-state control (off/low/high) for jets that support multiple speeds
+- **Light & Blower Control**: On/off switches for lights and blower
+- **Status Monitoring**: Sensors and binary sensors for spa state monitoring
+- **Flexible Configuration**: Import only the platforms you need
+
+### Jet Control Options
+
+This component provides two ways to control jets, depending on your needs:
+
+#### Option 1: Switch Platform (Traditional On/Off)
+Use the switch platform for simple on/off control of jets. This is backward compatible with previous versions:
+
+```yaml
+switch:
+  - platform: balboa_spa
+    balboa_spa_id: spa
+    jet1:
+      name: "Jet 1"
+    jet2:
+      name: "Jet 2"
+    # ... additional jets
+```
+
+#### Option 2: Fan Platform (3-State Control)
+Use the fan platform for full 3-state control (off/low/high) of jets:
+
+```yaml
+fan:
+  - platform: balboa_spa
+    balboa_spa_id: spa
+    jet1:
+      name: "Jet 1 Fan"
+    jet2:
+      name: "Jet 2 Fan" 
+    # ... additional jets
+```
+
+The fan platform maps spa jet states to ESPHome fan speeds:
+- **Off**: Fan speed 0, jet state 0
+- **Low**: Fan speed 1, jet state 1  
+- **High**: Fan speed 2, jet state 2
+
+**Note**: You can use both switch and fan platforms simultaneously for the same jets. The switch will show "on" for any non-zero jet state (low or high), while the fan will show the specific speed level.
+
+### Basic Configuration Example
 
 TODO:
 I am seeing a ton of CRC errors when reading data on my spa.  This might be invalid UART config (baud, buffer, etc). Or it might just be due to the noisy nature of running next two heaters and pumps.
@@ -94,6 +145,97 @@ binary_sensor:
       name: Heat State
     connected:
       name: Connected
+```
+
+### Advanced Configuration with 3-State Jets
+
+For spas that support multiple jet speeds, you can use the fan platform for more granular control:
+
+```yaml
+esphome:
+  name: hottub-3state
+  friendly_name: hottub-3state
+
+esp32:
+  board: lolin_s2_mini
+  framework: 
+    type: arduino
+
+external_components:
+  - source:
+     type: git
+     url: https://github.com/brianfeucht/esphome-balboa-spa
+     ref: main
+
+uart:
+  id: spa_uart_bus
+  tx_pin: GPIO37
+  rx_pin: GPIO39
+  data_bits: 8
+  parity: NONE
+  stop_bits: 1
+  baud_rate: 115200
+  rx_buffer_size: 128
+
+balboa_spa:
+  id: spa
+  spa_temp_scale: F
+
+# 3-state jet control using fan platform
+fan:
+  - platform: balboa_spa
+    balboa_spa_id: spa
+    jet1:
+      name: "Jet 1"
+      id: jet1
+    jet2:
+      name: "Jet 2"
+      id: jet2
+
+# Traditional on/off switches for other controls
+switch:
+  - platform: balboa_spa
+    balboa_spa_id: spa
+    light:
+      name: "Lights"
+    blower:
+      name: "Blower"
+
+climate:
+  - platform: balboa_spa
+    balboa_spa_id: spa
+    name: "Spa Thermostat"
+    visual:
+      min_temperature: 80 °F
+      max_temperature: 104 °F
+      temperature_step: 1.0 °F
+
+# Example automation: Cycle jet speeds
+automation:
+  - id: cycle_jet_speed
+    trigger:
+      - platform: homeassistant
+        event: cycle_jets
+    action:
+      - if:
+          condition:
+            - fan.is_off: jet1
+          then:
+            - fan.turn_on:
+                id: jet1
+                speed: 1  # Low speed
+      - if:
+          condition:
+            - lambda: return id(jet1).speed == 1;
+          then:
+            - fan.set_speed:
+                id: jet1
+                speed: 2  # High speed
+      - if:
+          condition:
+            - lambda: return id(jet1).speed == 2;
+          then:
+            - fan.turn_off: jet1  # Off
 ```
 ### ESP WebUI
 ![image](https://github.com/user-attachments/assets/af602be2-da9e-4880-8fb8-e7f7f9122977)
