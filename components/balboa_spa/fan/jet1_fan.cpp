@@ -62,10 +62,12 @@ int Jet1Fan::spa_state_to_speed(uint8_t spa_state) {
 }
 
 uint8_t Jet1Fan::speed_to_spa_state(int speed) {
-    // Convert speed (1-3) to spa state (0=off, 1=low, 2=high)
+    // Convert speed (0-3) to spa state (0=off, 1=low, 2=high)
+    // ESPHome fan speeds: 0=off, 1=33%, 2=66%, 3=100%
+    // Spa states: 0=off, 1=low, 2=high
     if (speed <= 0) return 0; // Off
-    if (speed <= 2) return 1; // Low
-    return 2; // High
+    if (speed == 1) return 1; // Low (33%)
+    return 2; // High (66% and 100% both map to high)
 }
 
 }  // namespace balboa_spa

@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Test script to validate the 3-state jet protocol parsing logic
-"""
+"""Test script to validate the 3-state jet protocol parsing logic"""
 
 def test_bit_extraction():
     """Test the new 2-bit extraction vs old 1-bit extraction"""
@@ -87,6 +85,40 @@ def test_toggle_logic():
             toggles = calculate_toggles(current, target)
             print(f"  {states[current]:>4} -> {states[target]:<4}: {toggles}")
 
+def test_speed_mapping_fixed():
+    """Test the corrected speed to spa state mapping"""
+    print("\n" + "="*50)
+    print("CORRECTED SPEED MAPPING TEST")
+    print("="*50)
+    
+    def corrected_speed_to_spa_state(speed):
+        """Corrected implementation"""
+        if speed <= 0: return 0  # Off
+        if speed == 1: return 1  # Low (33%)
+        return 2  # High (66% and 100% both map to high)
+    
+    def spa_state_to_speed(spa_state):
+        """Reverse mapping"""
+        mapping = {0: 0, 1: 1, 2: 3}  # Off, Low, High
+        return mapping.get(spa_state, 0)
+    
+    print("ESPHome Fan Speed Mapping (corrected):")
+    print("Speed -> Spa State -> Speed (round-trip)")
+    for speed in range(0, 5):
+        spa_state = corrected_speed_to_spa_state(speed)
+        reverse_speed = spa_state_to_speed(spa_state)
+        speed_name = "off" if speed == 0 else f"{speed*33:.0f}%" if speed <= 3 else "100%+"
+        print(f"  {speed} ({speed_name:>4}) -> State {spa_state} -> Speed {reverse_speed}")
+    
+    print("\nRound-trip consistency check:")
+    for spa_state in [0, 1, 2]:
+        speed = spa_state_to_speed(spa_state)
+        back_to_spa_state = corrected_speed_to_spa_state(speed)
+        consistent = spa_state == back_to_spa_state
+        state_name = ['off', 'low', 'high'][spa_state]
+        print(f"  Spa State {spa_state} ({state_name}) -> Speed {speed} -> Spa State {back_to_spa_state} {'✓' if consistent else '✗'}")
+
 if __name__ == "__main__":
     test_bit_extraction()
     test_toggle_logic()
+    test_speed_mapping_fixed()
