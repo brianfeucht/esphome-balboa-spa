@@ -1,0 +1,78 @@
+# Test configuration that exercises both Switch and Fan platforms
+external_components:
+  - source:
+      type: local
+      path: components
+
+esphome:
+  name: test-both-platforms
+  platform: ESP32
+  board: lolin_s2_mini
+
+logger:
+
+uart:
+  id: spa_uart_bus
+  tx_pin: GPIO37
+  rx_pin: GPIO39
+  baud_rate: 115200
+  rx_buffer_size: 128
+
+balboa_spa:
+  id: test_spa
+  spa_temp_scale: F
+  esphome_temp_scale: C
+
+# Test backward compatible switches
+switch:
+  - platform: balboa_spa
+    balboa_spa_id: test_spa
+    jet1:
+      name: "Jet 1 Switch"
+      id: jet1_switch
+    jet2:
+      name: "Jet 2 Switch"
+      id: jet2_switch
+    light:
+      name: "Lights"
+    blower:
+      name: "Blower"
+
+# Test new 3-state fans
+fan:
+  - platform: balboa_spa
+    balboa_spa_id: test_spa
+    jet1:
+      name: "Jet 1 Fan"
+      id: jet1_fan
+    jet2:
+      name: "Jet 2 Fan"
+      id: jet2_fan
+
+# Other components
+climate:
+  - platform: balboa_spa
+    balboa_spa_id: test_spa
+    name: "Spa Thermostat"
+
+sensor:
+  - platform: balboa_spa
+    balboa_spa_id: test_spa
+    heatstate:
+      name: "Heat State"
+
+binary_sensor:
+  - platform: balboa_spa
+    balboa_spa_id: test_spa
+    connected:
+      name: "Connected"
+
+# Test automation that uses both interfaces
+automation:
+  - id: test_dual_control
+    trigger:
+      - platform: state
+        entity_id: fan.jet_1_fan
+        to: "3"  # High speed
+    action:
+      - switch.turn_off: jet2_switch  # Turn off jet2 via switch

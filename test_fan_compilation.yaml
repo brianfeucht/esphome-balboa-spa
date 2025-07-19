@@ -1,0 +1,36 @@
+external_components:
+  - source:
+      type: local
+      path: components
+
+esphome:
+  name: test-fan-compilation
+  platform: ESP32
+  board: lolin_s2_mini
+
+logger:
+
+uart:
+  id: spa_uart_bus
+  tx_pin: GPIO37
+  rx_pin: GPIO39
+  baud_rate: 115200
+  rx_buffer_size: 128
+
+balboa_spa:
+  id: test_spa
+  spa_temp_scale: F
+  esphome_temp_scale: C
+
+# Test both platforms
+switch:
+  - platform: balboa_spa
+    balboa_spa_id: test_spa
+    jet1:
+      name: "Jet1 Switch"
+
+fan:
+  - platform: balboa_spa
+    balboa_spa_id: test_spa
+    jet1:
+      name: "Jet1 Fan"
