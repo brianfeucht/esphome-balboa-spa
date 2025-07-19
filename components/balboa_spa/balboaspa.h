@@ -53,6 +53,10 @@ class BalboaSpa : public uart::UARTDevice, public PollingComponent {
     void toggle_jet2();
     void toggle_jet3();
     void toggle_jet4();
+    void set_jet1_state(uint8_t state);
+    void set_jet2_state(uint8_t state);
+    void set_jet3_state(uint8_t state);
+    void set_jet4_state(uint8_t state);
     void toggle_blower();
     void set_highrange(bool high);
 
@@ -104,6 +108,9 @@ class BalboaSpa : public uart::UARTDevice, public PollingComponent {
     void decodeSettings();
     void decodeState();
     void decodeFilterSettings();
+    
+    // Helper method for DRY jet control
+    void set_jet_state_internal(uint8_t jet_number, uint8_t desired_state);
     void decodeFault();
 };
 

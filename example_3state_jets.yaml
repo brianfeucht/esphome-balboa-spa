@@ -1,0 +1,170 @@
+# Example ESPHome configuration for Balboa Spa with 3-state jet support
+# This demonstrates both traditional on/off switches and the new 3-state fan controls
+
+external_components:
+  - source:
+      type: local
+      path: components
+
+esphome:
+  name: balboa-spa-3state
+  platform: ESP32
+  board: lolin_s2_mini
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+
+# Enable OTA updates
+ota:
+
+wifi:
+  ssid: "your_wifi_ssid"
+  password: "your_wifi_password"
+
+# UART configuration for Balboa spa communication
+uart:
+  id: spa_uart_bus
+  tx_pin: GPIO37
+  rx_pin: GPIO39
+  baud_rate: 115200
+  rx_buffer_size: 128
+
+# Main Balboa Spa component
+balboa_spa:
+  id: spa
+  spa_temp_scale: F
+  esphome_temp_scale: F
+
+# Option 1: Traditional on/off switches for jets (backward compatible)
+switch:
+  - platform: balboa_spa
+    balboa_spa_id: spa
+    jet1:
+      name: "Jet 1 Switch"
+      id: jet1_switch
+    jet2:
+      name: "Jet 2 Switch"
+      id: jet2_switch
+    # Uncomment for jets 3 and 4 if your spa supports them
+    # jet3:
+    #   name: "Jet 3 Switch"
+    #   id: jet3_switch
+    # jet4:
+    #   name: "Jet 4 Switch"
+    #   id: jet4_switch
+    light:
+      name: "Spa Lights"
+      id: spa_lights
+    blower:
+      name: "Spa Blower"
+      id: spa_blower
+
+# Option 2: New 3-state fan controls for jets (off/low/high)
+fan:
+  - platform: balboa_spa
+    balboa_spa_id: spa
+    jet1:
+      name: "Jet 1 Fan"
+      id: jet1_fan
+    jet2:
+      name: "Jet 2 Fan"
+      id: jet2_fan
+    # Uncomment for jets 3 and 4 if your spa supports them
+    # jet3:
+    #   name: "Jet 3 Fan"
+    #   id: jet3_fan
+    # jet4:
+    #   name: "Jet 4 Fan"
+    #   id: jet4_fan
+
+# Climate control (thermostat)
+climate:
+  - platform: balboa_spa
+    balboa_spa_id: spa
+    name: "Spa Thermostat"
+    visual:
+      min_temperature: 80 °F
+      max_temperature: 104 °F
+      temperature_step: 1.0 °F
+
+# Status sensors
+sensor:
+  - platform: balboa_spa
+    balboa_spa_id: spa
+    blower:
+      name: "Blower Status"
+    highrange:
+      name: "High Range Mode"
+    circulation:
+      name: "Circulation Pump"
+    restmode:
+      name: "Rest Mode"
+    heatstate:
+      name: "Heat State"
+
+# Binary status sensors
+binary_sensor:
+  - platform: balboa_spa
+    balboa_spa_id: spa
+    blower:
+      name: "Blower Active"
+    highrange:
+      name: "High Range Active"
+    circulation:
+      name: "Circulation Active"
+    restmode:
+      name: "Rest Mode Active"
+    heatstate:
+      name: "Heating Active"
+    connected:
+      name: "Spa Connected"
+
+# Example automations using the new 3-state jets
+automation:
+  # Example: Set jets to low speed when spa reaches target temperature
+  - id: jets_auto_low
+    trigger:
+      - platform: state
+        entity_id: climate.spa_thermostat
+        attribute: current_temperature
+    condition:
+      - condition: template
+        value_template: >
+          {{ states.climate.spa_thermostat.attributes.current_temperature >= 
+             states.climate.spa_thermostat.attributes.temperature }}
+    action:
+      - fan.set_speed:
+          id: jet1_fan
+          speed: 1  # Low speed
+      - fan.set_speed:
+          id: jet2_fan
+          speed: 1  # Low speed
+
+  # Example: Cycle jet speeds with a button press (Home Assistant automation)
+  - id: cycle_jet1_speed
+    trigger:
+      - platform: homeassistant
+        event: cycle_jets
+    action:
+      - if:
+          condition:
+            - fan.is_off: jet1_fan
+          then:
+            - fan.turn_on:
+                id: jet1_fan
+                speed: 1  # Turn on to low
+      - if:
+          condition:
+            - lambda: return id(jet1_fan).speed == 1;
+          then:
+            - fan.set_speed:
+                id: jet1_fan
+                speed: 3  # Set to high
+      - if:
+          condition:
+            - lambda: return id(jet1_fan).speed == 3;
+          then:
+            - fan.turn_off: jet1_fan  # Turn off
