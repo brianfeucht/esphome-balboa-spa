@@ -109,89 +109,19 @@ void BalboaSpa::toggle_blower() {
 }
 
 void BalboaSpa::set_jet1_state(uint8_t state) {
-    // Set jet1 to desired state (0=off, 1=low, 2=high)
-    // Jets cycle through: off -> low -> high -> off
-    uint8_t current_state = spaState.jet1;
-    uint8_t target_state = state > 2 ? 0 : state; // Clamp to valid range
-    
-    if (current_state != target_state) {
-        // Calculate the most efficient path to reach target state
-        // Since jets cycle 0->1->2->0, we may need 1, 2, or 0 toggles
-        uint8_t toggles_needed;
-        if (current_state == 0 && target_state == 1) toggles_needed = 1;
-        else if (current_state == 0 && target_state == 2) toggles_needed = 2;
-        else if (current_state == 1 && target_state == 0) toggles_needed = 2;
-        else if (current_state == 1 && target_state == 2) toggles_needed = 1;
-        else if (current_state == 2 && target_state == 0) toggles_needed = 1;
-        else if (current_state == 2 && target_state == 1) toggles_needed = 2;
-        else toggles_needed = 0;
-        
-        for (uint8_t i = 0; i < toggles_needed; i++) {
-            toggle_jet1();
-            // Note: Actual state updates will come from the spa's response
-            // We don't artificially update the state here to avoid sync issues
-        }
-    }
+    set_jet_state_internal(1, state);
 }
 
 void BalboaSpa::set_jet2_state(uint8_t state) {
-    uint8_t current_state = spaState.jet2;
-    uint8_t target_state = state > 2 ? 0 : state;
-    
-    if (current_state != target_state) {
-        uint8_t toggles_needed;
-        if (current_state == 0 && target_state == 1) toggles_needed = 1;
-        else if (current_state == 0 && target_state == 2) toggles_needed = 2;
-        else if (current_state == 1 && target_state == 0) toggles_needed = 2;
-        else if (current_state == 1 && target_state == 2) toggles_needed = 1;
-        else if (current_state == 2 && target_state == 0) toggles_needed = 1;
-        else if (current_state == 2 && target_state == 1) toggles_needed = 2;
-        else toggles_needed = 0;
-        
-        for (uint8_t i = 0; i < toggles_needed; i++) {
-            toggle_jet2();
-        }
-    }
+    set_jet_state_internal(2, state);
 }
 
 void BalboaSpa::set_jet3_state(uint8_t state) {
-    uint8_t current_state = spaState.jet3;
-    uint8_t target_state = state > 2 ? 0 : state;
-    
-    if (current_state != target_state) {
-        uint8_t toggles_needed;
-        if (current_state == 0 && target_state == 1) toggles_needed = 1;
-        else if (current_state == 0 && target_state == 2) toggles_needed = 2;
-        else if (current_state == 1 && target_state == 0) toggles_needed = 2;
-        else if (current_state == 1 && target_state == 2) toggles_needed = 1;
-        else if (current_state == 2 && target_state == 0) toggles_needed = 1;
-        else if (current_state == 2 && target_state == 1) toggles_needed = 2;
-        else toggles_needed = 0;
-        
-        for (uint8_t i = 0; i < toggles_needed; i++) {
-            toggle_jet3();
-        }
-    }
+    set_jet_state_internal(3, state);
 }
 
 void BalboaSpa::set_jet4_state(uint8_t state) {
-    uint8_t current_state = spaState.jet4;
-    uint8_t target_state = state > 2 ? 0 : state;
-    
-    if (current_state != target_state) {
-        uint8_t toggles_needed;
-        if (current_state == 0 && target_state == 1) toggles_needed = 1;
-        else if (current_state == 0 && target_state == 2) toggles_needed = 2;
-        else if (current_state == 1 && target_state == 0) toggles_needed = 2;
-        else if (current_state == 1 && target_state == 2) toggles_needed = 1;
-        else if (current_state == 2 && target_state == 0) toggles_needed = 1;
-        else if (current_state == 2 && target_state == 1) toggles_needed = 2;
-        else toggles_needed = 0;
-        
-        for (uint8_t i = 0; i < toggles_needed; i++) {
-            toggle_jet4();
-        }
-    }
+    set_jet_state_internal(4, state);
 }
 
 void BalboaSpa::read_serial() {
@@ -695,6 +625,56 @@ float BalboaSpa::convert_c_to_f(float c) {
 
 float BalboaSpa::convert_f_to_c(float f) {
     return (f - 32.0) * 5.0 / 9.0;
+}
+
+void BalboaSpa::set_jet_state_internal(uint8_t jet_number, uint8_t desired_state) {
+    // DRY implementation for all jets using calculated toggles
+    // This approach works because spa state updates are asynchronous
+    
+    const uint8_t target_state = desired_state > 2 ? 0 : desired_state; // Clamp to valid range
+    uint8_t current_state;
+    
+    // Get current state for the specified jet
+    switch (jet_number) {
+        case 1: current_state = spaState.jet1; break;
+        case 2: current_state = spaState.jet2; break;
+        case 3: current_state = spaState.jet3; break;
+        case 4: current_state = spaState.jet4; break;
+        default: 
+            ESP_LOGW(TAG, "Invalid jet number: %d", jet_number);
+            return;
+    }
+    
+    // Skip if already at target state
+    if (current_state == target_state) {
+        ESP_LOGD(TAG, "Jet %d already at target state %d", jet_number, target_state);
+        return;
+    }
+    
+    // Calculate optimal number of toggles needed
+    // Jets cycle: off(0) -> low(1) -> high(2) -> off(0)
+    uint8_t toggles_needed;
+    if (current_state == 0 && target_state == 1) toggles_needed = 1;      // off -> low
+    else if (current_state == 0 && target_state == 2) toggles_needed = 2; // off -> high
+    else if (current_state == 1 && target_state == 0) toggles_needed = 2; // low -> off
+    else if (current_state == 1 && target_state == 2) toggles_needed = 1; // low -> high
+    else if (current_state == 2 && target_state == 0) toggles_needed = 1; // high -> off
+    else if (current_state == 2 && target_state == 1) toggles_needed = 2; // high -> low
+    else toggles_needed = 0;
+    
+    ESP_LOGD(TAG, "Jet %d: %d -> %d (%d toggles)", jet_number, current_state, target_state, toggles_needed);
+    
+    // Send the calculated toggles
+    for (uint8_t i = 0; i < toggles_needed; i++) {
+        switch (jet_number) {
+            case 1: toggle_jet1(); break;
+            case 2: toggle_jet2(); break;
+            case 3: toggle_jet3(); break;
+            case 4: toggle_jet4(); break;
+        }
+    }
+    
+    // Note: Actual state updates will come from spa's status messages in decodeState()
 }
 }  // namespace balboa_spa
 }  // namespace esphome

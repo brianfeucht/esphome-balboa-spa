@@ -108,6 +108,9 @@ class BalboaSpa : public uart::UARTDevice, public PollingComponent {
     void decodeSettings();
     void decodeState();
     void decodeFilterSettings();
+    
+    // Helper method for DRY jet control
+    void set_jet_state_internal(uint8_t jet_number, uint8_t desired_state);
     void decodeFault();
 };
 
