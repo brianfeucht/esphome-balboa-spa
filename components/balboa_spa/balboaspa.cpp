@@ -108,6 +108,92 @@ void BalboaSpa::toggle_blower() {
     send_command = 0x0C;
 }
 
+void BalboaSpa::set_jet1_state(uint8_t state) {
+    // Set jet1 to desired state (0=off, 1=low, 2=high)
+    // Jets cycle through: off -> low -> high -> off
+    uint8_t current_state = spaState.jet1;
+    uint8_t target_state = state > 2 ? 0 : state; // Clamp to valid range
+    
+    if (current_state != target_state) {
+        // Calculate the most efficient path to reach target state
+        // Since jets cycle 0->1->2->0, we may need 1, 2, or 0 toggles
+        uint8_t toggles_needed;
+        if (current_state == 0 && target_state == 1) toggles_needed = 1;
+        else if (current_state == 0 && target_state == 2) toggles_needed = 2;
+        else if (current_state == 1 && target_state == 0) toggles_needed = 2;
+        else if (current_state == 1 && target_state == 2) toggles_needed = 1;
+        else if (current_state == 2 && target_state == 0) toggles_needed = 1;
+        else if (current_state == 2 && target_state == 1) toggles_needed = 2;
+        else toggles_needed = 0;
+        
+        for (uint8_t i = 0; i < toggles_needed; i++) {
+            toggle_jet1();
+            // Note: Actual state updates will come from the spa's response
+            // We don't artificially update the state here to avoid sync issues
+        }
+    }
+}
+
+void BalboaSpa::set_jet2_state(uint8_t state) {
+    uint8_t current_state = spaState.jet2;
+    uint8_t target_state = state > 2 ? 0 : state;
+    
+    if (current_state != target_state) {
+        uint8_t toggles_needed;
+        if (current_state == 0 && target_state == 1) toggles_needed = 1;
+        else if (current_state == 0 && target_state == 2) toggles_needed = 2;
+        else if (current_state == 1 && target_state == 0) toggles_needed = 2;
+        else if (current_state == 1 && target_state == 2) toggles_needed = 1;
+        else if (current_state == 2 && target_state == 0) toggles_needed = 1;
+        else if (current_state == 2 && target_state == 1) toggles_needed = 2;
+        else toggles_needed = 0;
+        
+        for (uint8_t i = 0; i < toggles_needed; i++) {
+            toggle_jet2();
+        }
+    }
+}
+
+void BalboaSpa::set_jet3_state(uint8_t state) {
+    uint8_t current_state = spaState.jet3;
+    uint8_t target_state = state > 2 ? 0 : state;
+    
+    if (current_state != target_state) {
+        uint8_t toggles_needed;
+        if (current_state == 0 && target_state == 1) toggles_needed = 1;
+        else if (current_state == 0 && target_state == 2) toggles_needed = 2;
+        else if (current_state == 1 && target_state == 0) toggles_needed = 2;
+        else if (current_state == 1 && target_state == 2) toggles_needed = 1;
+        else if (current_state == 2 && target_state == 0) toggles_needed = 1;
+        else if (current_state == 2 && target_state == 1) toggles_needed = 2;
+        else toggles_needed = 0;
+        
+        for (uint8_t i = 0; i < toggles_needed; i++) {
+            toggle_jet3();
+        }
+    }
+}
+
+void BalboaSpa::set_jet4_state(uint8_t state) {
+    uint8_t current_state = spaState.jet4;
+    uint8_t target_state = state > 2 ? 0 : state;
+    
+    if (current_state != target_state) {
+        uint8_t toggles_needed;
+        if (current_state == 0 && target_state == 1) toggles_needed = 1;
+        else if (current_state == 0 && target_state == 2) toggles_needed = 2;
+        else if (current_state == 1 && target_state == 0) toggles_needed = 2;
+        else if (current_state == 1 && target_state == 2) toggles_needed = 1;
+        else if (current_state == 2 && target_state == 0) toggles_needed = 1;
+        else if (current_state == 2 && target_state == 1) toggles_needed = 2;
+        else toggles_needed = 0;
+        
+        for (uint8_t i = 0; i < toggles_needed; i++) {
+            toggle_jet4();
+        }
+    }
+}
+
 void BalboaSpa::read_serial() {
     if (!read_byte(&received_byte)) {
         return;
@@ -432,26 +518,26 @@ void BalboaSpa::decodeState() {
         spaState.highrange = spa_component_state;
     }
 
-    // 16:Flags Byte 11
-    spa_component_state = bitRead(input_queue[16], 1);
+    // 16:Flags Byte 11 - Read 2-bit jet states (0=off, 1=low, 2=high)
+    spa_component_state = (input_queue[16] >> 0) & 0x03;  // bits 0-1 for jet1
     if (spa_component_state != spaState.jet1) {
         ESP_LOGD(TAG, "Spa/jet_1/state: %.0f", spa_component_state);
         spaState.jet1 = spa_component_state;
     }
 
-    spa_component_state = bitRead(input_queue[16], 3);
+    spa_component_state = (input_queue[16] >> 2) & 0x03;  // bits 2-3 for jet2
     if (spa_component_state != spaState.jet2) {
         ESP_LOGD(TAG, "Spa/jet_2/state: %.0f", spa_component_state);
         spaState.jet2 = spa_component_state;
     }
 
-    spa_component_state = bitRead(input_queue[16], 5);
+    spa_component_state = (input_queue[16] >> 4) & 0x03;  // bits 4-5 for jet3
     if (spa_component_state != spaState.jet3) {
         ESP_LOGD(TAG, "Spa/jet_3/state: %.0f", spa_component_state);
         spaState.jet3 = spa_component_state;
     }
 
-    spa_component_state = bitRead(input_queue[16], 7);
+    spa_component_state = (input_queue[16] >> 6) & 0x03;  // bits 6-7 for jet4
     if (spa_component_state != spaState.jet4)
     {
       ESP_LOGD(TAG, "Spa/jet_4/state: %.0f", spa_component_state);

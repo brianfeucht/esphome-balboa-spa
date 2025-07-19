@@ -4,7 +4,58 @@ This project is based on the UART reader from [Dakoriki/ESPHome-Balboa-Spa](http
 
 There are a ton of these implementations on Github.  None of the ones I could find implemented the external component pattern as prescribed by EspHome.  So I create this one.  
 
-Climate, binary sensors, sensors, and switches are all optional.  So you only need to import what you want with your implementation.
+Climate, binary sensors, sensors, switches, and fans are all optional.  So you only need to import what you want with your implementation.
+
+### Features
+
+- **Climate Control**: Full thermostat functionality with temperature control
+- **Jet Control**: Two options for controlling jets:
+  - **Switch Platform**: Traditional on/off control (backward compatible)
+  - **Fan Platform**: 3-state control (off/low/high) for jets that support multiple speeds
+- **Light & Blower Control**: On/off switches for lights and blower
+- **Status Monitoring**: Sensors and binary sensors for spa state monitoring
+- **Flexible Configuration**: Import only the platforms you need
+
+### Jet Control Options
+
+This component provides two ways to control jets, depending on your needs:
+
+#### Option 1: Switch Platform (Traditional On/Off)
+Use the switch platform for simple on/off control of jets. This is backward compatible with previous versions:
+
+```yaml
+switch:
+  - platform: balboa_spa
+    balboa_spa_id: spa
+    jet1:
+      name: "Jet 1"
+    jet2:
+      name: "Jet 2"
+    # ... additional jets
+```
+
+#### Option 2: Fan Platform (3-State Control)
+Use the fan platform for full 3-state control (off/low/high) of jets:
+
+```yaml
+fan:
+  - platform: balboa_spa
+    balboa_spa_id: spa
+    jet1:
+      name: "Jet 1 Fan"
+    jet2:
+      name: "Jet 2 Fan" 
+    # ... additional jets
+```
+
+The fan platform maps spa jet states to ESPHome fan speeds:
+- **Off**: Fan speed 0, jet state 0
+- **Low**: Fan speed 1, jet state 1  
+- **High**: Fan speed 3, jet state 2
+
+**Note**: You can use both switch and fan platforms simultaneously for the same jets. The switch will show "on" for any non-zero jet state (low or high), while the fan will show the specific speed level.
+
+### Basic Configuration Example
 
 TODO:
 I am seeing a ton of CRC errors when reading data on my spa.  This might be invalid UART config (baud, buffer, etc). Or it might just be due to the noisy nature of running next two heaters and pumps.
