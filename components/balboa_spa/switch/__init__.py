@@ -37,7 +37,7 @@ def jet_switch_schema(cls):
         icon=ICON_FAN,
         default_restore_mode="DISABLED",
     ).extend({
-        cv.Optional(CONF_DISCARD_UPDATES, default=10): cv.positive_int,
+        cv.Optional(CONF_DISCARD_UPDATES, default=20): cv.positive_int,
     })
 
 CONFIG_SCHEMA = cv.Schema(
@@ -57,7 +57,7 @@ CONFIG_SCHEMA = cv.Schema(
             icon=ICON_GRAIN,
             default_restore_mode="DISABLED",
         ).extend({
-            cv.Optional(CONF_DISCARD_UPDATES, default=10): cv.positive_int,
+            cv.Optional(CONF_DISCARD_UPDATES, default=20): cv.positive_int,
         }),
     })
 
