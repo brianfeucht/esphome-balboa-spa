@@ -28,6 +28,20 @@ namespace balboa_spa {
         uint8_t filter2_duration_minute :6;
 
     };
+
+    enum ToggleStateMaybe {
+        OFF = 0,
+        ON,
+        HIGH,
+        DONT_KNOW
+    };
+
+    static const char* TOGGLE_STATE_MAYBE_STRINGS[] = {
+        "OFF",
+        "ON",
+        "HIGH",
+        "DONT_KNOW"
+    };
 }  // namespace balboa_spa
 }  // namespace esphome
 
