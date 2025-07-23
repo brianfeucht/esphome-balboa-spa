@@ -32,7 +32,7 @@ namespace balboa_spa {
     enum ToggleStateMaybe {
         OFF = 0,
         ON,
-        HIGH,
+        HIGH_SPEED,
         DONT_KNOW
     };
 
