@@ -63,6 +63,9 @@ class BalboaSpa : public uart::UARTDevice, public PollingComponent {
 
     void register_listener(const std::function<void(SpaState*)> &func) {this->listeners_.push_back(func);}
 
+	bool get_restmode();
+	void toggle_heat();
+
   private:
     CircularBuffer<uint8_t, 100> input_queue;
     CircularBuffer<uint8_t, 100> output_queue;
