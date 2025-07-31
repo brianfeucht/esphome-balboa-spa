@@ -70,6 +70,16 @@ void BalboaSpa::set_highrange(bool high) {
     }
 }
 
+bool BalboaSpa::get_restmode() {
+  return spaState.rest_mode == 1;
+}
+
+void BalboaSpa::toggle_heat() {
+  ESP_LOGD("balboa_spa", "Send 0x51 to toggle heat/rest");
+  send_command = 0x51;
+}
+
+
 void BalboaSpa::set_hour(int hour) {
     if (hour >= 0 && hour <= 23) {
         target_hour = hour;
