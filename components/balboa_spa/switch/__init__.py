@@ -29,30 +29,24 @@ CONF_JET3 = "jet3"
 CONF_JET4 = "jet4"
 CONF_LIGHTS = "light"
 CONF_BLOWER = "blower"
+CONF_DISCARD_UPDATES = "discard_updates"
+
+def jet_switch_schema(cls):
+    return switch.switch_schema(
+        cls,
+        icon=ICON_FAN,
+        default_restore_mode="DISABLED",
+    ).extend({
+        cv.Optional(CONF_DISCARD_UPDATES, default=20): cv.positive_int,
+    })
 
 CONFIG_SCHEMA = cv.Schema(
     {
         cv.GenerateID(CONF_SPA_ID): cv.use_id(BalboaSpa),
-        cv.Optional(CONF_JET1): switch.switch_schema(
-            Jet1Switch,
-            icon=ICON_FAN,
-            default_restore_mode="DISABLED",
-        ),
-        cv.Optional(CONF_JET2): switch.switch_schema(
-            Jet2Switch,
-            icon=ICON_FAN,
-            default_restore_mode="DISABLED",
-        ),
-        cv.Optional(CONF_JET3): switch.switch_schema(
-            Jet3Switch,
-            icon=ICON_FAN,
-            default_restore_mode="DISABLED",
-        ),
-        cv.Optional(CONF_JET4): switch.switch_schema(
-            Jet4Switch,
-            icon=ICON_FAN,
-            default_restore_mode="DISABLED",
-        ),
+        cv.Optional(CONF_JET1): jet_switch_schema(Jet1Switch),
+        cv.Optional(CONF_JET2): jet_switch_schema(Jet2Switch),
+        cv.Optional(CONF_JET3): jet_switch_schema(Jet3Switch),
+        cv.Optional(CONF_JET4): jet_switch_schema(Jet4Switch),
         cv.Optional(CONF_LIGHTS): switch.switch_schema(
             LightsSwitch,
             icon=ICON_LIGHTBULB,
@@ -62,13 +56,24 @@ CONFIG_SCHEMA = cv.Schema(
             BlowerSwitch,
             icon=ICON_GRAIN,
             default_restore_mode="DISABLED",
-        ),
+        ).extend({
+            cv.Optional(CONF_DISCARD_UPDATES, default=20): cv.positive_int,
+        }),
     })
 
 async def to_code(config):
     parent = await cg.get_variable(config[CONF_SPA_ID])
 
-    for switch_type in [CONF_JET1, CONF_JET2, CONF_JET3, CONF_JET4, CONF_LIGHTS, CONF_BLOWER]:
+    for switch_type, cls in [
+        (CONF_JET1, Jet1Switch),
+        (CONF_JET2, Jet2Switch),
+        (CONF_JET3, Jet3Switch),
+        (CONF_JET4, Jet4Switch),
+        (CONF_BLOWER, BlowerSwitch),
+        (CONF_LIGHTS, LightsSwitch),
+    ]:
         if conf := config.get(switch_type):
             sw_var = await switch.new_switch(conf)
             cg.add(sw_var.set_parent(parent))
+            if CONF_DISCARD_UPDATES in conf:
+                cg.add(sw_var.set_discard_updates(conf[CONF_DISCARD_UPDATES]))
