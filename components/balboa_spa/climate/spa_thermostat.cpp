@@ -26,8 +26,26 @@ climate::ClimateTraits BalboaSpaThermostat::traits()
     if (has_preset){
         spa->set_highrange( *call.get_preset() == climate::ClimatePreset::CLIMATE_PRESET_HOME );
     }
- }
 
+		if (call.get_mode().has_value()) {
+		auto requested_mode = *call.get_mode();
+
+		// CLIMATE_MODE_HEAT = (Ready)
+		// CLIMATE_MODE_OFF = (Rest)
+		// SpaState.rest_mode 1 = Rest, 0 = Ready
+
+		bool is_in_rest = spa->get_restmode(); 
+
+		if (requested_mode == climate::CLIMATE_MODE_HEAT && is_in_rest) {
+			ESP_LOGD("spa_thermostat", "Toggle from Rest to Heat (Ready)");
+			spa->toggle_heat();
+		} else if (requested_mode == climate::CLIMATE_MODE_OFF && !is_in_rest) {
+			ESP_LOGD("spa_thermostat", "Toggle from Heat to Rest");
+			spa->toggle_heat();
+		}
+		}
+ }
+ 
 void BalboaSpaThermostat::set_parent(BalboaSpa *parent) {
     spa = parent;
     parent->register_listener([this](SpaState* spaState){ this->update(spaState); });
