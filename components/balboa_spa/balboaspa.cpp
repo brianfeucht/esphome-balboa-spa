@@ -492,8 +492,7 @@ void BalboaSpa::decodeState() {
         spaState.light = spa_component_state;
     }
 
-    // Check for second light state (assuming it's a different bit pattern in byte 19)
-    spa_component_state = bitRead(input_queue[19], 1);
+    spa_component_state = (input_queue[19] & 0x0C) >> 2; // Check bits 2-3 for light2;
     if (spa_component_state != spaState.light2) {
         ESP_LOGD(TAG, "Spa/light2/state: %.0f", spa_component_state);
         spaState.light2 = spa_component_state;
