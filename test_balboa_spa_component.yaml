@@ -24,6 +24,8 @@ switch:
       name: Jet4
     light:
       name: Lights
+    light2:
+      name: Second Lights
     blower:
       name: Blower
 
