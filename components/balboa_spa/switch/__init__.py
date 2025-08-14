@@ -22,6 +22,7 @@ Jet3Switch = balboa_spa_ns.class_("Jet3Switch", switch.Switch)
 Jet4Switch = balboa_spa_ns.class_("Jet4Switch", switch.Switch)
 LightsSwitch = balboa_spa_ns.class_("LightsSwitch", switch.Switch)
 BlowerSwitch = balboa_spa_ns.class_("BlowerSwitch", switch.Switch)
+Filter2EnableSwitch = balboa_spa_ns.class_("Filter2EnableSwitch", switch.Switch)
 
 CONF_JET1 = "jet1"
 CONF_JET2 = "jet2"
@@ -29,6 +30,7 @@ CONF_JET3 = "jet3"
 CONF_JET4 = "jet4"
 CONF_LIGHTS = "light"
 CONF_BLOWER = "blower"
+CONF_FILTER2_ENABLE = "filter2_enable"
 CONF_DISCARD_UPDATES = "discard_updates"
 
 def jet_switch_schema(cls):
@@ -59,6 +61,11 @@ CONFIG_SCHEMA = cv.Schema(
         ).extend({
             cv.Optional(CONF_DISCARD_UPDATES, default=20): cv.positive_int,
         }),
+        cv.Optional(CONF_FILTER2_ENABLE): switch.switch_schema(
+            Filter2EnableSwitch,
+            icon=ICON_FAN,
+            default_restore_mode="DISABLED",
+        ),
     })
 
 async def to_code(config):
@@ -71,6 +78,7 @@ async def to_code(config):
         (CONF_JET4, Jet4Switch),
         (CONF_BLOWER, BlowerSwitch),
         (CONF_LIGHTS, LightsSwitch),
+        (CONF_FILTER2_ENABLE, Filter2EnableSwitch),
     ]:
         if conf := config.get(switch_type):
             sw_var = await switch.new_switch(conf)

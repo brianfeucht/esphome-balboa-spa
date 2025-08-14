@@ -34,6 +34,7 @@ float BalboaSpa::get_setup_priority() const { return esphome::setup_priority::LA
 
 SpaConfig BalboaSpa::get_current_config() { return spaConfig; }
 SpaState* BalboaSpa::get_current_state() { return &spaState; }
+SpaFilterSettings* BalboaSpa::get_current_filter_settings() { return &spaFilterSettings; }
 
 void BalboaSpa::set_temp(float temp) {
     float target_temp = 0.0;
@@ -118,6 +119,53 @@ void BalboaSpa::toggle_blower() {
     send_command = 0x0C;
 }
 
+void BalboaSpa::set_filter1_start_time(int hour, int minute) {
+    if (hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59) {
+        target_filter_settings.filter1_hour = hour;
+        target_filter_settings.filter1_minute = minute;
+        filter_settings_dirty = true;
+        send_command = 0x23; // Use 0x23 for filter config setting
+        ESP_LOGD(TAG, "Filter1/start_time/set: %02d:%02d", hour, minute);
+    }
+}
+
+void BalboaSpa::set_filter1_duration(int hours, int minutes) {
+    if (hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59) {
+        target_filter_settings.filter1_duration_hour = hours;
+        target_filter_settings.filter1_duration_minute = minutes;
+        filter_settings_dirty = true;
+        send_command = 0x23;
+        ESP_LOGD(TAG, "Filter1/duration/set: %02d:%02d", hours, minutes);
+    }
+}
+
+void BalboaSpa::set_filter2_enabled(bool enabled) {
+    target_filter_settings.filter2_enable = enabled ? 1 : 0;
+    filter_settings_dirty = true;
+    send_command = 0x23;
+    ESP_LOGD(TAG, "Filter2/enabled/set: %s", enabled ? "ON" : "OFF");
+}
+
+void BalboaSpa::set_filter2_start_time(int hour, int minute) {
+    if (hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59) {
+        target_filter_settings.filter2_hour = hour;
+        target_filter_settings.filter2_minute = minute;
+        filter_settings_dirty = true;
+        send_command = 0x23;
+        ESP_LOGD(TAG, "Filter2/start_time/set: %02d:%02d", hour, minute);
+    }
+}
+
+void BalboaSpa::set_filter2_duration(int hours, int minutes) {
+    if (hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59) {
+        target_filter_settings.filter2_duration_hour = hours;
+        target_filter_settings.filter2_duration_minute = minutes;
+        filter_settings_dirty = true;
+        send_command = 0x23;
+        ESP_LOGD(TAG, "Filter2/duration/set: %02d:%02d", hours, minutes);
+    }
+}
+
 void BalboaSpa::read_serial() {
     if (!read_byte(&received_byte)) {
         return;
@@ -189,6 +237,23 @@ void BalboaSpa::read_serial() {
                 output_queue.push(0xBF);
                 output_queue.push(0x20);
                 output_queue.push(target_temperature);
+            } else if (send_command == 0x23) {
+                // 0x23 marks dirty filter settings
+                output_queue.push(client_id);
+                output_queue.push(0xBF);
+                output_queue.push(0x22);
+                output_queue.push(0x01); // Filter config type
+                output_queue.push(target_filter_settings.filter1_hour);
+                output_queue.push(target_filter_settings.filter1_minute);
+                output_queue.push(target_filter_settings.filter1_duration_hour);
+                output_queue.push(target_filter_settings.filter1_duration_minute);
+                uint8_t filter2_hour_with_enable = target_filter_settings.filter2_hour | (target_filter_settings.filter2_enable << 7);
+                output_queue.push(filter2_hour_with_enable);
+                output_queue.push(target_filter_settings.filter2_minute);
+                output_queue.push(target_filter_settings.filter2_duration_hour);
+                output_queue.push(target_filter_settings.filter2_duration_minute);
+                filter_settings_dirty = false;
+                ESP_LOGD(TAG, "Filter/config/sent: Sending filter configuration");
             } else if (send_command == 0x00) {
                 if (config_request_status == 0) { // Get configuration of the hot tub
                     output_queue.push(client_id);
@@ -519,6 +584,11 @@ void BalboaSpa::decodeFilterSettings() {
     ESP_LOGD(TAG, "Spa/filter2/state: %s", filter_payload);
 
     filtersettings_request_status = 2;
+
+    // Run through filter listeners
+    for (const auto &listener : this->filter_listeners_) {
+      listener(&spaFilterSettings);
+    }
 }
 
 void BalboaSpa::decodeFault() {

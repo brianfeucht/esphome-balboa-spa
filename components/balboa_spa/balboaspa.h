@@ -44,10 +44,19 @@ class BalboaSpa : public uart::UARTDevice, public PollingComponent {
 
     SpaConfig get_current_config();
     SpaState* get_current_state();
+    SpaFilterSettings* get_current_filter_settings();
 
     void set_temp(float temp);
     void set_hour(int hour);
     void set_minute(int minute);
+    
+    // Filter configuration setters
+    void set_filter1_start_time(int hour, int minute);
+    void set_filter1_duration(int hours, int minutes);
+    void set_filter2_enabled(bool enabled);
+    void set_filter2_start_time(int hour, int minute);
+    void set_filter2_duration(int hours, int minutes);
+    
     void toggle_light();
     void toggle_jet1();
     void toggle_jet2();
@@ -62,6 +71,7 @@ class BalboaSpa : public uart::UARTDevice, public PollingComponent {
     bool is_communicating();
 
     void register_listener(const std::function<void(SpaState*)> &func) {this->listeners_.push_back(func);}
+    void register_filter_listener(const std::function<void(SpaFilterSettings*)> &func) {this->filter_listeners_.push_back(func);}
 
 	bool get_restmode();
 	void toggle_heat();
@@ -75,6 +85,11 @@ class BalboaSpa : public uart::UARTDevice, public PollingComponent {
     uint8_t target_temperature = 0x00;
     uint8_t target_hour = 0x00;
     uint8_t target_minute = 0x00;
+    
+    // Target filter settings for setting filter configurations
+    SpaFilterSettings target_filter_settings;
+    bool filter_settings_dirty = false;
+    
     uint8_t client_id = 0x00;
     uint32_t last_received_time = 0;
 
@@ -84,6 +99,7 @@ class BalboaSpa : public uart::UARTDevice, public PollingComponent {
     float convert_f_to_c(float f);
 
     std::vector<std::function<void(SpaState*)>> listeners_;
+    std::vector<std::function<void(SpaFilterSettings*)>> filter_listeners_;
 
     char config_request_status = 0; //stages: 0-> want it; 1-> requested it; 2-> got it; 3-> further processed it
     char faultlog_request_status = 0; //stages: 0-> want it; 1-> requested it; 2-> got it; 3-> further processed it
