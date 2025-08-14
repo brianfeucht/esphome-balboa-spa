@@ -55,6 +55,8 @@ switch:
       name: Lights
     blower:
       name: Blower
+    filter2_enable:
+      name: "Filter 2 Enable"
 
 climate:
   - platform: balboa_spa
@@ -94,6 +96,30 @@ binary_sensor:
       name: Heat State
     connected:
       name: Connected
+
+number:
+  - platform: balboa_spa
+    balboa_spa_id: spa
+    spa_hour:
+      name: "Spa Hour"
+    spa_minute:
+      name: "Spa Minute"
+    filter1_start_hour:
+      name: "Filter 1 Start Hour"
+    filter1_start_minute:
+      name: "Filter 1 Start Minute"
+    filter1_duration_hour:
+      name: "Filter 1 Duration Hour"
+    filter1_duration_minute:
+      name: "Filter 1 Duration Minute"
+    filter2_start_hour:
+      name: "Filter 2 Start Hour"
+    filter2_start_minute:
+      name: "Filter 2 Start Minute"
+    filter2_duration_hour:
+      name: "Filter 2 Duration Hour"
+    filter2_duration_minute:
+      name: "Filter 2 Duration Minute"
 ```
 ### ESP WebUI
 ![image](https://github.com/user-attachments/assets/af602be2-da9e-4880-8fb8-e7f7f9122977)

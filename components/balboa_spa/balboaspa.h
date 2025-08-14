@@ -15,6 +15,9 @@
 namespace esphome {
 namespace balboa_spa {
 
+// Forward declarations
+class BalboaSpaNumber;
+
 // Not defined in recent framework libs so stealing from
 // https://github.com/espressif/arduino-esp32/blob/496b8411773243e1ad88a68652d6982ba2366d6b/cores/esp32/Arduino.h#L99
 #define bitRead(value, bit)            (((value) >> (bit)) & 0x01)
@@ -72,6 +75,7 @@ class BalboaSpa : public uart::UARTDevice, public PollingComponent {
 
     void register_listener(const std::function<void(SpaState*)> &func) {this->listeners_.push_back(func);}
     void register_filter_listener(const std::function<void(SpaFilterSettings*)> &func) {this->filter_listeners_.push_back(func);}
+    void register_number_entity(BalboaSpaNumber* number) {this->number_entities_.push_back(number);}
 
 	bool get_restmode();
 	void toggle_heat();
@@ -100,6 +104,7 @@ class BalboaSpa : public uart::UARTDevice, public PollingComponent {
 
     std::vector<std::function<void(SpaState*)>> listeners_;
     std::vector<std::function<void(SpaFilterSettings*)>> filter_listeners_;
+    std::vector<BalboaSpaNumber*> number_entities_;
 
     char config_request_status = 0; //stages: 0-> want it; 1-> requested it; 2-> got it; 3-> further processed it
     char faultlog_request_status = 0; //stages: 0-> want it; 1-> requested it; 2-> got it; 3-> further processed it

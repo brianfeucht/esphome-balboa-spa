@@ -15,8 +15,8 @@ void Filter2EnableSwitch::update(const SpaFilterSettings* filter_settings) {
 
 void Filter2EnableSwitch::set_parent(BalboaSpa *parent) {
     spa = parent;
-    // Note: We'll need to handle filter settings updates differently since they're not as frequent
-    // For now, this will be updated when filter settings are decoded
+    // Register for filter settings updates
+    parent->register_filter_listener([this](SpaFilterSettings* filter_settings){ this->update(filter_settings); });
 }
 
 void Filter2EnableSwitch::write_state(bool state) {

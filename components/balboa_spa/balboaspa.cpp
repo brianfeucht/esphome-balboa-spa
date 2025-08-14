@@ -28,6 +28,11 @@ void BalboaSpa::update() {
     for (const auto &listener : this->listeners_) {
       listener(&spaState);
     }
+
+    // Update number entities with spa state
+    for (auto* number_entity : this->number_entities_) {
+      number_entity->update_from_spa_state(&spaState);
+    }
 }
 
 float BalboaSpa::get_setup_priority() const { return esphome::setup_priority::LATE; }
@@ -588,6 +593,11 @@ void BalboaSpa::decodeFilterSettings() {
     // Run through filter listeners
     for (const auto &listener : this->filter_listeners_) {
       listener(&spaFilterSettings);
+    }
+
+    // Update number entities
+    for (auto* number_entity : this->number_entities_) {
+      number_entity->update_from_filter_settings(&spaFilterSettings);
     }
 }
 
