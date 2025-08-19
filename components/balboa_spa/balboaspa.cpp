@@ -98,6 +98,10 @@ void BalboaSpa::toggle_light() {
     send_command = 0x11;
 }
 
+void BalboaSpa::toggle_light2() {
+    send_command = 0x12;
+}
+
 void BalboaSpa::toggle_jet1() {
     send_command = 0x04;
 }
@@ -486,6 +490,12 @@ void BalboaSpa::decodeState() {
     if (spa_component_state != spaState.light) {
         ESP_LOGD(TAG, "Spa/light/state: %.0f", spa_component_state);
         spaState.light = spa_component_state;
+    }
+
+    spa_component_state = (input_queue[19] & 0x0C) >> 2; // Check bits 2-3 for light2;
+    if (spa_component_state != spaState.light2) {
+        ESP_LOGD(TAG, "Spa/light2/state: %.0f", spa_component_state);
+        spaState.light2 = spa_component_state;
     }
 
     // TODO: callback on newState
