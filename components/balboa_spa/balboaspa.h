@@ -50,6 +50,7 @@ class BalboaSpa : public uart::UARTDevice, public PollingComponent {
     void set_minute(int minute);
     void set_timescale(bool is_24h);
     void toggle_light();
+    void toggle_light2();
     void toggle_jet1();
     void toggle_jet2();
     void toggle_jet3();
