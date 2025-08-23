@@ -48,6 +48,7 @@ class BalboaSpa : public uart::UARTDevice, public PollingComponent {
     void set_temp(float temp);
     void set_hour(int hour);
     void set_minute(int minute);
+    void set_timescale(bool is_24h);
     void toggle_light();
     void toggle_light2();
     void toggle_jet1();
@@ -78,6 +79,8 @@ class BalboaSpa : public uart::UARTDevice, public PollingComponent {
     uint8_t target_minute = 0x00;
     uint8_t client_id = 0x00;
     uint32_t last_received_time = 0;
+    uint8_t send_preference_code = 0;
+    uint8_t send_preference_data = 0;
 
     TEMP_SCALE spa_temp_scale = TEMP_SCALE::UNDEFINED;
     TEMP_SCALE esphome_temp_scale = TEMP_SCALE::C;
