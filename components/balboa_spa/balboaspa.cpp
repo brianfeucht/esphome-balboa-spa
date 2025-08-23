@@ -94,6 +94,12 @@ void BalboaSpa::set_minute(int minute) {
     }
 }
 
+void BalboaSpa::set_timescale(bool is_24h) {
+    send_preference_data = is_24h ? 0x01 : 0x00;
+    send_command = 0x27;
+    send_preference_code = 0x02;
+}
+
 void BalboaSpa::toggle_light() {
     send_command = 0x11;
 }
@@ -223,7 +229,13 @@ void BalboaSpa::read_serial() {
                     output_queue.push(0xBF);
                     output_queue.push(0x07);
                 }
-            } else {
+            } else if (send_command == 0x27) {
+                output_queue.push(client_id);
+                output_queue.push(0xBF);
+                output_queue.push(0x27);
+                output_queue.push(send_preference_code);
+                output_queue.push(send_preference_data);
+            }else {
                 output_queue.push(client_id);
                 output_queue.push(0xBF);
                 output_queue.push(0x11);
@@ -352,6 +364,7 @@ void BalboaSpa::decodeSettings() {
     spaConfig.aux1 = ((input_queue[9] & 0x01) != 0);
     spaConfig.aux2 = ((input_queue[9] & 0x02) != 0);
     spaConfig.temperature_scale = input_queue[3] & 0x01; //Read temperature scale - 0 -> Farenheit, 1-> Celcius
+    spaConfig.clock_mode = (input_queue[3] >> 1) & 0x1; //Read clock mode - 0 -> 12h, 1-> 24h
     ESP_LOGD(TAG, "Spa/config/pumps1: %d", spaConfig.pump1);
     ESP_LOGD(TAG, "Spa/config/pumps2: %d", spaConfig.pump2);
     ESP_LOGD(TAG, "Spa/config/pumps3: %d", spaConfig.pump3);
@@ -366,6 +379,7 @@ void BalboaSpa::decodeSettings() {
     ESP_LOGD(TAG, "Spa/config/aux1: %d", spaConfig.aux1);
     ESP_LOGD(TAG, "Spa/config/aux2: %d", spaConfig.aux2);
     ESP_LOGD(TAG, "Spa/config/temperature_scale: %d", spaConfig.temperature_scale);
+    ESP_LOGD(TAG, "Spa/config/clock_mode: %d", spaConfig.clock_mode);
     config_request_status = 2;
 
     if (spa_temp_scale == TEMP_SCALE::UNDEFINED) {
