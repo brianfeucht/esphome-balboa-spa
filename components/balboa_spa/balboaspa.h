@@ -48,6 +48,7 @@ namespace esphome
 
       SpaConfig get_current_config();
       SpaState *get_current_state();
+      SpaFilterSettings *get_current_filter_settings();
 
       void set_temp(float temp);
       void set_hour(int hour);

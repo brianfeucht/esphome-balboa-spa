@@ -43,6 +43,7 @@ namespace esphome
 
         SpaConfig BalboaSpa::get_current_config() { return spaConfig; }
         SpaState *BalboaSpa::get_current_state() { return &spaState; }
+        SpaFilterSettings *BalboaSpa::get_current_filter_settings() { return &spaFilterSettings; }
 
         void BalboaSpa::set_temp(float temp)
         {
@@ -664,6 +665,12 @@ namespace esphome
             ESP_LOGD(TAG, "Spa/filter2/state: %s", filter_payload);
 
             filtersettings_request_status = 2;
+            
+            // Notify listeners about filter settings update
+            for (const auto &listener : this->listeners_)
+            {
+                listener(&spaState);
+            }
         }
 
         void BalboaSpa::decodeFault()
