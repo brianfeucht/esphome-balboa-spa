@@ -25,6 +25,12 @@ external_components:
      url: https://github.com/brianfeucht/esphome-balboa-spa
      ref: main
 
+# API and Time required for Sync Spa Time Button. 
+api:
+
+time:
+  - platform: homeassistant
+
 uart:
   id: spa_uart_bus
   tx_pin: GPIO37
@@ -94,6 +100,24 @@ binary_sensor:
       name: Heat State
     connected:
       name: Connected
+
+
+text_sensor:
+  - platform: balboa_spa
+    balboa_spa_id: spa
+    spa_time:
+      name: "Spa Time"
+    filter1_config:
+      name: "Filter 1 Config"
+    filter2_config:
+      name: "Filter 2 Config"
+
+button:
+  - platform: spa
+    balboa_spa_id: test_spa
+    sync_time:
+      name: "Sync Spa Time"
+
 ```
 ### ESP WebUI
 ![image](https://github.com/user-attachments/assets/af602be2-da9e-4880-8fb8-e7f7f9122977)
