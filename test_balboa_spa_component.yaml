@@ -67,3 +67,9 @@ binary_sensor:
       name: Heat State
     connected:
       name: Connected
+
+text_sensor:
+  - platform: balboa_spa
+    balboa_spa_id: test_spa
+    spa_time:
+      name: "Spa Time"
