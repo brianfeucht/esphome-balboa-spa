@@ -83,3 +83,16 @@ button:
     balboa_spa_id: test_spa
     sync_time:
       name: "Sync Spa Time"
+
+text:
+  - platform: balboa_spa
+    balboa_spa_id: test_spa
+    spa_time:
+      name: "Set Spa Time"
+      mode: TEXT
+    filter1_config:
+      name: "Set Filter 1 Config"
+      mode: TEXT
+    filter2_config:
+      name: "Set Filter 2 Config"
+      mode: TEXT

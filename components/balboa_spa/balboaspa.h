@@ -54,6 +54,9 @@ namespace esphome
       void set_hour(int hour);
       void set_minute(int minute);
       void set_timescale(bool is_24h);
+      void set_filter1_config(uint8_t start_hour, uint8_t start_minute, uint8_t duration_hour, uint8_t duration_minute);
+      void set_filter2_config(uint8_t start_hour, uint8_t start_minute, uint8_t duration_hour, uint8_t duration_minute);
+      void disable_filter2();
       void toggle_light();
       void toggle_light2();
       void toggle_jet1();
@@ -83,6 +86,15 @@ namespace esphome
       uint8_t target_temperature = 0x00;
       uint8_t target_hour = 0x00;
       uint8_t target_minute = 0x00;
+      uint8_t target_filter1_start_hour = 0x00;
+      uint8_t target_filter1_start_minute = 0x00;
+      uint8_t target_filter1_duration_hour = 0x00;
+      uint8_t target_filter1_duration_minute = 0x00;
+      uint8_t target_filter2_start_hour = 0x00;
+      uint8_t target_filter2_start_minute = 0x00;
+      uint8_t target_filter2_duration_hour = 0x00;
+      uint8_t target_filter2_duration_minute = 0x00;
+      bool target_filter2_enable = false;
       uint8_t client_id = 0x00;
       uint32_t last_received_time = 0;
       uint8_t send_preference_code = 0;
