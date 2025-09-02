@@ -77,3 +77,9 @@ text_sensor:
       name: "Filter 1 Config"
     filter2_config:
       name: "Filter 2 Config"
+
+button:
+  - platform: balboa_spa
+    balboa_spa_id: test_spa
+    sync_time:
+      name: "Sync Spa Time"
