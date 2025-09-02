@@ -12,6 +12,11 @@ class SpaFilter1ConfigTextSensor : public text_sensor::TextSensor {
   void update(SpaFilterSettings* filterSettings);
  private:
   BalboaSpa *parent_;
+  // Store last known values for change detection
+  uint8_t last_filter1_hour_ = 255;
+  uint8_t last_filter1_minute_ = 255;
+  uint8_t last_filter1_duration_hour_ = 255;
+  uint8_t last_filter1_duration_minute_ = 255;
 };
 
 class SpaFilter2ConfigTextSensor : public text_sensor::TextSensor {
@@ -20,6 +25,12 @@ class SpaFilter2ConfigTextSensor : public text_sensor::TextSensor {
   void update(SpaFilterSettings* filterSettings);
  private:
   BalboaSpa *parent_;
+  // Store last known values for change detection
+  uint8_t last_filter2_enable_ = 255;
+  uint8_t last_filter2_hour_ = 255;
+  uint8_t last_filter2_minute_ = 255;
+  uint8_t last_filter2_duration_hour_ = 255;
+  uint8_t last_filter2_duration_minute_ = 255;
 };
 
 }  // namespace balboa_spa
