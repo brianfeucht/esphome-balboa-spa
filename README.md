@@ -101,11 +101,27 @@ binary_sensor:
     connected:
       name: Connected
 
+<<<<<<< HEAD
+=======
+text:
+  - platform: balboa_spa
+    balboa_spa_id: spa
+    spa_time:
+      name: "Set Spa Time"
+      mode: TEXT
+    filter1_config:
+      name: "Set Filter 1 Config"
+      mode: TEXT
+    filter2_config:
+      name: "Set Filter 2 Config"
+      mode: TEXT
+>>>>>>> f397dca (Add documentation for text components and update README)
 
 text_sensor:
   - platform: balboa_spa
     balboa_spa_id: spa
     spa_time:
+<<<<<<< HEAD
       name: "Spa Time"
     filter1_config:
       name: "Filter 1 Config"
@@ -117,6 +133,37 @@ button:
     balboa_spa_id: test_spa
     sync_time:
       name: "Sync Spa Time"
+=======
+      name: "Current Spa Time"
+    filter1_config:
+      name: "Current Filter 1 Config"
+    filter2_config:
+      name: "Current Filter 2 Config"
+```
+
+## Text Components (Writable)
+
+The text components allow you to set spa time and filter configurations:
+
+- **spa_time**: Set the spa time in HH:MM format (24-hour format, e.g., "14:30")
+- **filter1_config**: Set filter 1 configuration using JSON format: `{"start":"HH:MM","duration":"HH:MM"}`
+- **filter2_config**: Set filter 2 configuration using JSON format or "disabled" to disable filter 2
+
+### Examples:
+- Set spa time to 2:30 PM: `14:30`
+- Set filter 1 to start at 8:00 AM and run for 4 hours 30 minutes: `{"start":"08:00","duration":"04:30"}`
+- Disable filter 2: `disabled`
+
+All inputs are validated. Invalid formats will be rejected with error messages in the logs.
+
+## Text Sensors (Read-only)
+
+The text sensors display current spa status:
+
+- **spa_time**: Current spa time in HH:MM format
+- **filter1_config**: Current filter 1 configuration in JSON format
+- **filter2_config**: Current filter 2 configuration in JSON format (or "disabled")
+>>>>>>> f397dca (Add documentation for text components and update README)
 
 ```
 ### ESP WebUI
