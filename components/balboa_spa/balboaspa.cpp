@@ -115,6 +115,12 @@ namespace esphome
             send_command = 0x51;
         }
 
+        void BalboaSpa::request_config_update()
+        {
+            ESP_LOGD(TAG, "Requesting spa config update");
+            config_request_status = 0; // Reset to request config again
+        }
+
         void BalboaSpa::set_hour(int hour)
         {
             if (hour >= 0 && hour <= 23)
