@@ -73,3 +73,7 @@ text_sensor:
     balboa_spa_id: test_spa
     spa_time:
       name: "Spa Time"
+    filter1_config:
+      name: "Filter 1 Config"
+    filter2_config:
+      name: "Filter 2 Config"
