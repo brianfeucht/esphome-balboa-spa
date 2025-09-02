@@ -11,6 +11,7 @@ namespace esphome
         {
             input_queue.clear();
             output_queue.clear();
+            filtersettings_update_timer = 0;
         }
 
         void BalboaSpa::update()
@@ -25,6 +26,16 @@ namespace esphome
             else if (status_has_error())
             {
                 status_clear_error();
+            }
+
+            // Filter settings periodic update timer (every 5 minutes)
+            if (filtersettings_request_status == 2) {
+                filtersettings_update_timer++;
+                if (filtersettings_update_timer >= 6000) { // 6000 * 50ms = 5 minutes
+                    filtersettings_request_status = 0; // Reset to request again
+                    filtersettings_update_timer = 0;
+                    ESP_LOGD(TAG, "Spa/debug/filtersettings_request_status: %s", "resetting for periodic update");
+                }
             }
 
             while (available())
@@ -276,15 +287,16 @@ namespace esphome
                             faultlog_request_status = 1;
                             ESP_LOGD(TAG, "Spa/debug/faultlog_request_status: %s", "requesting fault log, #1");
                         }
-                        else if ((filtersettings_request_status == 0) && (faultlog_request_status == 2))
-                        { // Get the filter cycles log once we have the faultlog
+                        else if (filtersettings_request_status == 0 && 
+                                (faultlog_request_status == 2 || faultlog_request_status == 0))
+                        { // Get the filter cycles log once we have the faultlog, or periodically
                             output_queue.push(client_id);
                             output_queue.push(0xBF);
                             output_queue.push(0x22);
                             output_queue.push(0x01);
                             output_queue.push(0x00);
                             output_queue.push(0x00);
-                            ESP_LOGD(TAG, "Spa/debug/filtersettings_request_status: %s", "requesting filter settings, #1");
+                            ESP_LOGD(TAG, "Spa/debug/filtersettings_request_status: %s", "requesting filter settings");
                             filtersettings_request_status = 1;
                         }
                         else
@@ -665,7 +677,8 @@ namespace esphome
             ESP_LOGD(TAG, "Spa/filter2/state: %s", filter_payload);
 
             filtersettings_request_status = 2;
-            
+            filtersettings_update_timer = 0; // Reset timer after successful decode
+
             // Notify listeners about filter settings update
             for (const auto &listener : this->listeners_)
             {
