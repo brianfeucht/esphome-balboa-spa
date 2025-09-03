@@ -9,6 +9,22 @@ namespace esphome
     {
         static const char *TAG = "balboa_spa.text";
 
+        // Helper function to safely parse integer from string without exceptions
+        bool safe_parse_int(const std::string &str, int &result)
+        {
+            if (str.empty())
+                return false;
+            
+            result = 0;
+            for (char c : str)
+            {
+                if (c < '0' || c > '9')
+                    return false;
+                result = result * 10 + (c - '0');
+            }
+            return true;
+        }
+
         // SpaTimeText implementation
         void SpaTimeText::set_parent(BalboaSpa *parent)
         {
@@ -40,25 +56,21 @@ namespace esphome
                 return false;
             }
 
-            // Extract hour and minute
-            try
-            {
-                std::string hour_str = time_str.substr(0, 2);
-                std::string minute_str = time_str.substr(3, 2);
-                
-                int h = std::stoi(hour_str);
-                int m = std::stoi(minute_str);
-                
-                if (h >= 0 && h < 24 && m >= 0 && m < 60)
-                {
-                    hour = static_cast<uint8_t>(h);
-                    minute = static_cast<uint8_t>(m);
-                    return true;
-                }
-            }
-            catch (const std::exception &)
+            // Extract hour and minute using safe parsing
+            std::string hour_str = time_str.substr(0, 2);
+            std::string minute_str = time_str.substr(3, 2);
+            
+            int h, m;
+            if (!safe_parse_int(hour_str, h) || !safe_parse_int(minute_str, m))
             {
                 return false;
+            }
+            
+            if (h >= 0 && h < 24 && m >= 0 && m < 60)
+            {
+                hour = static_cast<uint8_t>(h);
+                minute = static_cast<uint8_t>(m);
+                return true;
             }
             
             return false;
@@ -94,26 +106,21 @@ namespace esphome
             
             if (std::regex_match(config_str, matches, pattern))
             {
-                try
-                {
-                    int sh = std::stoi(matches[1]);
-                    int sm = std::stoi(matches[2]);
-                    int dh = std::stoi(matches[3]);
-                    int dm = std::stoi(matches[4]);
-                    
-                    if (sh >= 0 && sh < 24 && sm >= 0 && sm < 60 && 
-                        dh >= 0 && dh < 24 && dm >= 0 && dm < 60)
-                    {
-                        start_hour = static_cast<uint8_t>(sh);
-                        start_minute = static_cast<uint8_t>(sm);
-                        duration_hour = static_cast<uint8_t>(dh);
-                        duration_minute = static_cast<uint8_t>(dm);
-                        return true;
-                    }
-                }
-                catch (const std::exception &)
+                int sh, sm, dh, dm;
+                if (!safe_parse_int(matches[1], sh) || !safe_parse_int(matches[2], sm) ||
+                    !safe_parse_int(matches[3], dh) || !safe_parse_int(matches[4], dm))
                 {
                     return false;
+                }
+                
+                if (sh >= 0 && sh < 24 && sm >= 0 && sm < 60 && 
+                    dh >= 0 && dh < 24 && dm >= 0 && dm < 60)
+                {
+                    start_hour = static_cast<uint8_t>(sh);
+                    start_minute = static_cast<uint8_t>(sm);
+                    duration_hour = static_cast<uint8_t>(dh);
+                    duration_minute = static_cast<uint8_t>(dm);
+                    return true;
                 }
             }
             
@@ -159,26 +166,21 @@ namespace esphome
             
             if (std::regex_match(config_str, matches, pattern))
             {
-                try
-                {
-                    int sh = std::stoi(matches[1]);
-                    int sm = std::stoi(matches[2]);
-                    int dh = std::stoi(matches[3]);
-                    int dm = std::stoi(matches[4]);
-                    
-                    if (sh >= 0 && sh < 24 && sm >= 0 && sm < 60 && 
-                        dh >= 0 && dh < 24 && dm >= 0 && dm < 60)
-                    {
-                        start_hour = static_cast<uint8_t>(sh);
-                        start_minute = static_cast<uint8_t>(sm);
-                        duration_hour = static_cast<uint8_t>(dh);
-                        duration_minute = static_cast<uint8_t>(dm);
-                        return true;
-                    }
-                }
-                catch (const std::exception &)
+                int sh, sm, dh, dm;
+                if (!safe_parse_int(matches[1], sh) || !safe_parse_int(matches[2], sm) ||
+                    !safe_parse_int(matches[3], dh) || !safe_parse_int(matches[4], dm))
                 {
                     return false;
+                }
+                
+                if (sh >= 0 && sh < 24 && sm >= 0 && sm < 60 && 
+                    dh >= 0 && dh < 24 && dm >= 0 && dm < 60)
+                {
+                    start_hour = static_cast<uint8_t>(sh);
+                    start_minute = static_cast<uint8_t>(sm);
+                    duration_hour = static_cast<uint8_t>(dh);
+                    duration_minute = static_cast<uint8_t>(dm);
+                    return true;
                 }
             }
             
