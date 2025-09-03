@@ -54,6 +54,13 @@ namespace esphome
       void set_hour(int hour);
       void set_minute(int minute);
       void set_timescale(bool is_24h);
+      void set_filter1_config(uint8_t start_hour, uint8_t start_minute, uint8_t duration_hour, uint8_t duration_minute);
+      void set_filter2_config(uint8_t start_hour, uint8_t start_minute, uint8_t duration_hour, uint8_t duration_minute);
+      void set_filter1_start_time(uint8_t hour, uint8_t minute);
+      void set_filter1_duration(uint8_t hour, uint8_t minute);
+      void set_filter2_start_time(uint8_t hour, uint8_t minute);
+      void set_filter2_duration(uint8_t hour, uint8_t minute);
+      void disable_filter2();
       void toggle_light();
       void toggle_light2();
       void toggle_jet1();
@@ -69,10 +76,12 @@ namespace esphome
       bool is_communicating();
 
       void register_listener(const std::function<void(SpaState *)> &func) { this->listeners_.push_back(func); }
+      void register_filter_listener(const std::function<void(SpaFilterSettings *)> &func) { this->filter_listeners_.push_back(func); }
 
       bool get_restmode();
       void toggle_heat();
       void request_config_update();
+      void request_filter_settings_update();
 
     private:
       CircularBuffer<uint8_t, 100> input_queue;
@@ -83,6 +92,15 @@ namespace esphome
       uint8_t target_temperature = 0x00;
       uint8_t target_hour = 0x00;
       uint8_t target_minute = 0x00;
+      uint8_t target_filter1_start_hour = 0x00;
+      uint8_t target_filter1_start_minute = 0x00;
+      uint8_t target_filter1_duration_hour = 0x00;
+      uint8_t target_filter1_duration_minute = 0x00;
+      uint8_t target_filter2_start_hour = 0x00;
+      uint8_t target_filter2_start_minute = 0x00;
+      uint8_t target_filter2_duration_hour = 0x00;
+      uint8_t target_filter2_duration_minute = 0x00;
+      bool target_filter2_enable = false;
       uint8_t client_id = 0x00;
       uint32_t last_received_time = 0;
       uint8_t send_preference_code = 0;
@@ -94,6 +112,7 @@ namespace esphome
       float convert_f_to_c(float f);
 
       std::vector<std::function<void(SpaState *)>> listeners_;
+      std::vector<std::function<void(SpaFilterSettings *)>> filter_listeners_;
 
       char config_request_status = 0;         // stages: 0-> want it; 1-> requested it; 2-> got it; 3-> further processed it
       char faultlog_request_status = 0;       // stages: 0-> want it; 1-> requested it; 2-> got it; 3-> further processed it

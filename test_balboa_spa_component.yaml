@@ -83,3 +83,24 @@ button:
     balboa_spa_id: test_spa
     sync_time:
       name: "Sync Spa Time"
+    disable_filter2:
+      name: "Disable Filter 2"
+
+text:
+  - platform: balboa_spa
+    balboa_spa_id: test_spa
+    spa_time:
+      name: "Set Spa Time"
+      mode: TEXT
+    filter1_start_time:
+      name: "Set Filter 1 Start Time"
+      mode: TEXT
+    filter1_duration:
+      name: "Set Filter 1 Duration"
+      mode: TEXT
+    filter2_start_time:
+      name: "Set Filter 2 Start Time"  
+      mode: TEXT
+    filter2_duration:
+      name: "Set Filter 2 Duration"
+      mode: TEXT

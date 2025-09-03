@@ -121,6 +121,12 @@ namespace esphome
             config_request_status = 0; // Reset to request config again
         }
 
+        void BalboaSpa::request_filter_settings_update()
+        {
+            ESP_LOGD(TAG, "Requesting spa filter settings update");
+            filtersettings_request_status = 0; // Reset to request filter settings again
+        }
+
         void BalboaSpa::set_hour(int hour)
         {
             if (hour >= 0 && hour <= 23)
@@ -144,6 +150,83 @@ namespace esphome
             send_preference_data = is_24h ? 0x01 : 0x00;
             send_command = 0x27;
             send_preference_code = 0x02;
+        }
+
+        void BalboaSpa::set_filter1_config(uint8_t start_hour, uint8_t start_minute, uint8_t duration_hour, uint8_t duration_minute)
+        {
+            if (start_hour < 24 && start_minute < 60 && duration_hour < 24 && duration_minute < 60)
+            {
+                target_filter1_start_hour = start_hour;
+                target_filter1_start_minute = start_minute;
+                target_filter1_duration_hour = duration_hour;
+                target_filter1_duration_minute = duration_minute;
+                send_command = 0x25; // Filter configuration command
+            }
+        }
+
+        void BalboaSpa::set_filter2_config(uint8_t start_hour, uint8_t start_minute, uint8_t duration_hour, uint8_t duration_minute)
+        {
+            if (start_hour < 24 && start_minute < 60 && duration_hour < 24 && duration_minute < 60)
+            {
+                target_filter2_start_hour = start_hour;
+                target_filter2_start_minute = start_minute;
+                target_filter2_duration_hour = duration_hour;
+                target_filter2_duration_minute = duration_minute;
+                target_filter2_enable = true;
+                send_command = 0x25; // Filter configuration command
+            }
+        }
+
+        void BalboaSpa::disable_filter2()
+        {
+            target_filter2_enable = false;
+            send_command = 0x25; // Filter configuration command
+        }
+
+        void BalboaSpa::set_filter1_start_time(uint8_t hour, uint8_t minute)
+        {
+            if (hour < 24 && minute < 60)
+            {
+                target_filter1_start_hour = hour;
+                target_filter1_start_minute = minute;
+                send_command = 0x25; // Filter configuration command
+                ESP_LOGI(TAG, "Filter 1 start time set to %02d:%02d", hour, minute);
+            }
+        }
+
+        void BalboaSpa::set_filter1_duration(uint8_t hour, uint8_t minute)
+        {
+            if (hour < 24 && minute < 60)
+            {
+                target_filter1_duration_hour = hour;
+                target_filter1_duration_minute = minute;
+                send_command = 0x25; // Filter configuration command
+                ESP_LOGI(TAG, "Filter 1 duration set to %02d:%02d", hour, minute);
+            }
+        }
+
+        void BalboaSpa::set_filter2_start_time(uint8_t hour, uint8_t minute)
+        {
+            if (hour < 24 && minute < 60)
+            {
+                target_filter2_start_hour = hour;
+                target_filter2_start_minute = minute;
+                target_filter2_enable = true;
+                send_command = 0x25; // Filter configuration command
+                ESP_LOGI(TAG, "Filter 2 start time set to %02d:%02d", hour, minute);
+            }
+        }
+
+        void BalboaSpa::set_filter2_duration(uint8_t hour, uint8_t minute)
+        {
+            if (hour < 24 && minute < 60)
+            {
+                target_filter2_duration_hour = hour;
+                target_filter2_duration_minute = minute;
+                target_filter2_enable = true;
+                send_command = 0x25; // Filter configuration command
+                ESP_LOGI(TAG, "Filter 2 duration set to %02d:%02d", hour, minute);
+            }
         }
 
         void BalboaSpa::toggle_light()
@@ -320,6 +403,21 @@ namespace esphome
                         output_queue.push(0x27);
                         output_queue.push(send_preference_code);
                         output_queue.push(send_preference_data);
+                    }
+                    else if (send_command == 0x25)
+                    {
+                        // Filter configuration command
+                        output_queue.push(client_id);
+                        output_queue.push(0xBF);
+                        output_queue.push(0x23);
+                        output_queue.push(target_filter1_start_hour);
+                        output_queue.push(target_filter1_start_minute);
+                        output_queue.push(target_filter1_duration_hour);
+                        output_queue.push(target_filter1_duration_minute);
+                        output_queue.push(target_filter2_enable ? (target_filter2_start_hour | 0x80) : 0x00);
+                        output_queue.push(target_filter2_start_minute);
+                        output_queue.push(target_filter2_duration_hour);
+                        output_queue.push(target_filter2_duration_minute);
                     }
                     else
                     {
@@ -689,6 +787,12 @@ namespace esphome
             for (const auto &listener : this->listeners_)
             {
                 listener(&spaState);
+            }
+            
+            // Notify filter listeners about filter settings update
+            for (const auto &filter_listener : this->filter_listeners_)
+            {
+                filter_listener(&spaFilterSettings);
             }
         }
 
