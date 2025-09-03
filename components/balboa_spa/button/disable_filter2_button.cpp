@@ -17,6 +17,8 @@ namespace esphome
             ESP_LOGD(TAG, "Disable Filter 2 button pressed");
             parent_->disable_filter2();
             ESP_LOGI(TAG, "Filter 2 disabled");
+            // Request fresh filter settings from spa after update
+            parent_->request_filter_settings_update();
         }
 
     } // namespace balboa_spa
