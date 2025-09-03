@@ -26,15 +26,28 @@ namespace esphome
         // Shared time validation function used by all text components
         bool validate_time_format(const std::string &time_str, uint8_t &hour, uint8_t &minute)
         {
-            // Check format HH:MM
-            if (time_str.length() != 5 || time_str[2] != ':')
+            // Check format H:MM or HH:MM (4 or 5 characters)
+            if (time_str.length() < 4 || time_str.length() > 5)
+            {
+                return false;
+            }
+
+            // Find the colon position
+            size_t colon_pos = time_str.find(':');
+            if (colon_pos == std::string::npos || colon_pos == 0 || colon_pos >= time_str.length() - 2)
             {
                 return false;
             }
 
             // Extract hour and minute using safe parsing
-            std::string hour_str = time_str.substr(0, 2);
-            std::string minute_str = time_str.substr(3, 2);
+            std::string hour_str = time_str.substr(0, colon_pos);
+            std::string minute_str = time_str.substr(colon_pos + 1);
+            
+            // Minute should always be 2 digits
+            if (minute_str.length() != 2)
+            {
+                return false;
+            }
             
             int h, m;
             if (!safe_parse_int(hour_str, h) || !safe_parse_int(minute_str, m))
@@ -71,7 +84,7 @@ namespace esphome
             }
             else
             {
-                ESP_LOGW(TAG, "Invalid time format: %s. Expected HH:MM", value.c_str());
+                ESP_LOGW(TAG, "Invalid time format: %s. Expected H:MM or HH:MM", value.c_str());
             }
         }
 
@@ -98,7 +111,7 @@ namespace esphome
             }
             else
             {
-                ESP_LOGW(TAG, "Invalid time format: %s. Expected HH:MM", value.c_str());
+                ESP_LOGW(TAG, "Invalid time format: %s. Expected H:MM or HH:MM", value.c_str());
             }
         }
 
@@ -125,7 +138,7 @@ namespace esphome
             }
             else
             {
-                ESP_LOGW(TAG, "Invalid time format: %s. Expected HH:MM", value.c_str());
+                ESP_LOGW(TAG, "Invalid time format: %s. Expected H:MM or HH:MM", value.c_str());
             }
         }
 
@@ -152,7 +165,7 @@ namespace esphome
             }
             else
             {
-                ESP_LOGW(TAG, "Invalid time format: %s. Expected HH:MM", value.c_str());
+                ESP_LOGW(TAG, "Invalid time format: %s. Expected H:MM or HH:MM", value.c_str());
             }
         }
 
@@ -179,7 +192,7 @@ namespace esphome
             }
             else
             {
-                ESP_LOGW(TAG, "Invalid time format: %s. Expected HH:MM", value.c_str());
+                ESP_LOGW(TAG, "Invalid time format: %s. Expected H:MM or HH:MM", value.c_str());
             }
         }
 

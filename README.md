@@ -141,20 +141,20 @@ button:
 
 The text components allow you to set spa time and filter configurations using simple time formats:
 
-- **spa_time**: Set the spa time in HH:MM format (24-hour format, e.g., "14:30")
-- **filter1_start_time**: Set filter 1 start time in HH:MM format
-- **filter1_duration**: Set filter 1 duration in HH:MM format  
-- **filter2_start_time**: Set filter 2 start time in HH:MM format
-- **filter2_duration**: Set filter 2 duration in HH:MM format
+- **spa_time**: Set the spa time in H:MM or HH:MM format (24-hour format, e.g., "8:30" or "14:30")
+- **filter1_start_time**: Set filter 1 start time in H:MM or HH:MM format
+- **filter1_duration**: Set filter 1 duration in H:MM or HH:MM format  
+- **filter2_start_time**: Set filter 2 start time in H:MM or HH:MM format
+- **filter2_duration**: Set filter 2 duration in H:MM or HH:MM format
 
 ### Examples:
-- Set spa time to 2:30 PM: `14:30`
-- Set filter 1 to start at 8:00 AM: `08:00`
-- Set filter 1 to run for 4 hours 30 minutes: `04:30`
+- Set spa time to 2:30 PM: `14:30` or `2:30`
+- Set filter 1 to start at 8:00 AM: `08:00` or `8:00`
+- Set filter 1 to run for 4 hours 30 minutes: `04:30` or `4:30`
 - Set filter 2 to start at 6:00 PM: `18:00`
-- Set filter 2 to run for 2 hours: `02:00`
+- Set filter 2 to run for 2 hours: `02:00` or `2:00`
 
-All inputs are validated for proper time format (HH:MM with valid hours 0-23 and minutes 0-59). Invalid formats will be rejected with error messages in the logs.
+All inputs are validated for proper time format (H:MM or HH:MM with valid hours 0-23 and minutes 0-59). Invalid formats will be rejected with error messages in the logs.
 
 ## Text Sensors (Read-only)
 
