@@ -39,13 +39,13 @@ async def to_code(config):
     parent = await cg.get_variable(config[CONF_SPA_ID])
 
     if conf := config.get(CONF_SPA_TIME):
-        var = await text.new_text(conf)
+        var = await text.new_text(conf, SpaTimeText)
         cg.add(var.set_parent(parent))
 
     if conf := config.get(CONF_FILTER1_CONFIG):
-        var = await text.new_text(conf)
+        var = await text.new_text(conf, SpaFilter1ConfigText)
         cg.add(var.set_parent(parent))
 
     if conf := config.get(CONF_FILTER2_CONFIG):
-        var = await text.new_text(conf)
+        var = await text.new_text(conf, SpaFilter2ConfigText)
         cg.add(var.set_parent(parent))
