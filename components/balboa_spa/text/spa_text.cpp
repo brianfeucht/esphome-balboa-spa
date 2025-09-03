@@ -86,8 +86,11 @@ namespace esphome
                 // Only update if the value has changed to avoid unnecessary updates
                 if (this->state != current_time)
                 {
+                    // Set flag to indicate this update comes from the spa
+                    this->updating_from_spa_ = true;
                     this->state = current_time;
                     this->publish_state(current_time);
+                    this->updating_from_spa_ = false;
                     ESP_LOGD(TAG, "Spa time updated from tub: %s", current_time.c_str());
                 }
             }
@@ -95,6 +98,13 @@ namespace esphome
 
         void SpaTimeText::control(const std::string &value)
         {
+            // Don't send commands back to spa if this update came from the spa itself
+            if (this->updating_from_spa_)
+            {
+                ESP_LOGD(TAG, "Ignoring spa time control from spa update: %s", value.c_str());
+                return;
+            }
+
             uint8_t hour, minute;
             if (validate_time_format(value, hour, minute))
             {

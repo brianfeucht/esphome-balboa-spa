@@ -22,6 +22,7 @@ namespace esphome
       
     private:
       BalboaSpa *parent_;
+      bool updating_from_spa_ = false;
       bool validate_time_format(const std::string &time_str, uint8_t &hour, uint8_t &minute);
     };
 
