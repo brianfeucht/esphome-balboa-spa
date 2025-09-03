@@ -89,7 +89,7 @@ namespace esphome
         bool SpaFilter1ConfigText::validate_filter_config(const std::string &config_str, uint8_t &start_hour, uint8_t &start_minute, uint8_t &duration_hour, uint8_t &duration_minute)
         {
             // Simple regex pattern matching for JSON format
-            std::regex pattern(R"(\{\s*"start"\s*:\s*"(\d{1,2}):(\d{1,2})"\s*,\s*"duration"\s*:\s*"(\d{1,2}):(\d{1,2})"\s*\})");
+            std::regex pattern("\\{\\s*\"start\"\\s*:\\s*\"(\\d{1,2}):(\\d{1,2})\"\\s*,\\s*\"duration\"\\s*:\\s*\"(\\d{1,2}):(\\d{1,2})\"\\s*\\}");
             std::smatch matches;
             
             if (std::regex_match(config_str, matches, pattern))
@@ -154,7 +154,7 @@ namespace esphome
         bool SpaFilter2ConfigText::validate_filter_config(const std::string &config_str, uint8_t &start_hour, uint8_t &start_minute, uint8_t &duration_hour, uint8_t &duration_minute)
         {
             // Same validation as Filter1
-            std::regex pattern(R"(\{\s*"start"\s*:\s*"(\d{1,2}):(\d{1,2})"\s*,\s*"duration"\s*:\s*"(\d{1,2}):(\d{1,2})"\s*\})");
+            std::regex pattern("\\{\\s*\"start\"\\s*:\\s*\"(\\d{1,2}):(\\d{1,2})\"\\s*,\\s*\"duration\"\\s*:\\s*\"(\\d{1,2}):(\\d{1,2})\"\\s*\\}");
             std::smatch matches;
             
             if (std::regex_match(config_str, matches, pattern))
