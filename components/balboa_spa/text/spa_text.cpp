@@ -69,6 +69,28 @@ namespace esphome
         void SpaTimeText::set_parent(BalboaSpa *parent)
         {
             this->parent_ = parent;
+            // Register listener to update from spa state
+            parent->register_listener([this](SpaState *state) {
+                this->update_from_spa_state(state);
+            });
+        }
+
+        void SpaTimeText::update_from_spa_state(SpaState *state)
+        {
+            if (state != nullptr)
+            {
+                char time_str[6];
+                snprintf(time_str, sizeof(time_str), "%02d:%02d", state->hour, state->minutes);
+                std::string current_time(time_str);
+                
+                // Only update if the value has changed to avoid unnecessary updates
+                if (this->state != current_time)
+                {
+                    this->state = current_time;
+                    this->publish_state(current_time);
+                    ESP_LOGD(TAG, "Spa time updated from tub: %s", current_time.c_str());
+                }
+            }
         }
 
         void SpaTimeText::control(const std::string &value)
@@ -97,6 +119,28 @@ namespace esphome
         void SpaFilter1StartTimeText::set_parent(BalboaSpa *parent)
         {
             this->parent_ = parent;
+            // Register filter listener to update from spa filter settings
+            parent->register_filter_listener([this](SpaFilterSettings *settings) {
+                this->update_from_filter_settings(settings);
+            });
+        }
+
+        void SpaFilter1StartTimeText::update_from_filter_settings(SpaFilterSettings *settings)
+        {
+            if (settings != nullptr)
+            {
+                char time_str[6];
+                snprintf(time_str, sizeof(time_str), "%02d:%02d", settings->filter1_hour, settings->filter1_minute);
+                std::string current_time(time_str);
+                
+                // Only update if the value has changed to avoid unnecessary updates
+                if (this->state != current_time)
+                {
+                    this->state = current_time;
+                    this->publish_state(current_time);
+                    ESP_LOGD(TAG, "Filter 1 start time updated from tub: %s", current_time.c_str());
+                }
+            }
         }
 
         void SpaFilter1StartTimeText::control(const std::string &value)
@@ -124,6 +168,28 @@ namespace esphome
         void SpaFilter1DurationText::set_parent(BalboaSpa *parent)
         {
             this->parent_ = parent;
+            // Register filter listener to update from spa filter settings
+            parent->register_filter_listener([this](SpaFilterSettings *settings) {
+                this->update_from_filter_settings(settings);
+            });
+        }
+
+        void SpaFilter1DurationText::update_from_filter_settings(SpaFilterSettings *settings)
+        {
+            if (settings != nullptr)
+            {
+                char time_str[6];
+                snprintf(time_str, sizeof(time_str), "%02d:%02d", settings->filter1_duration_hour, settings->filter1_duration_minute);
+                std::string current_duration(time_str);
+                
+                // Only update if the value has changed to avoid unnecessary updates
+                if (this->state != current_duration)
+                {
+                    this->state = current_duration;
+                    this->publish_state(current_duration);
+                    ESP_LOGD(TAG, "Filter 1 duration updated from tub: %s", current_duration.c_str());
+                }
+            }
         }
 
         void SpaFilter1DurationText::control(const std::string &value)
@@ -151,6 +217,28 @@ namespace esphome
         void SpaFilter2StartTimeText::set_parent(BalboaSpa *parent)
         {
             this->parent_ = parent;
+            // Register filter listener to update from spa filter settings
+            parent->register_filter_listener([this](SpaFilterSettings *settings) {
+                this->update_from_filter_settings(settings);
+            });
+        }
+
+        void SpaFilter2StartTimeText::update_from_filter_settings(SpaFilterSettings *settings)
+        {
+            if (settings != nullptr)
+            {
+                char time_str[6];
+                snprintf(time_str, sizeof(time_str), "%02d:%02d", settings->filter2_hour, settings->filter2_minute);
+                std::string current_time(time_str);
+                
+                // Only update if the value has changed to avoid unnecessary updates
+                if (this->state != current_time)
+                {
+                    this->state = current_time;
+                    this->publish_state(current_time);
+                    ESP_LOGD(TAG, "Filter 2 start time updated from tub: %s", current_time.c_str());
+                }
+            }
         }
 
         void SpaFilter2StartTimeText::control(const std::string &value)
@@ -178,6 +266,28 @@ namespace esphome
         void SpaFilter2DurationText::set_parent(BalboaSpa *parent)
         {
             this->parent_ = parent;
+            // Register filter listener to update from spa filter settings
+            parent->register_filter_listener([this](SpaFilterSettings *settings) {
+                this->update_from_filter_settings(settings);
+            });
+        }
+
+        void SpaFilter2DurationText::update_from_filter_settings(SpaFilterSettings *settings)
+        {
+            if (settings != nullptr)
+            {
+                char time_str[6];
+                snprintf(time_str, sizeof(time_str), "%02d:%02d", settings->filter2_duration_hour, settings->filter2_duration_minute);
+                std::string current_duration(time_str);
+                
+                // Only update if the value has changed to avoid unnecessary updates
+                if (this->state != current_duration)
+                {
+                    this->state = current_duration;
+                    this->publish_state(current_duration);
+                    ESP_LOGD(TAG, "Filter 2 duration updated from tub: %s", current_duration.c_str());
+                }
+            }
         }
 
         void SpaFilter2DurationText::control(const std::string &value)

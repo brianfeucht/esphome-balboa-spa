@@ -15,6 +15,7 @@ namespace esphome
     public:
       SpaTimeText() = default;
       void set_parent(BalboaSpa *parent);
+      void update_from_spa_state(SpaState *state);
 
     protected:
       void control(const std::string &value) override;
@@ -29,6 +30,7 @@ namespace esphome
     public:
       SpaFilter1StartTimeText() = default;
       void set_parent(BalboaSpa *parent);
+      void update_from_filter_settings(SpaFilterSettings *settings);
 
     protected:
       void control(const std::string &value) override;
@@ -43,6 +45,7 @@ namespace esphome
     public:
       SpaFilter1DurationText() = default;
       void set_parent(BalboaSpa *parent);
+      void update_from_filter_settings(SpaFilterSettings *settings);
 
     protected:
       void control(const std::string &value) override;
@@ -57,6 +60,7 @@ namespace esphome
     public:
       SpaFilter2StartTimeText() = default;
       void set_parent(BalboaSpa *parent);
+      void update_from_filter_settings(SpaFilterSettings *settings);
 
     protected:
       void control(const std::string &value) override;
@@ -71,6 +75,7 @@ namespace esphome
     public:
       SpaFilter2DurationText() = default;
       void set_parent(BalboaSpa *parent);
+      void update_from_filter_settings(SpaFilterSettings *settings);
 
     protected:
       void control(const std::string &value) override;

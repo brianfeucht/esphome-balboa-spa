@@ -83,6 +83,8 @@ button:
     balboa_spa_id: test_spa
     sync_time:
       name: "Sync Spa Time"
+    disable_filter2:
+      name: "Disable Filter 2"
 
 text:
   - platform: balboa_spa

@@ -131,21 +131,34 @@ text_sensor:
       name: "Filter 2 Config"
 
 button:
-  - platform: spa
+  - platform: balboa_spa
     balboa_spa_id: test_spa
     sync_time:
       name: "Sync Spa Time"
+    disable_filter2:
+      name: "Disable Filter 2"
 ```
 
 ## Text Components (Writable)
 
-The text components allow you to set spa time and filter configurations using simple time formats:
+The text components allow you to set spa time and filter configurations using simple time formats. These components automatically display current values from the spa and update when changes are detected from the spa panel.
 
-- **spa_time**: Set the spa time in H:MM or HH:MM format (24-hour format, e.g., "8:30" or "14:30")
-- **filter1_start_time**: Set filter 1 start time in H:MM or HH:MM format
-- **filter1_duration**: Set filter 1 duration in H:MM or HH:MM format  
-- **filter2_start_time**: Set filter 2 start time in H:MM or HH:MM format
-- **filter2_duration**: Set filter 2 duration in H:MM or HH:MM format
+- **spa_time**: Set and view the spa time in H:MM or HH:MM format (24-hour format, e.g., "8:30" or "14:30")
+- **filter1_start_time**: Set and view filter 1 start time in H:MM or HH:MM format
+- **filter1_duration**: Set and view filter 1 duration in H:MM or HH:MM format  
+- **filter2_start_time**: Set and view filter 2 start time in H:MM or HH:MM format
+- **filter2_duration**: Set and view filter 2 duration in H:MM or HH:MM format
+
+### Auto-Population from Spa
+Text components automatically populate with current spa values:
+- On startup, components display current spa time and filter settings
+- When settings are changed from the spa panel, text components update automatically
+- Values stay synchronized between ESPHome and the spa control panel
+
+### Button Components
+
+- **sync_time**: Synchronizes spa time with ESPHome system time
+- **disable_filter2**: Disables the filter 2 schedule
 
 ### Examples:
 - Set spa time to 2:30 PM: `14:30` or `2:30`

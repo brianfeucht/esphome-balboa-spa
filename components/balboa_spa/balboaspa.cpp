@@ -782,6 +782,12 @@ namespace esphome
             {
                 listener(&spaState);
             }
+            
+            // Notify filter listeners about filter settings update
+            for (const auto &filter_listener : this->filter_listeners_)
+            {
+                filter_listener(&spaFilterSettings);
+            }
         }
 
         void BalboaSpa::decodeFault()
