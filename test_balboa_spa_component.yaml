@@ -90,9 +90,15 @@ text:
     spa_time:
       name: "Set Spa Time"
       mode: TEXT
-    filter1_config:
-      name: "Set Filter 1 Config"
+    filter1_start_time:
+      name: "Set Filter 1 Start Time"
       mode: TEXT
-    filter2_config:
-      name: "Set Filter 2 Config"
+    filter1_duration:
+      name: "Set Filter 1 Duration"
+      mode: TEXT
+    filter2_start_time:
+      name: "Set Filter 2 Start Time"  
+      mode: TEXT
+    filter2_duration:
+      name: "Set Filter 2 Duration"
       mode: TEXT

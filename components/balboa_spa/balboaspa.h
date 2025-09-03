@@ -56,6 +56,10 @@ namespace esphome
       void set_timescale(bool is_24h);
       void set_filter1_config(uint8_t start_hour, uint8_t start_minute, uint8_t duration_hour, uint8_t duration_minute);
       void set_filter2_config(uint8_t start_hour, uint8_t start_minute, uint8_t duration_hour, uint8_t duration_minute);
+      void set_filter1_start_time(uint8_t hour, uint8_t minute);
+      void set_filter1_duration(uint8_t hour, uint8_t minute);
+      void set_filter2_start_time(uint8_t hour, uint8_t minute);
+      void set_filter2_duration(uint8_t hour, uint8_t minute);
       void disable_filter2();
       void toggle_light();
       void toggle_light2();

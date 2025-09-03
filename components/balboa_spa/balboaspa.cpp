@@ -177,6 +177,52 @@ namespace esphome
             send_command = 0x25; // Filter configuration command
         }
 
+        void BalboaSpa::set_filter1_start_time(uint8_t hour, uint8_t minute)
+        {
+            if (hour < 24 && minute < 60)
+            {
+                target_filter1_start_hour = hour;
+                target_filter1_start_minute = minute;
+                send_command = 0x25; // Filter configuration command
+                ESP_LOGI(TAG, "Filter 1 start time set to %02d:%02d", hour, minute);
+            }
+        }
+
+        void BalboaSpa::set_filter1_duration(uint8_t hour, uint8_t minute)
+        {
+            if (hour < 24 && minute < 60)
+            {
+                target_filter1_duration_hour = hour;
+                target_filter1_duration_minute = minute;
+                send_command = 0x25; // Filter configuration command
+                ESP_LOGI(TAG, "Filter 1 duration set to %02d:%02d", hour, minute);
+            }
+        }
+
+        void BalboaSpa::set_filter2_start_time(uint8_t hour, uint8_t minute)
+        {
+            if (hour < 24 && minute < 60)
+            {
+                target_filter2_start_hour = hour;
+                target_filter2_start_minute = minute;
+                target_filter2_enable = true;
+                send_command = 0x25; // Filter configuration command
+                ESP_LOGI(TAG, "Filter 2 start time set to %02d:%02d", hour, minute);
+            }
+        }
+
+        void BalboaSpa::set_filter2_duration(uint8_t hour, uint8_t minute)
+        {
+            if (hour < 24 && minute < 60)
+            {
+                target_filter2_duration_hour = hour;
+                target_filter2_duration_minute = minute;
+                target_filter2_enable = true;
+                send_command = 0x25; // Filter configuration command
+                ESP_LOGI(TAG, "Filter 2 duration set to %02d:%02d", hour, minute);
+            }
+        }
+
         void BalboaSpa::toggle_light()
         {
             send_command = 0x11;

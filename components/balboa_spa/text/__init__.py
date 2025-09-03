@@ -12,12 +12,16 @@ from .. import (
 DEPENDENCIES = ["balboa_spa"]
 
 SpaTimeText = balboa_spa_ns.class_("SpaTimeText", text.Text)
-SpaFilter1ConfigText = balboa_spa_ns.class_("SpaFilter1ConfigText", text.Text)
-SpaFilter2ConfigText = balboa_spa_ns.class_("SpaFilter2ConfigText", text.Text)
+SpaFilter1StartTimeText = balboa_spa_ns.class_("SpaFilter1StartTimeText", text.Text)
+SpaFilter1DurationText = balboa_spa_ns.class_("SpaFilter1DurationText", text.Text)
+SpaFilter2StartTimeText = balboa_spa_ns.class_("SpaFilter2StartTimeText", text.Text)
+SpaFilter2DurationText = balboa_spa_ns.class_("SpaFilter2DurationText", text.Text)
 
 CONF_SPA_TIME = "spa_time"
-CONF_FILTER1_CONFIG = "filter1_config"
-CONF_FILTER2_CONFIG = "filter2_config"
+CONF_FILTER1_START_TIME = "filter1_start_time"
+CONF_FILTER1_DURATION = "filter1_duration"
+CONF_FILTER2_START_TIME = "filter2_start_time"
+CONF_FILTER2_DURATION = "filter2_duration"
 
 CONFIG_SCHEMA = cv.Schema({
     cv.GenerateID(CONF_SPA_ID): cv.use_id(BalboaSpa),
@@ -25,13 +29,21 @@ CONFIG_SCHEMA = cv.Schema({
         SpaTimeText,
         icon=ICON_TIMER,
     ),
-    cv.Optional(CONF_FILTER1_CONFIG): text.text_schema(
-        SpaFilter1ConfigText,
+    cv.Optional(CONF_FILTER1_START_TIME): text.text_schema(
+        SpaFilter1StartTimeText,
         icon=ICON_WATER,
     ),
-    cv.Optional(CONF_FILTER2_CONFIG): text.text_schema(
-        SpaFilter2ConfigText,
+    cv.Optional(CONF_FILTER1_DURATION): text.text_schema(
+        SpaFilter1DurationText,
+        icon=ICON_TIMER,
+    ),
+    cv.Optional(CONF_FILTER2_START_TIME): text.text_schema(
+        SpaFilter2StartTimeText,
         icon=ICON_WATER,
+    ),
+    cv.Optional(CONF_FILTER2_DURATION): text.text_schema(
+        SpaFilter2DurationText,
+        icon=ICON_TIMER,
     ),
 })
 
@@ -42,10 +54,18 @@ async def to_code(config):
         var = await text.new_text(conf, SpaTimeText)
         cg.add(var.set_parent(parent))
 
-    if conf := config.get(CONF_FILTER1_CONFIG):
-        var = await text.new_text(conf, SpaFilter1ConfigText)
+    if conf := config.get(CONF_FILTER1_START_TIME):
+        var = await text.new_text(conf, SpaFilter1StartTimeText)
         cg.add(var.set_parent(parent))
 
-    if conf := config.get(CONF_FILTER2_CONFIG):
-        var = await text.new_text(conf, SpaFilter2ConfigText)
+    if conf := config.get(CONF_FILTER1_DURATION):
+        var = await text.new_text(conf, SpaFilter1DurationText)
+        cg.add(var.set_parent(parent))
+
+    if conf := config.get(CONF_FILTER2_START_TIME):
+        var = await text.new_text(conf, SpaFilter2StartTimeText)
+        cg.add(var.set_parent(parent))
+
+    if conf := config.get(CONF_FILTER2_DURATION):
+        var = await text.new_text(conf, SpaFilter2DurationText)
         cg.add(var.set_parent(parent))

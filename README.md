@@ -107,11 +107,17 @@ text:
     spa_time:
       name: "Set Spa Time"
       mode: TEXT
-    filter1_config:
-      name: "Set Filter 1 Config"
+    filter1_start_time:
+      name: "Set Filter 1 Start Time"
       mode: TEXT
-    filter2_config:
-      name: "Set Filter 2 Config"
+    filter1_duration:
+      name: "Set Filter 1 Duration"
+      mode: TEXT
+    filter2_start_time:
+      name: "Set Filter 2 Start Time"
+      mode: TEXT
+    filter2_duration:
+      name: "Set Filter 2 Duration"
       mode: TEXT
 
 text_sensor:
@@ -133,18 +139,22 @@ button:
 
 ## Text Components (Writable)
 
-The text components allow you to set spa time and filter configurations:
+The text components allow you to set spa time and filter configurations using simple time formats:
 
 - **spa_time**: Set the spa time in HH:MM format (24-hour format, e.g., "14:30")
-- **filter1_config**: Set filter 1 configuration using JSON format: `{"start":"HH:MM","duration":"HH:MM"}`
-- **filter2_config**: Set filter 2 configuration using JSON format or "disabled" to disable filter 2
+- **filter1_start_time**: Set filter 1 start time in HH:MM format
+- **filter1_duration**: Set filter 1 duration in HH:MM format  
+- **filter2_start_time**: Set filter 2 start time in HH:MM format
+- **filter2_duration**: Set filter 2 duration in HH:MM format
 
 ### Examples:
 - Set spa time to 2:30 PM: `14:30`
-- Set filter 1 to start at 8:00 AM and run for 4 hours 30 minutes: `{"start":"08:00","duration":"04:30"}`
-- Disable filter 2: `disabled`
+- Set filter 1 to start at 8:00 AM: `08:00`
+- Set filter 1 to run for 4 hours 30 minutes: `04:30`
+- Set filter 2 to start at 6:00 PM: `18:00`
+- Set filter 2 to run for 2 hours: `02:00`
 
-All inputs are validated. Invalid formats will be rejected with error messages in the logs.
+All inputs are validated for proper time format (HH:MM with valid hours 0-23 and minutes 0-59). Invalid formats will be rejected with error messages in the logs.
 
 ## Text Sensors (Read-only)
 
