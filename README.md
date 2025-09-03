@@ -154,7 +154,6 @@ The text sensors display current spa status:
 - **filter1_config**: Current filter 1 configuration in JSON format
 - **filter2_config**: Current filter 2 configuration in JSON format (or "disabled")
 
-```
 ### ESP WebUI
 ![image](https://github.com/user-attachments/assets/af602be2-da9e-4880-8fb8-e7f7f9122977)
 
