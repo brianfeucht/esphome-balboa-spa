@@ -162,6 +162,8 @@ namespace esphome
                 this->state = value;
                 this->publish_state(value);
                 ESP_LOGI(TAG, "Filter 1 start time set to: %s", value.c_str());
+                // Request fresh filter settings from spa after update
+                this->parent_->request_filter_settings_update();
             }
             else
             {
@@ -211,6 +213,8 @@ namespace esphome
                 this->state = value;
                 this->publish_state(value);
                 ESP_LOGI(TAG, "Filter 1 duration set to: %s", value.c_str());
+                // Request fresh filter settings from spa after update
+                this->parent_->request_filter_settings_update();
             }
             else
             {
@@ -260,6 +264,8 @@ namespace esphome
                 this->state = value;
                 this->publish_state(value);
                 ESP_LOGI(TAG, "Filter 2 start time set to: %s", value.c_str());
+                // Request fresh filter settings from spa after update
+                this->parent_->request_filter_settings_update();
             }
             else
             {
@@ -309,6 +315,8 @@ namespace esphome
                 this->state = value;
                 this->publish_state(value);
                 ESP_LOGI(TAG, "Filter 2 duration set to: %s", value.c_str());
+                // Request fresh filter settings from spa after update
+                this->parent_->request_filter_settings_update();
             }
             else
             {

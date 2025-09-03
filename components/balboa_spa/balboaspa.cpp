@@ -121,6 +121,12 @@ namespace esphome
             config_request_status = 0; // Reset to request config again
         }
 
+        void BalboaSpa::request_filter_settings_update()
+        {
+            ESP_LOGD(TAG, "Requesting spa filter settings update");
+            filtersettings_request_status = 0; // Reset to request filter settings again
+        }
+
         void BalboaSpa::set_hour(int hour)
         {
             if (hour >= 0 && hour <= 23)

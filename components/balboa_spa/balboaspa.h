@@ -81,6 +81,7 @@ namespace esphome
       bool get_restmode();
       void toggle_heat();
       void request_config_update();
+      void request_filter_settings_update();
 
     private:
       CircularBuffer<uint8_t, 100> input_queue;
