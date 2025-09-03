@@ -101,8 +101,6 @@ binary_sensor:
     connected:
       name: Connected
 
-<<<<<<< HEAD
-=======
 text:
   - platform: balboa_spa
     balboa_spa_id: spa
@@ -115,13 +113,11 @@ text:
     filter2_config:
       name: "Set Filter 2 Config"
       mode: TEXT
->>>>>>> f397dca (Add documentation for text components and update README)
 
 text_sensor:
   - platform: balboa_spa
     balboa_spa_id: spa
     spa_time:
-<<<<<<< HEAD
       name: "Spa Time"
     filter1_config:
       name: "Filter 1 Config"
@@ -133,12 +129,6 @@ button:
     balboa_spa_id: test_spa
     sync_time:
       name: "Sync Spa Time"
-=======
-      name: "Current Spa Time"
-    filter1_config:
-      name: "Current Filter 1 Config"
-    filter2_config:
-      name: "Current Filter 2 Config"
 ```
 
 ## Text Components (Writable)
@@ -163,7 +153,6 @@ The text sensors display current spa status:
 - **spa_time**: Current spa time in HH:MM format
 - **filter1_config**: Current filter 1 configuration in JSON format
 - **filter2_config**: Current filter 2 configuration in JSON format (or "disabled")
->>>>>>> f397dca (Add documentation for text components and update README)
 
 ```
 ### ESP WebUI
