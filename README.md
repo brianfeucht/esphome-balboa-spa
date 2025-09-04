@@ -152,17 +152,6 @@ logger:
     BalboaSpa.CRC: NONE  # Silence CRC error messages
 ```
 
-Alternatively, you can set different log levels:
-- `NONE`: Completely suppress CRC errors
-- `WARN`: Show CRC errors as warnings instead of debug messages
-- `ERROR`: Show CRC errors as errors
-
-Other troubleshooting steps for CRC errors:
-- Try adjusting `rx_buffer_size` (e.g., 256 instead of 128)
-- Check RS485 wiring (ensure A and B wires are not swapped)
-- Add proper RS485 termination resistors
-- Consider using a different baud rate if your spa supports it
-
 ## Text Components (Writable)
 
 The text components allow you to set spa time and filter configurations using simple time formats. These components automatically display current values from the spa and update when changes are detected from the spa panel.
