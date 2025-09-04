@@ -7,7 +7,7 @@ There are a ton of these implementations on Github.  None of the ones I could fi
 Climate, binary sensors, sensors, and switches are all optional.  So you only need to import what you want with your implementation.
 
 TODO:
-I am seeing a ton of CRC errors when reading data on my spa.  This might be invalid UART config (baud, buffer, etc). Or it might just be due to the noisy nature of running next two heaters and pumps.
+I am seeing a ton of CRC errors when reading data on my spa.  This might be invalid UART config (baud, buffer, etc). Or it might just be due to the noisy nature of running next two heaters and pumps. **Note: CRC errors can now be silenced specifically - see Troubleshooting section below.**
 
 ```
 esphome:
@@ -138,6 +138,30 @@ button:
     disable_filter2:
       name: "Disable Filter 2"
 ```
+
+## Troubleshooting
+
+### CRC Errors
+
+CRC errors are very common with Balboa spa controllers due to electrical interference from heaters and pumps. If you're seeing frequent CRC error messages in your logs, you can silence them specifically while keeping other DEBUG level logging:
+
+```yaml
+logger:
+  level: DEBUG
+  logs:
+    BalboaSpa.CRC: NONE  # Silence CRC error messages
+```
+
+Alternatively, you can set different log levels:
+- `NONE`: Completely suppress CRC errors
+- `WARN`: Show CRC errors as warnings instead of debug messages
+- `ERROR`: Show CRC errors as errors
+
+Other troubleshooting steps for CRC errors:
+- Try adjusting `rx_buffer_size` (e.g., 256 instead of 128)
+- Check RS485 wiring (ensure A and B wires are not swapped)
+- Add proper RS485 termination resistors
+- Consider using a different baud rate if your spa supports it
 
 ## Text Components (Writable)
 

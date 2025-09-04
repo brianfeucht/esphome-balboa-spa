@@ -6,6 +6,7 @@ namespace esphome
     {
 
         static const char *TAG = "BalboaSpa.component";
+        static const char *CRC_TAG = "BalboaSpa.CRC";
 
         void BalboaSpa::setup()
         {
@@ -304,7 +305,7 @@ namespace esphome
                 auto packet_crc = input_queue[input_queue[1]];
                 if (calculated_crc != packet_crc)
                 {
-                    ESP_LOGD(TAG, "CRC %d != Packet crc %d end=0x%X", calculated_crc, packet_crc, input_queue[input_queue[1] + 1]);
+                    ESP_LOGD(CRC_TAG, "CRC %d != Packet crc %d end=0x%X", calculated_crc, packet_crc, input_queue[input_queue[1] + 1]);
                     input_queue.clear();
                     return;
                 }
