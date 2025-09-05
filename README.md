@@ -138,7 +138,25 @@ button:
     disable_filter2:
       name: "Disable Filter 2"
     fault_log_dump:
-      name: "Dump All Fault Log Entries"
+      name: "Dump Current Fault Log Entry"
+```
+
+### Fault Log Dump Button
+
+The fault log dump button provides access to the current fault log information from the spa controller with high-visibility WARNING level logging. **Important**: Due to Balboa protocol limitations, only the current/most recent fault entry is accessible via RS485 communication - historical fault entries cannot be retrieved.
+
+When pressed, the button will display:
+- Total number of fault log entries stored in the spa
+- Details of the current fault entry (code, message, timing)
+- Clear indication if historical entries exist but are not accessible
+
+Example output:
+```
+[balboa_spa.component]: FAULT LOG STATUS - Total Entries: 24, Current Entry: 24/24
+[balboa_spa.component]: CURRENT FAULT - Code: 19, Message: Priming Mode  
+[balboa_spa.component]: FAULT TIMING - Days Ago: 6, Time: 19:54
+[balboa_spa.component]: NOTE: 23 historical fault entries exist but are not accessible via this protocol
+```
 ```
 
 ## Troubleshooting

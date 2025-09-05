@@ -23,7 +23,7 @@ namespace esphome
             
             // Trigger fault log dump process
             parent_->start_fault_log_dump();
-            ESP_LOGI(TAG, "Fault log dump started");
+            ESP_LOGI(TAG, "Fault log dump requested - will display current fault log information");
         }
 
     } // namespace balboa_spa

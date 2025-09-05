@@ -153,15 +153,15 @@ namespace esphome
                 return;
             }
             
-            ESP_LOGI(TAG, "Starting fault log dump process");
+            ESP_LOGI(TAG, "Starting fault log dump - requesting current fault log entry");
             fault_log_dump_active = true;
             fault_log_dump_total_entries = 0;
             fault_log_dump_requests_sent = 0;
             fault_log_dump_seen_entries.clear();
             
-            // Force a fault log request to start the process
+            // Force a fault log request to get current fault information
             faultlog_request_status = 0;
-            ESP_LOGD(TAG, "Fault log dump: requesting first fault log entry");
+            ESP_LOGD(TAG, "Fault log dump: requesting fault log information");
         }
 
         void BalboaSpa::set_hour(int hour)
@@ -910,64 +910,26 @@ namespace esphome
             
             // Handle fault log dump mode vs normal mode
             if (fault_log_dump_active) {
-                // In dump mode: log with WARNING level
-                ESP_LOGW(TAG, "FAULT LOG ENTRY %d/%d - Code: %d, Message: %s, DaysAgo: %d, Time: %02d:%02d", 
-                         spaFaultLog.current_entry + 1, spaFaultLog.total_entries,
-                         spaFaultLog.fault_code, spaFaultLog.fault_message.c_str(),
+                // In dump mode: provide comprehensive fault log information
+                ESP_LOGW(TAG, "FAULT LOG STATUS - Total Entries: %d, Current Entry: %d/%d", 
+                         spaFaultLog.total_entries, spaFaultLog.current_entry + 1, spaFaultLog.total_entries);
+                ESP_LOGW(TAG, "CURRENT FAULT - Code: %d, Message: %s", 
+                         spaFaultLog.fault_code, spaFaultLog.fault_message.c_str());
+                ESP_LOGW(TAG, "FAULT TIMING - Days Ago: %d, Time: %02d:%02d", 
                          spaFaultLog.days_ago, spaFaultLog.hour, spaFaultLog.minutes);
                 
-                // Update total entries on first entry if not set
-                if (fault_log_dump_total_entries == 0) {
-                    fault_log_dump_total_entries = spaFaultLog.total_entries;
-                    ESP_LOGI(TAG, "Fault log dump: found %d total entries", fault_log_dump_total_entries);
-                }
-                
-                // Track this entry as seen
-                uint8_t entry_index = spaFaultLog.current_entry;
-                bool already_seen = false;
-                for (uint8_t seen_entry : fault_log_dump_seen_entries) {
-                    if (seen_entry == entry_index) {
-                        already_seen = true;
-                        break;
-                    }
-                }
-                
-                if (!already_seen) {
-                    fault_log_dump_seen_entries.push_back(entry_index);
-                }
-                
-                fault_log_dump_requests_sent++;
-                
-                // Check if we should continue or stop
-                bool should_continue = false;
-                
-                if (fault_log_dump_requests_sent >= 50) {
-                    // Safety limit: don't send more than 50 requests
-                    stop_fault_log_dump("hit safety limit of 50 requests");
-                } else if (fault_log_dump_seen_entries.size() >= fault_log_dump_total_entries && fault_log_dump_total_entries > 0) {
-                    // Success: we've seen all entries
-                    char reason[100];
-                    snprintf(reason, sizeof(reason), "successfully dumped all %d entries", fault_log_dump_seen_entries.size());
-                    stop_fault_log_dump(reason);
-                } else if (already_seen && fault_log_dump_requests_sent > fault_log_dump_total_entries + 2) {
-                    // We're getting repeats and have sent enough requests
-                    char reason[100];  
-                    snprintf(reason, sizeof(reason), "dumped %d unique entries, detected repeat", fault_log_dump_seen_entries.size());
-                    stop_fault_log_dump(reason);
+                // Check if there are historical entries we can't access
+                if (spaFaultLog.total_entries > 1) {
+                    ESP_LOGW(TAG, "NOTE: %d historical fault entries exist but are not accessible via this protocol", 
+                             spaFaultLog.total_entries - 1);
+                    ESP_LOGW(TAG, "The spa controller only exposes the most recent fault entry through RS485 communication");
                 } else {
-                    // Continue requesting more entries
-                    should_continue = true;
+                    ESP_LOGW(TAG, "No historical fault entries - this is the only fault log entry");
                 }
                 
-                if (should_continue) {
-                    // Request next entry
-                    ESP_LOGD(TAG, "Fault log dump: requesting next entry (seen %d/%d, requests: %d)", 
-                             fault_log_dump_seen_entries.size(), fault_log_dump_total_entries, fault_log_dump_requests_sent);
-                    faultlog_request_status = 0; // Trigger next request
-                } else {
-                    // Dump is complete, set status to finished
-                    faultlog_request_status = 2;
-                }
+                // Complete the dump after single request
+                stop_fault_log_dump("completed - only current fault entry is accessible via protocol");
+                faultlog_request_status = 2;
             } else {
                 // Normal mode: log with DEBUG level
                 ESP_LOGD(TAG, "Spa/fault/Entries: %d", spaFaultLog.total_entries);
