@@ -86,6 +86,7 @@ namespace esphome
       void start_fault_log_dump();
 
     private:
+      void stop_fault_log_dump(const char* reason);
       CircularBuffer<uint8_t, 100> input_queue;
       CircularBuffer<uint8_t, 100> output_queue;
       uint8_t received_byte, loop_index, temp_index;

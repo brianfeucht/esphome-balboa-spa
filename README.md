@@ -137,6 +137,8 @@ button:
       name: "Sync Spa Time"
     disable_filter2:
       name: "Disable Filter 2"
+    fault_log_dump:
+      name: "Dump All Fault Log Entries"
 ```
 
 ## Troubleshooting

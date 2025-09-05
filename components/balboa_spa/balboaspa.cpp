@@ -13,6 +13,23 @@ namespace esphome
             input_queue.clear();
             output_queue.clear();
             filtersettings_update_timer = 0;
+            
+            // Initialize fault log dump state
+            fault_log_dump_active = false;
+            fault_log_dump_total_entries = 0;
+            fault_log_dump_requests_sent = 0;
+            fault_log_dump_seen_entries.clear();
+        }
+
+        void BalboaSpa::stop_fault_log_dump(const char* reason)
+        {
+            if (fault_log_dump_active) {
+                ESP_LOGI(TAG, "Fault log dump stopped: %s", reason);
+                fault_log_dump_active = false;
+                fault_log_dump_total_entries = 0;
+                fault_log_dump_requests_sent = 0;
+                fault_log_dump_seen_entries.clear();
+            }
         }
 
         void BalboaSpa::update()
@@ -130,6 +147,12 @@ namespace esphome
 
         void BalboaSpa::start_fault_log_dump()
         {
+            // Check if a dump is already in progress
+            if (fault_log_dump_active) {
+                ESP_LOGW(TAG, "Fault log dump already in progress, ignoring request");
+                return;
+            }
+            
             ESP_LOGI(TAG, "Starting fault log dump process");
             fault_log_dump_active = true;
             fault_log_dump_total_entries = 0;
@@ -920,13 +943,17 @@ namespace esphome
                 
                 if (fault_log_dump_requests_sent >= 50) {
                     // Safety limit: don't send more than 50 requests
-                    ESP_LOGW(TAG, "Fault log dump: hit safety limit of 50 requests, stopping");
+                    stop_fault_log_dump("hit safety limit of 50 requests");
                 } else if (fault_log_dump_seen_entries.size() >= fault_log_dump_total_entries && fault_log_dump_total_entries > 0) {
                     // Success: we've seen all entries
-                    ESP_LOGI(TAG, "Fault log dump completed - successfully dumped all %d entries", fault_log_dump_total_entries);
+                    char reason[100];
+                    snprintf(reason, sizeof(reason), "successfully dumped all %d entries", fault_log_dump_seen_entries.size());
+                    stop_fault_log_dump(reason);
                 } else if (already_seen && fault_log_dump_requests_sent > fault_log_dump_total_entries + 2) {
                     // We're getting repeats and have sent enough requests
-                    ESP_LOGI(TAG, "Fault log dump completed - seen %d unique entries, got repeat", fault_log_dump_seen_entries.size());
+                    char reason[100];  
+                    snprintf(reason, sizeof(reason), "dumped %d unique entries, detected repeat", fault_log_dump_seen_entries.size());
+                    stop_fault_log_dump(reason);
                 } else {
                     // Continue requesting more entries
                     should_continue = true;
@@ -937,12 +964,6 @@ namespace esphome
                     ESP_LOGD(TAG, "Fault log dump: requesting next entry (seen %d/%d, requests: %d)", 
                              fault_log_dump_seen_entries.size(), fault_log_dump_total_entries, fault_log_dump_requests_sent);
                     faultlog_request_status = 0; // Trigger next request
-                } else {
-                    // Stop the dump process
-                    fault_log_dump_active = false;
-                    fault_log_dump_total_entries = 0;
-                    fault_log_dump_requests_sent = 0;
-                    fault_log_dump_seen_entries.clear();
                 }
             } else {
                 // Normal mode: log with DEBUG level
