@@ -964,6 +964,9 @@ namespace esphome
                     ESP_LOGD(TAG, "Fault log dump: requesting next entry (seen %d/%d, requests: %d)", 
                              fault_log_dump_seen_entries.size(), fault_log_dump_total_entries, fault_log_dump_requests_sent);
                     faultlog_request_status = 0; // Trigger next request
+                } else {
+                    // Dump is complete, set status to finished
+                    faultlog_request_status = 2;
                 }
             } else {
                 // Normal mode: log with DEBUG level
@@ -974,10 +977,11 @@ namespace esphome
                 ESP_LOGD(TAG, "Spa/fault/DaysAgo: %d", spaFaultLog.days_ago);
                 ESP_LOGD(TAG, "Spa/fault/Hours: %d", spaFaultLog.hour);
                 ESP_LOGD(TAG, "Spa/fault/Minutes: %d", spaFaultLog.minutes);
+                
+                // In normal mode, always set status to finished
+                faultlog_request_status = 2;
+                // ESP_LOGD(TAG, "Spa/debug/faultlog_request_status: have the faultlog, #2");
             }
-            
-            faultlog_request_status = 2;
-            // ESP_LOGD(TAG, "Spa/debug/faultlog_request_status: have the faultlog, #2");
 
             // Update CRC state to prevent reprocessing the same message
             last_state_crc = input_queue[input_queue[1]];
