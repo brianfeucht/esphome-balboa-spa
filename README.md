@@ -1,15 +1,16 @@
 ## Component for Balboa Spa
-
 This project is based on the UART reader from [Dakoriki/ESPHome-Balboa-Spa](https://github.com/Dakoriki/ESPHome-Balboa-Spa)
 
 There are a ton of these implementations on Github.  None of the ones I could find implemented the external component pattern as prescribed by EspHome.  So I create this one.  
 
-Climate, binary sensors, sensors, and switches are all optional.  So you only need to import what you want with your implementation.
+All components are optional (climate, switch, text_sensor, etc).  So you only need to import what you want with your implementation.
 
-TODO:
-I am seeing a ton of CRC errors when reading data on my spa.  This might be invalid UART config (baud, buffer, etc). Or it might just be due to the noisy nature of running next two heaters and pumps. **Note: CRC errors can now be silenced specifically - see Troubleshooting section below.**
+### CRC Errors
+I and multiple other users see a ton of CRC errors.  I've spent some time investigating the serial bit stream and all the cases I've identified have been bit flipping.  This might be invalid UART config (baud, buffer, etc) or a bad hardware design. However, I'm assuming this is just due to the noisy nature of running next heaters and pumps.
+**Note: CRC errors can be silenced specifically - see Troubleshooting section below.**
 
-```
+## Sample Config
+```yaml
 esphome:
   name: hottub
   friendly_name: hottub
