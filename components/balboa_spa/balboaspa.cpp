@@ -128,6 +128,19 @@ namespace esphome
             filtersettings_request_status = 0; // Reset to request filter settings again
         }
 
+        void BalboaSpa::start_fault_log_dump()
+        {
+            ESP_LOGI(TAG, "Starting fault log dump process");
+            fault_log_dump_active = true;
+            fault_log_dump_total_entries = 0;
+            fault_log_dump_requests_sent = 0;
+            fault_log_dump_seen_entries.clear();
+            
+            // Force a fault log request to start the process
+            faultlog_request_status = 0;
+            ESP_LOGD(TAG, "Fault log dump: requesting first fault log entry");
+        }
+
         void BalboaSpa::set_hour(int hour)
         {
             if (hour >= 0 && hour <= 23)
@@ -871,13 +884,77 @@ namespace esphome
             spaFaultLog.days_ago = input_queue[8];
             spaFaultLog.hour = input_queue[9];
             spaFaultLog.minutes = input_queue[10];
-            ESP_LOGD(TAG, "Spa/fault/Entries: %d", spaFaultLog.total_entries);
-            ESP_LOGD(TAG, "Spa/fault/Entry: %d", spaFaultLog.current_entry);
-            ESP_LOGD(TAG, "Spa/fault/Code: %d", spaFaultLog.fault_code);
-            ESP_LOGD(TAG, "Spa/fault/Message: %s", spaFaultLog.fault_message.c_str());
-            ESP_LOGD(TAG, "Spa/fault/DaysAgo: %d", spaFaultLog.days_ago);
-            ESP_LOGD(TAG, "Spa/fault/Hours: %d", spaFaultLog.hour);
-            ESP_LOGD(TAG, "Spa/fault/Minutes: %d", spaFaultLog.minutes);
+            
+            // Handle fault log dump mode vs normal mode
+            if (fault_log_dump_active) {
+                // In dump mode: log with WARNING level
+                ESP_LOGW(TAG, "FAULT LOG ENTRY %d/%d - Code: %d, Message: %s, DaysAgo: %d, Time: %02d:%02d", 
+                         spaFaultLog.current_entry + 1, spaFaultLog.total_entries,
+                         spaFaultLog.fault_code, spaFaultLog.fault_message.c_str(),
+                         spaFaultLog.days_ago, spaFaultLog.hour, spaFaultLog.minutes);
+                
+                // Update total entries on first entry if not set
+                if (fault_log_dump_total_entries == 0) {
+                    fault_log_dump_total_entries = spaFaultLog.total_entries;
+                    ESP_LOGI(TAG, "Fault log dump: found %d total entries", fault_log_dump_total_entries);
+                }
+                
+                // Track this entry as seen
+                uint8_t entry_index = spaFaultLog.current_entry;
+                bool already_seen = false;
+                for (uint8_t seen_entry : fault_log_dump_seen_entries) {
+                    if (seen_entry == entry_index) {
+                        already_seen = true;
+                        break;
+                    }
+                }
+                
+                if (!already_seen) {
+                    fault_log_dump_seen_entries.push_back(entry_index);
+                }
+                
+                fault_log_dump_requests_sent++;
+                
+                // Check if we should continue or stop
+                bool should_continue = false;
+                
+                if (fault_log_dump_requests_sent >= 50) {
+                    // Safety limit: don't send more than 50 requests
+                    ESP_LOGW(TAG, "Fault log dump: hit safety limit of 50 requests, stopping");
+                } else if (fault_log_dump_seen_entries.size() >= fault_log_dump_total_entries && fault_log_dump_total_entries > 0) {
+                    // Success: we've seen all entries
+                    ESP_LOGI(TAG, "Fault log dump completed - successfully dumped all %d entries", fault_log_dump_total_entries);
+                } else if (already_seen && fault_log_dump_requests_sent > fault_log_dump_total_entries + 2) {
+                    // We're getting repeats and have sent enough requests
+                    ESP_LOGI(TAG, "Fault log dump completed - seen %d unique entries, got repeat", fault_log_dump_seen_entries.size());
+                } else {
+                    // Continue requesting more entries
+                    should_continue = true;
+                }
+                
+                if (should_continue) {
+                    // Request next entry
+                    ESP_LOGD(TAG, "Fault log dump: requesting next entry (seen %d/%d, requests: %d)", 
+                             fault_log_dump_seen_entries.size(), fault_log_dump_total_entries, fault_log_dump_requests_sent);
+                    faultlog_request_status = 0; // Trigger next request
+                } else {
+                    // Stop the dump process
+                    fault_log_dump_active = false;
+                    fault_log_dump_total_entries = 0;
+                    fault_log_dump_requests_sent = 0;
+                    fault_log_dump_seen_entries.clear();
+                }
+            } else {
+                // Normal mode: log with DEBUG level
+                ESP_LOGD(TAG, "Spa/fault/Entries: %d", spaFaultLog.total_entries);
+                ESP_LOGD(TAG, "Spa/fault/Entry: %d", spaFaultLog.current_entry);
+                ESP_LOGD(TAG, "Spa/fault/Code: %d", spaFaultLog.fault_code);
+                ESP_LOGD(TAG, "Spa/fault/Message: %s", spaFaultLog.fault_message.c_str());
+                ESP_LOGD(TAG, "Spa/fault/DaysAgo: %d", spaFaultLog.days_ago);
+                ESP_LOGD(TAG, "Spa/fault/Hours: %d", spaFaultLog.hour);
+                ESP_LOGD(TAG, "Spa/fault/Minutes: %d", spaFaultLog.minutes);
+            }
+            
             faultlog_request_status = 2;
             // ESP_LOGD(TAG, "Spa/debug/faultlog_request_status: have the faultlog, #2");
 

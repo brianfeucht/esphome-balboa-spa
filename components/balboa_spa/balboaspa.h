@@ -11,6 +11,7 @@
 #include <string>
 #include <iostream>
 #include <sstream>
+#include <vector>
 
 namespace esphome
 {
@@ -82,6 +83,7 @@ namespace esphome
       void toggle_heat();
       void request_config_update();
       void request_filter_settings_update();
+      void start_fault_log_dump();
 
     private:
       CircularBuffer<uint8_t, 100> input_queue;
@@ -119,6 +121,12 @@ namespace esphome
       char filtersettings_request_status = 0; // stages: 0-> want it; 1-> requested it; 2-> got it; 3-> further processed it
       char faultlog_update_timer = 0;         // temp logic so we only get the fault log once per 5 minutes
       uint16_t filtersettings_update_timer = 0;   // timer for periodic filter settings requests (every 5 minutes)
+      
+      // Fault log dump state variables
+      bool fault_log_dump_active = false;     // true when dumping all fault entries
+      uint8_t fault_log_dump_total_entries = 0; // total entries to dump
+      uint8_t fault_log_dump_requests_sent = 0; // safety counter to prevent infinite loops
+      std::vector<uint8_t> fault_log_dump_seen_entries; // track which entry indices we've seen
 
       SpaConfig spaConfig;
       SpaState spaState;

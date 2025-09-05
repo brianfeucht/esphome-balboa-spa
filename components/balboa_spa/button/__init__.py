@@ -7,14 +7,17 @@ DEPENDENCIES = ["balboa_spa"]
 
 SyncTimeButton = balboa_spa_ns.class_("SyncTimeButton", button.Button)
 DisableFilter2Button = balboa_spa_ns.class_("DisableFilter2Button", button.Button)
+FaultLogDumpButton = balboa_spa_ns.class_("FaultLogDumpButton", button.Button)
 
 CONF_SYNC_TIME = "sync_time"
 CONF_DISABLE_FILTER2 = "disable_filter2"
+CONF_FAULT_LOG_DUMP = "fault_log_dump"
 
 CONFIG_SCHEMA = cv.Schema({
     cv.GenerateID(CONF_SPA_ID): cv.use_id(BalboaSpa),
     cv.Optional(CONF_SYNC_TIME): button.button_schema(SyncTimeButton),
     cv.Optional(CONF_DISABLE_FILTER2): button.button_schema(DisableFilter2Button),
+    cv.Optional(CONF_FAULT_LOG_DUMP): button.button_schema(FaultLogDumpButton),
 })
 
 async def to_code(config):
@@ -23,5 +26,8 @@ async def to_code(config):
         var = await button.new_button(conf)
         cg.add(var.set_parent(parent))
     if conf := config.get(CONF_DISABLE_FILTER2):
+        var = await button.new_button(conf)
+        cg.add(var.set_parent(parent))
+    if conf := config.get(CONF_FAULT_LOG_DUMP):
         var = await button.new_button(conf)
         cg.add(var.set_parent(parent))
