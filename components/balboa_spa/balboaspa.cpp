@@ -81,11 +81,12 @@ namespace esphome
 
             if (spa_temp_scale == TEMP_SCALE::C)
             {
-                target_temperature = target_temp * 2;
+                target_temperature = (uint8_t)round(target_temp * 2.0);
+
             }
             else if (spa_temp_scale == TEMP_SCALE::F)
             {
-                target_temperature = convert_c_to_f(target_temp);
+                target_temperature = (uint8_t)round(convert_c_to_f(target_temp));
             }
             else
             {
@@ -319,10 +320,9 @@ namespace esphome
                     // FE BF 02:got new client ID
                     if (input_queue[2] == 0xFE && input_queue[4] == 0x02)
                     {
-                        client_id = input_queue[5];
-                        if (client_id > 0x2F)
-                            client_id = 0x2F;
-                        ESP_LOGD(TAG, "Spa/node/id: Got ID: %d, acknowledging", client_id);
+                        uint8_t offered_id = input_queue[5];
+                        client_id = 0x2B;  // Use ID 43 (0x2B) which we know supports decimals
+                        ESP_LOGD(TAG, "Spa/node/id: Spa offered ID %d, using ID %d instead", offered_id, client_id);
                         ID_ack();
                         ESP_LOGD(TAG, "Spa/node/id: %d", client_id);
                     }
@@ -609,7 +609,7 @@ namespace esphome
 
             if (spa_temp_scale == TEMP_SCALE::C)
             {
-                temp_read = input_queue[25] / 2;
+                temp_read = input_queue[25] / 2.0;
             }
             else if (spa_temp_scale == TEMP_SCALE::F)
             {
@@ -641,7 +641,7 @@ namespace esphome
             {
                 if (spa_temp_scale == TEMP_SCALE::C)
                 {
-                    temp_read = input_queue[7] / 2;
+                    temp_read = input_queue[7] / 2.0;
                 }
                 else if (spa_temp_scale == TEMP_SCALE::F)
                 {
