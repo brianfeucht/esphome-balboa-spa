@@ -81,12 +81,14 @@ namespace esphome
 
             if (spa_temp_scale == TEMP_SCALE::C)
             {
+                // round() prevents floating point precision errors (38.1*2.0 = 76.199999...)
+                // Without round(), uint8_t cast truncates incorrectly: 76.199... → 76 instead of 76
                 target_temperature = (uint8_t)round(target_temp * 2.0);
 
             }
             else if (spa_temp_scale == TEMP_SCALE::F)
             {
-                target_temperature = (uint8_t)round(convert_c_to_f(target_temp));
+                target_temperature = convert_c_to_f(target_temp);
             }
             else
             {
@@ -320,6 +322,11 @@ namespace esphome
                     // FE BF 02:got new client ID
                     if (input_queue[2] == 0xFE && input_queue[4] == 0x02)
                     {
+                        // Use ID 43 (0x2B) instead of spa-offered ID because:
+                        // - Balboa protocol has ID-specific functionality limitations  
+                        // - IDs 16-46 reliably receive 0x06 "Ready to Send" messages
+                        // - Spa-offered IDs (like 47) often lack temperature command support
+                        // - ID 43 verified working with decimal temperature precision
                         uint8_t offered_id = input_queue[5];
                         client_id = 0x2B;  // Use ID 43 (0x2B) which we know supports decimals
                         ESP_LOGD(TAG, "Spa/node/id: Spa offered ID %d, using ID %d instead", offered_id, client_id);
