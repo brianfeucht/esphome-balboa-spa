@@ -14,8 +14,8 @@ balboa_spa:
 switch:
   - platform: balboa_spa
     balboa_spa_id: test_spa
-    # jet1:  # Commented out - using fan component instead
-    #   name: Jet1
+    jet1: # Test if basic switch works
+      name: Jet1 Test
     # jet2:  # Commented out - using fan component instead
     #   name: Jet2
     # jet3:  # Commented out - using fan component instead
@@ -29,21 +29,22 @@ switch:
     blower:
       name: Blower
 
-fan:
-  - platform: balboa_spa
-    balboa_spa_id: test_spa
-    jet_1:
-      name: "Jet 1 Fan"
-      id: jet1_fan
-    jet_2:
-      name: "Jet 2 Fan"
-      id: jet2_fan
-    jet_3:
-      name: "Jet 3 Fan"
-      id: jet3_fan
-    jet_4:
-      name: "Jet 4 Fan"
-      id: jet4_fan
+# Temporarily disabled for testing
+# fan:
+#   - platform: balboa_spa
+#     balboa_spa_id: test_spa
+#     jet_1:
+#       name: "Jet 1 Fan"
+#       id: jet1_fan
+#     jet_2:
+#       name: "Jet 2 Fan"
+#       id: jet2_fan
+#     jet_3:
+#       name: "Jet 3 Fan"
+#       id: jet3_fan
+#     jet_4:
+#       name: "Jet 4 Fan"
+#       id: jet4_fan
 
 climate:
   - platform: balboa_spa

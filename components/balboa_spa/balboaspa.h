@@ -81,6 +81,8 @@ namespace esphome
 
       void register_listener(const std::function<void(SpaState *)> &func) { this->listeners_.push_back(func); }
       void register_filter_listener(const std::function<void(SpaFilterSettings *)> &func) { this->filter_listeners_.push_back(func); }
+      
+      void check_pending_jet_toggles();
 
       bool get_restmode();
       void toggle_heat();
@@ -107,6 +109,16 @@ namespace esphome
       bool target_filter2_enable = false;
       uint8_t client_id = 0x00;
       uint32_t last_received_time = 0;
+      
+      // Multi-toggle support for jet speed control
+      uint8_t jet1_target_speed = 0;
+      uint8_t jet1_toggles_remaining = 0;
+      uint8_t jet2_target_speed = 0;
+      uint8_t jet2_toggles_remaining = 0;
+      uint8_t jet3_target_speed = 0;
+      uint8_t jet3_toggles_remaining = 0;
+      uint8_t jet4_target_speed = 0;
+      uint8_t jet4_toggles_remaining = 0;
       uint8_t send_preference_code = 0;
       uint8_t send_preference_data = 0;
 

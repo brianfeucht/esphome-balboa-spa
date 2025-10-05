@@ -26,39 +26,34 @@ void control_jet_fan(BalboaSpa *parent, const fan::FanCall &call, int jet_number
   if (call.get_state().has_value()) {
     bool target_state = *call.get_state();
     
-    if (call.get_speed().has_value()) {
-      int speed_level = *call.get_speed();
+    if (target_state) {
+      // Fan is being turned on - check if speed is specified
+      uint8_t jet_speed = 1;  // Default to LOW speed
       
-      if (target_state) {
-        // Fan is being turned on with specific speed
-        uint8_t jet_speed = (speed_level == 1) ? 1 : 2;  // 1=LOW, 2=HIGH
-        
-        ESP_LOGD(TAG, "Setting %s to speed %d", jet_name, jet_speed);
-        
-        switch (jet_number) {
-          case 1: parent->set_jet1_speed(jet_speed); break;
-          case 2: parent->set_jet2_speed(jet_speed); break;
-          case 3: parent->set_jet3_speed(jet_speed); break;
-          case 4: parent->set_jet4_speed(jet_speed); break;
-        }
-      } else {
-        // Fan is being turned off
-        ESP_LOGD(TAG, "Turning off %s", jet_name);
-        switch (jet_number) {
-          case 1: parent->set_jet1_speed(0); break;
-          case 2: parent->set_jet2_speed(0); break;
-          case 3: parent->set_jet3_speed(0); break;
-          case 4: parent->set_jet4_speed(0); break;
-        }
+      if (call.get_speed().has_value()) {
+        int fan_speed = *call.get_speed();
+        // ESPHome fan speeds: 1=LOW, 2=HIGH
+        // Balboa jet speeds: 0=OFF, 1=LOW, 2=HIGH  
+        jet_speed = fan_speed;  // Direct mapping: fan_speed 1->jet_speed 1, fan_speed 2->jet_speed 2
+      }
+      
+      ESP_LOGD(TAG, "Setting %s to speed %d (fan_speed=%d)", jet_name, jet_speed, 
+               call.get_speed().has_value() ? *call.get_speed() : 1);
+      
+      switch (jet_number) {
+        case 1: parent->set_jet1_speed(jet_speed); break;
+        case 2: parent->set_jet2_speed(jet_speed); break;
+        case 3: parent->set_jet3_speed(jet_speed); break;
+        case 4: parent->set_jet4_speed(jet_speed); break;
       }
     } else {
-      // Just on/off toggle without specific speed
-      ESP_LOGD(TAG, "Toggling %s", jet_name);
+      // Fan is being turned off
+      ESP_LOGD(TAG, "Turning off %s", jet_name);
       switch (jet_number) {
-        case 1: parent->toggle_jet1(); break;
-        case 2: parent->toggle_jet2(); break;
-        case 3: parent->toggle_jet3(); break;
-        case 4: parent->toggle_jet4(); break;
+        case 1: parent->set_jet1_speed(0); break;
+        case 2: parent->set_jet2_speed(0); break;
+        case 3: parent->set_jet3_speed(0); break;
+        case 4: parent->set_jet4_speed(0); break;
       }
     }
   }
@@ -77,20 +72,24 @@ void update_jet_fan_state(fan::Fan *fan, SpaState *state, int jet_number, const 
   }
   
   // Update fan state based on jet speed
-  // 0 = OFF, 1 = LOW (speed 1), 2 = HIGH (speed 2)
+  // Balboa jet speeds: 0=OFF, 1=LOW, 2=HIGH
+  // ESPHome fan speeds: 1=LOW, 2=HIGH (0 is not valid, OFF is handled by state=false)
   bool is_on = (jet_speed > 0);
-  int fan_speed = (jet_speed > 0) ? jet_speed : 1;  // Speed 1 or 2, default to 1 when off
+  int fan_speed = (jet_speed > 0) ? jet_speed : 1;  // Use jet_speed directly as fan_speed, default to 1 when off
   
-  ESP_LOGD(TAG, "%s state changed: speed=%d, fan_on=%d, fan_speed=%d", 
-           jet_name, jet_speed, is_on, fan_speed);
+  // Only update and publish state if it actually changed
+  bool state_changed = (fan->state != is_on) || (fan->speed != fan_speed);
   
-  // Update fan state
-  auto call = fan->make_call();
-  call.set_state(is_on);
-  if (is_on) {
-    call.set_speed(fan_speed);
+  if (state_changed) {
+    ESP_LOGD(TAG, "%s state changed: jet_speed=%d, fan_on=%d, fan_speed=%d", 
+             jet_name, jet_speed, is_on, fan_speed);
+    
+    // Update fan state without triggering control() again
+    // Use direct state assignment to avoid feedback loop
+    fan->state = is_on;
+    fan->speed = fan_speed;  // Always set speed, even when off (ESPHome expects this)
+    fan->publish_state();
   }
-  call.perform();
 }
 
 // ==================== JET 1 FAN ====================

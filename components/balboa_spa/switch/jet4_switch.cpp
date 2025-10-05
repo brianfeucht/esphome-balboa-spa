@@ -12,17 +12,20 @@ namespace esphome
                 this->discard_updates--;
                 return;
             }
-            if (this->state != spaState->jet4 && this->setState == ToggleStateMaybe::DONT_KNOW)
+            // Convert multi-speed jet state (0,1,2) to switch state (false,true)
+            bool jet_is_on = (spaState->jet4 > 0);
+            
+            if (this->state != jet_is_on && this->setState == ToggleStateMaybe::DONT_KNOW)
             {
-                this->publish_state(spaState->jet4);
-                ESP_LOGD("jet4_switch", "Jet4 switch state updated to %s", spaState->jet4 ? STRON : STROFF);
+                this->publish_state(jet_is_on);
+                ESP_LOGD("jet4_switch", "Jet4 switch state updated to %s", jet_is_on ? STRON : STROFF);
             }
-            else if (this->setState == ToggleStateMaybe::ON && !spaState->jet4)
+            else if (this->setState == ToggleStateMaybe::ON && !jet_is_on)
             {
                 this->toggle_jet4();
                 ESP_LOGD("jet4_switch", "Jet4 state changed %s setState is ON, toggling jet4", state ? STRON : STROFF);
             }
-            else if (this->setState == ToggleStateMaybe::OFF && spaState->jet4)
+            else if (this->setState == ToggleStateMaybe::OFF && jet_is_on)
             {
                 this->toggle_jet4();
                 ESP_LOGD("jet4_switch", "Jet4 state changed %s setState is OFF, toggling jet4", state ? STRON : STROFF);

@@ -281,8 +281,26 @@ namespace esphome
                 return;
             }
             
-            ESP_LOGD(TAG, "Setting jet1 from speed %d to %d (toggle needed)", current_speed, speed);
-            send_command = 0x04;  // Same as toggle_jet1(), spa cycles through speeds
+            // Calculate how many toggles needed to reach target speed
+            // Spa cycles: 0 -> 1 -> 2 -> 0 -> 1 -> 2...
+            int toggles_needed = 0;
+            uint8_t test_speed = current_speed;
+            while (test_speed != speed && toggles_needed < 3) {
+                test_speed = (test_speed + 1) % 3;  // Cycle through 0,1,2
+                toggles_needed++;
+            }
+            
+            ESP_LOGD(TAG, "Setting jet1 from speed %d to %d (%d toggles needed)", 
+                     current_speed, speed, toggles_needed);
+            
+            // Store the request for processing
+            jet1_target_speed = speed;
+            jet1_toggles_remaining = toggles_needed;
+            
+            // Start the first toggle
+            if (toggles_needed > 0) {
+                send_command = 0x04;  // toggle_jet1()
+            }
         }
 
         void BalboaSpa::set_jet2_speed(uint8_t speed)
@@ -298,8 +316,26 @@ namespace esphome
                 return;
             }
             
-            ESP_LOGD(TAG, "Setting jet2 from speed %d to %d (toggle needed)", current_speed, speed);
-            send_command = 0x05;  // Same as toggle_jet2(), spa cycles through speeds
+            // Calculate how many toggles needed to reach target speed
+            // Spa cycles: 0 -> 1 -> 2 -> 0 -> 1 -> 2...
+            int toggles_needed = 0;
+            uint8_t test_speed = current_speed;
+            while (test_speed != speed && toggles_needed < 3) {
+                test_speed = (test_speed + 1) % 3;  // Cycle through 0,1,2
+                toggles_needed++;
+            }
+            
+            ESP_LOGD(TAG, "Setting jet2 from speed %d to %d (%d toggles needed)", 
+                     current_speed, speed, toggles_needed);
+            
+            // Store the request for processing
+            jet2_target_speed = speed;
+            jet2_toggles_remaining = toggles_needed;
+            
+            // Start the first toggle
+            if (toggles_needed > 0) {
+                send_command = 0x05;  // toggle_jet2()
+            }
         }
 
         void BalboaSpa::set_jet3_speed(uint8_t speed)
@@ -315,8 +351,26 @@ namespace esphome
                 return;
             }
             
-            ESP_LOGD(TAG, "Setting jet3 from speed %d to %d (toggle needed)", current_speed, speed);
-            send_command = 0x06;  // Same as toggle_jet3(), spa cycles through speeds
+            // Calculate how many toggles needed to reach target speed
+            // Spa cycles: 0 -> 1 -> 2 -> 0 -> 1 -> 2...
+            int toggles_needed = 0;
+            uint8_t test_speed = current_speed;
+            while (test_speed != speed && toggles_needed < 3) {
+                test_speed = (test_speed + 1) % 3;  // Cycle through 0,1,2
+                toggles_needed++;
+            }
+            
+            ESP_LOGD(TAG, "Setting jet3 from speed %d to %d (%d toggles needed)", 
+                     current_speed, speed, toggles_needed);
+            
+            // Store the request for processing
+            jet3_target_speed = speed;
+            jet3_toggles_remaining = toggles_needed;
+            
+            // Start the first toggle
+            if (toggles_needed > 0) {
+                send_command = 0x06;  // toggle_jet3()
+            }
         }
 
         void BalboaSpa::set_jet4_speed(uint8_t speed)
@@ -332,8 +386,83 @@ namespace esphome
                 return;
             }
             
-            ESP_LOGD(TAG, "Setting jet4 from speed %d to %d (toggle needed)", current_speed, speed);
-            send_command = 0x07;  // Same as toggle_jet4(), spa cycles through speeds
+            // Calculate how many toggles needed to reach target speed
+            // Spa cycles: 0 -> 1 -> 2 -> 0 -> 1 -> 2...
+            int toggles_needed = 0;
+            uint8_t test_speed = current_speed;
+            while (test_speed != speed && toggles_needed < 3) {
+                test_speed = (test_speed + 1) % 3;  // Cycle through 0,1,2
+                toggles_needed++;
+            }
+            
+            ESP_LOGD(TAG, "Setting jet4 from speed %d to %d (%d toggles needed)", 
+                     current_speed, speed, toggles_needed);
+            
+            // Store the request for processing
+            jet4_target_speed = speed;
+            jet4_toggles_remaining = toggles_needed;
+            
+            // Start the first toggle
+            if (toggles_needed > 0) {
+                send_command = 0x07;  // toggle_jet4()
+            }
+        }
+
+        void BalboaSpa::check_pending_jet_toggles()
+        {
+            // Check each jet for pending toggles after state update
+            // Only process if no other command is pending (send_command == 0x00)
+            if (send_command != 0x00) {
+                return; // Another command is already queued
+            }
+            
+            // Check jet1
+            if (jet1_toggles_remaining > 0) {
+                jet1_toggles_remaining--;
+                if (jet1_toggles_remaining > 0) {
+                    ESP_LOGD(TAG, "Jet1: Sending next toggle (%d remaining)", jet1_toggles_remaining);
+                    send_command = 0x04;
+                    return; // Only send one command at a time
+                } else {
+                    ESP_LOGD(TAG, "Jet1: Reached target speed %d", jet1_target_speed);
+                }
+            }
+            
+            // Check jet2
+            if (jet2_toggles_remaining > 0) {
+                jet2_toggles_remaining--;
+                if (jet2_toggles_remaining > 0) {
+                    ESP_LOGD(TAG, "Jet2: Sending next toggle (%d remaining)", jet2_toggles_remaining);
+                    send_command = 0x05;
+                    return;
+                } else {
+                    ESP_LOGD(TAG, "Jet2: Reached target speed %d", jet2_target_speed);
+                }
+            }
+            
+            // Check jet3
+            if (jet3_toggles_remaining > 0) {
+                jet3_toggles_remaining--;
+                if (jet3_toggles_remaining > 0) {
+                    ESP_LOGD(TAG, "Jet3: Sending next toggle (%d remaining)", jet3_toggles_remaining);
+                    send_command = 0x06;
+                    return;
+                } else {
+                    ESP_LOGD(TAG, "Jet3: Reached target speed %d", jet3_target_speed);
+                }
+            }
+            
+            // Check jet4
+            if (jet4_toggles_remaining > 0) {
+                jet4_toggles_remaining--;
+                if (jet4_toggles_remaining > 0) {
+                    ESP_LOGD(TAG, "Jet4: Sending next toggle (%d remaining)", jet4_toggles_remaining);
+                    send_command = 0x07;
+                    return;
+                } else {
+                    ESP_LOGD(TAG, "Jet4: Reached target speed %d", jet4_target_speed);
+                }
+            }
         }
 
         void BalboaSpa::read_serial()
@@ -826,6 +955,9 @@ namespace esphome
             }
 
             // TODO: callback on newState
+            
+            // Handle pending multi-toggles for jet speed control
+            check_pending_jet_toggles();
 
             last_state_crc = input_queue[input_queue[1]];
         }
