@@ -6,16 +6,6 @@ namespace balboa_spa {
 
 static const char *TAG = "BalboaSpa.jet_fan";
 
-// Helper function to get fan traits (same for all jets)
-fan::FanTraits get_jet_fan_traits() {
-  fan::FanTraits traits;
-  traits.set_oscillation(false);
-  traits.set_direction(false);
-  traits.set_speed(true);
-  traits.set_supported_speed_count(2);  // LOW and HIGH (OFF is handled by on/off)
-  return traits;
-}
-
 // Helper function for fan control logic
 void control_jet_fan(BalboaSpa *parent, const fan::FanCall &call, int jet_number, const char* jet_name) {
   if (parent == nullptr) {
@@ -92,108 +82,35 @@ void update_jet_fan_state(fan::Fan *fan, SpaState *state, int jet_number, const 
   }
 }
 
-// ==================== JET 1 FAN ====================
+// ==================== GENERIC JET FAN ====================
 
-void Jet1Fan::setup() {
-  ESP_LOGCONFIG(TAG, "Setting up Balboa Spa Jet 1 Fan...");
+void JetFan::setup() {
+  ESP_LOGCONFIG(TAG, "Setting up Balboa Spa %s Fan...", this->jet_name_.c_str());
   if (this->parent_ != nullptr) {
     SpaState *state = this->parent_->get_current_state();
     this->on_spa_state_change(state);
   }
 }
 
-void Jet1Fan::dump_config() {
-  ESP_LOGCONFIG(TAG, "Balboa Spa Jet 1 Fan");
+void JetFan::dump_config() {
+  ESP_LOGCONFIG(TAG, "Balboa Spa %s Fan", this->jet_name_.c_str());
 }
 
-fan::FanTraits Jet1Fan::get_traits() {
-  return get_jet_fan_traits();
+fan::FanTraits JetFan::get_traits() {
+  fan::FanTraits traits;
+  traits.set_oscillation(false);
+  traits.set_direction(false);
+  traits.set_speed(true);
+  traits.set_supported_speed_count(2);  // LOW and HIGH (OFF is handled by on/off)
+  return traits;
 }
 
-void Jet1Fan::control(const fan::FanCall &call) {
-  control_jet_fan(this->parent_, call, 1, "Jet1");
+void JetFan::control(const fan::FanCall &call) {
+  control_jet_fan(this->parent_, call, this->jet_number_, this->jet_name_.c_str());
 }
 
-void Jet1Fan::on_spa_state_change(SpaState *state) {
-  update_jet_fan_state(this, state, 1, "Jet1");
-}
-
-// ==================== JET 2 FAN ====================
-
-void Jet2Fan::setup() {
-  ESP_LOGCONFIG(TAG, "Setting up Balboa Spa Jet 2 Fan...");
-  if (this->parent_ != nullptr) {
-    SpaState *state = this->parent_->get_current_state();
-    this->on_spa_state_change(state);
-  }
-}
-
-void Jet2Fan::dump_config() {
-  ESP_LOGCONFIG(TAG, "Balboa Spa Jet 2 Fan");
-}
-
-fan::FanTraits Jet2Fan::get_traits() {
-  return get_jet_fan_traits();
-}
-
-void Jet2Fan::control(const fan::FanCall &call) {
-  control_jet_fan(this->parent_, call, 2, "Jet2");
-}
-
-void Jet2Fan::on_spa_state_change(SpaState *state) {
-  update_jet_fan_state(this, state, 2, "Jet2");
-}
-
-// ==================== JET 3 FAN ====================
-
-void Jet3Fan::setup() {
-  ESP_LOGCONFIG(TAG, "Setting up Balboa Spa Jet 3 Fan...");
-  if (this->parent_ != nullptr) {
-    SpaState *state = this->parent_->get_current_state();
-    this->on_spa_state_change(state);
-  }
-}
-
-void Jet3Fan::dump_config() {
-  ESP_LOGCONFIG(TAG, "Balboa Spa Jet 3 Fan");
-}
-
-fan::FanTraits Jet3Fan::get_traits() {
-  return get_jet_fan_traits();
-}
-
-void Jet3Fan::control(const fan::FanCall &call) {
-  control_jet_fan(this->parent_, call, 3, "Jet3");
-}
-
-void Jet3Fan::on_spa_state_change(SpaState *state) {
-  update_jet_fan_state(this, state, 3, "Jet3");
-}
-
-// ==================== JET 4 FAN ====================
-
-void Jet4Fan::setup() {
-  ESP_LOGCONFIG(TAG, "Setting up Balboa Spa Jet 4 Fan...");
-  if (this->parent_ != nullptr) {
-    SpaState *state = this->parent_->get_current_state();
-    this->on_spa_state_change(state);
-  }
-}
-
-void Jet4Fan::dump_config() {
-  ESP_LOGCONFIG(TAG, "Balboa Spa Jet 4 Fan");
-}
-
-fan::FanTraits Jet4Fan::get_traits() {
-  return get_jet_fan_traits();
-}
-
-void Jet4Fan::control(const fan::FanCall &call) {
-  control_jet_fan(this->parent_, call, 4, "Jet4");
-}
-
-void Jet4Fan::on_spa_state_change(SpaState *state) {
-  update_jet_fan_state(this, state, 4, "Jet4");
+void JetFan::on_spa_state_change(SpaState *state) {
+  update_jet_fan_state(this, state, this->jet_number_, this->jet_name_.c_str());
 }
 
 }  // namespace balboa_spa
