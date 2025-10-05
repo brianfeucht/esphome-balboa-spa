@@ -1,5 +1,5 @@
 # this configuration file has all empty custom components set up.
-# use 'esphome test_empty.yaml compile' to build. 
+# use 'esphome test_empty.yaml compile' to build.
 
 external_components:
   - source:
@@ -14,14 +14,14 @@ balboa_spa:
 switch:
   - platform: balboa_spa
     balboa_spa_id: test_spa
-    jet1:
-      name: Jet1
-    jet2:
-      name: Jet2
-    jet3:
-      name: Jet3
-    jet4:
-      name: Jet4
+    # jet1:  # Commented out - using fan component instead
+    #   name: Jet1
+    # jet2:  # Commented out - using fan component instead
+    #   name: Jet2
+    # jet3:  # Commented out - using fan component instead
+    #   name: Jet3
+    # jet4:  # Commented out - using fan component instead
+    #   name: Jet4
     light:
       name: Lights
     light2:
@@ -29,14 +29,30 @@ switch:
     blower:
       name: Blower
 
+fan:
+  - platform: balboa_spa
+    balboa_spa_id: test_spa
+    jet_1:
+      name: "Jet 1 Fan"
+      id: jet1_fan
+    jet_2:
+      name: "Jet 2 Fan"
+      id: jet2_fan
+    jet_3:
+      name: "Jet 3 Fan"
+      id: jet3_fan
+    jet_4:
+      name: "Jet 4 Fan"
+      id: jet4_fan
+
 climate:
   - platform: balboa_spa
     balboa_spa_id: test_spa
     name: "Spa Thermostat"
     visual:
-      min_temperature: 62 °F    # min: 17
-      max_temperature: 105 °F    # max: 30
-      temperature_step: 0.5 °F  # min: 0.5
+      min_temperature: 62 °F # min: 17
+      max_temperature: 105 °F # max: 30
+      temperature_step: 0.5 °F # min: 0.5
 
 sensor:
   - platform: balboa_spa
@@ -99,7 +115,7 @@ text:
       name: "Set Filter 1 Duration"
       mode: TEXT
     filter2_start_time:
-      name: "Set Filter 2 Start Time"  
+      name: "Set Filter 2 Start Time"
       mode: TEXT
     filter2_duration:
       name: "Set Filter 2 Duration"

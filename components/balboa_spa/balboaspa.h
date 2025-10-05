@@ -67,6 +67,10 @@ namespace esphome
       void toggle_jet2();
       void toggle_jet3();
       void toggle_jet4();
+      void set_jet1_speed(uint8_t speed);  // 0=OFF, 1=LOW, 2=HIGH
+      void set_jet2_speed(uint8_t speed);  // 0=OFF, 1=LOW, 2=HIGH
+      void set_jet3_speed(uint8_t speed);  // 0=OFF, 1=LOW, 2=HIGH
+      void set_jet4_speed(uint8_t speed);  // 0=OFF, 1=LOW, 2=HIGH
       void toggle_blower();
       void set_highrange(bool high);
 

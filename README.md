@@ -50,18 +50,38 @@ balboa_spa:
 switch:
   - platform: balboa_spa
     balboa_spa_id: spa
-    jet1:
-      name: Jet1
-    jet2:
-      name: Jet2
-    jet3:
-      name: Jet3
-    jet4:
-      name: Jet4
+    # Note: For multi-speed jets, consider using 'fan' component instead (see below)
+    # jet1:
+    #   name: Jet1
+    # jet2:
+    #   name: Jet2
+    # jet3:
+    #   name: Jet3
+    # jet4:
+    #   name: Jet4
     light:
       name: Lights
     blower:
       name: Blower
+
+# Multi-Speed Jet Control (Recommended)
+# Use 'fan' component for jets that support OFF/LOW/HIGH speeds
+# Falls back gracefully to ON/OFF for spas without multi-speed support
+fan:
+  - platform: balboa_spa
+    balboa_spa_id: spa
+    jet_1:
+      name: "Jet 1"
+      id: jet1_fan
+    jet_2:
+      name: "Jet 2"
+      id: jet2_fan
+    jet_3:
+      name: "Jet 3"
+      id: jet3_fan
+    jet_4:
+      name: "Jet 4"
+      id: jet4_fan
 
 climate:
   - platform: balboa_spa
@@ -139,6 +159,32 @@ button:
     disable_filter2:
       name: "Disable Filter 2"
 ```
+
+## Multi-Speed Jets: Fan vs Switch Components
+
+### Fan Components (Recommended)
+The `fan` platform provides full control over multi-speed jets with support for:
+- **OFF** - Jet is off
+- **LOW** - Low speed (speed 1)
+- **HIGH** - High speed (speed 2)
+
+**Advantages:**
+- Native Home Assistant fan controls with speed slider
+- Automatic fallback to ON/OFF for spas without multi-speed support
+- More intuitive user interface
+- Better integration with Home Assistant automations
+
+### Switch Components (Legacy)
+The `switch` platform provides simple ON/OFF control:
+- **OFF** - Jet is off  
+- **ON** - Jet cycles through speeds (OFF→LOW→HIGH→OFF)
+
+**Use switch components when:**
+- Your spa only supports ON/OFF jets (no speed control)
+- You prefer simple toggle behavior
+- You need backward compatibility with existing automations
+
+**Note:** You can use both components simultaneously if needed, but `fan` is recommended for new installations with multi-speed capable spas.
 
 ## Troubleshooting
 
