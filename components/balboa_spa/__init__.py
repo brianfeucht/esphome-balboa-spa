@@ -8,6 +8,7 @@ DEPENDENCIES = ['uart']
 CONF_SPA_ID = "balboa_spa_id"
 CONF_SPA_TEMP_SCALE = "spa_temp_scale"
 CONF_ESPHOME_TEMP_SCALE = "esphome_temp_scale"
+CONF_CLIENT_ID = "client_id"
 
 balboa_spa_ns = cg.esphome_ns.namespace('balboa_spa')
 BalboaSpa = balboa_spa_ns.class_('BalboaSpa', cg.Component, uart.UARTDevice)
@@ -23,6 +24,7 @@ CONFIG_SCHEMA = cv.Schema({
     cv.GenerateID(): cv.declare_id(BalboaSpa),
     cv.Optional(CONF_SPA_TEMP_SCALE, default=254): cv.enum(TEMP_SCALES, upper=True),
     cv.Optional(CONF_ESPHOME_TEMP_SCALE, default="C"): cv.enum(TEMP_SCALES, upper=True),
+    cv.Optional(CONF_CLIENT_ID): cv.int_range(min=1, max=47),
 }).extend(cv.COMPONENT_SCHEMA).extend(uart.UART_DEVICE_SCHEMA)
 
 def to_code(config):
@@ -34,5 +36,8 @@ def to_code(config):
 
     if esphome_temp_scale_conf := config.get(CONF_ESPHOME_TEMP_SCALE):
         cg.add(var.set_esphome_temp_scale(esphome_temp_scale_conf))
+
+    if client_id_conf := config.get(CONF_CLIENT_ID):
+        cg.add(var.set_client_id(client_id_conf))
 
     yield uart.register_uart_device(var, config)

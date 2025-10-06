@@ -46,6 +46,8 @@ balboa_spa:
   id: spa
   # Set this to C or F based on the units your spa is configured for
   spa_temp_scale: F
+  # Optional: Override the automatically assigned client ID
+  # client_id: 10
 
 switch:
   - platform: balboa_spa

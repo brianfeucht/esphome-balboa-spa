@@ -319,10 +319,18 @@ namespace esphome
                     // FE BF 02:got new client ID
                     if (input_queue[2] == 0xFE && input_queue[4] == 0x02)
                     {
-                        client_id = input_queue[5];
-                        if (client_id > 0x2F)
-                            client_id = 0x2F;
-                        ESP_LOGD(TAG, "Spa/node/id: Got ID: %d, acknowledging", client_id);
+                        if (use_client_id_override)
+                        {
+                            client_id = client_id_override;
+                            ESP_LOGD(TAG, "Spa/node/id: Using override ID: %d, acknowledging", client_id);
+                        }
+                        else
+                        {
+                            client_id = input_queue[5];
+                            if (client_id > 0x2F)
+                                client_id = 0x2F;
+                            ESP_LOGD(TAG, "Spa/node/id: Got ID: %d, acknowledging", client_id);
+                        }
                         ID_ack();
                         ESP_LOGD(TAG, "Spa/node/id: %d", client_id);
                     }
@@ -898,6 +906,20 @@ namespace esphome
         void BalboaSpa::set_esphome_temp_scale(TEMP_SCALE scale)
         {
             esphome_temp_scale = scale;
+        }
+
+        void BalboaSpa::set_client_id(uint8_t id)
+        {
+            if (id >= 1 && id <= 0x2F)
+            {
+                client_id_override = id;
+                use_client_id_override = true;
+                ESP_LOGD(TAG, "Client ID override set to %d", id);
+            }
+            else
+            {
+                ESP_LOGW(TAG, "Invalid client ID override %d, must be between 1 and 47", id);
+            }
         }
 
         float BalboaSpa::convert_c_to_f(float c)
