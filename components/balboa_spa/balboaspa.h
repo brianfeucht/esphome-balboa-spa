@@ -72,6 +72,7 @@ namespace esphome
 
       void set_spa_temp_scale(TEMP_SCALE scale);
       void set_esphome_temp_scale(TEMP_SCALE scale);
+      void set_client_id(uint8_t id);
 
       bool is_communicating();
 
@@ -102,6 +103,8 @@ namespace esphome
       uint8_t target_filter2_duration_minute = 0x00;
       bool target_filter2_enable = false;
       uint8_t client_id = 0x00;
+      uint8_t client_id_override = 0x00;
+      bool use_client_id_override = false;
       uint32_t last_received_time = 0;
       uint8_t send_preference_code = 0;
       uint8_t send_preference_data = 0;
