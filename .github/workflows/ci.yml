@@ -17,17 +17,17 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v5.0.0
       - name: ESPHome ESP32
-        uses: esphome/build-action@v7.0.0
+        uses: esphome/build-action@v7.1.0
         with:
           yaml-file: esp32_test_component.yaml
           version: stable
       - name: ESPHome ESP32 IDF
-        uses: esphome/build-action@v7.0.0
+        uses: esphome/build-action@v7.1.0
         with:
           yaml-file: esp32idf_test_component.yaml
           version: stable
       - name: ESPHome ESP8266
-        uses: esphome/build-action@v7.0.0
+        uses: esphome/build-action@v7.1.0
         with:
           yaml-file: esp8266_test_component.yaml
           version: stable
