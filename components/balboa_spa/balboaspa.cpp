@@ -613,7 +613,7 @@ namespace esphome
         void BalboaSpa::decodeState()
         {
             // 25:Flag Byte 20 - Set Temperature
-            float temp_read = 0.0;
+            float temp_read = 0.0f;
 
             if (spa_temp_scale == TEMP_SCALE::C)
             {
