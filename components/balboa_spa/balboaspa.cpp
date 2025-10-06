@@ -81,7 +81,7 @@ namespace esphome
 
             if (spa_temp_scale == TEMP_SCALE::C)
             {
-                target_temperature = target_temp * 2;
+                target_temperature = target_temp * 2.0f;
             }
             else if (spa_temp_scale == TEMP_SCALE::F)
             {
@@ -613,11 +613,11 @@ namespace esphome
         void BalboaSpa::decodeState()
         {
             // 25:Flag Byte 20 - Set Temperature
-            double temp_read = 0.0;
+            float temp_read = 0.0f;
 
             if (spa_temp_scale == TEMP_SCALE::C)
             {
-                temp_read = input_queue[25] / 2;
+                temp_read = input_queue[25] / 2.0f;
             }
             else if (spa_temp_scale == TEMP_SCALE::F)
             {
@@ -649,7 +649,7 @@ namespace esphome
             {
                 if (spa_temp_scale == TEMP_SCALE::C)
                 {
-                    temp_read = input_queue[7] / 2;
+                    temp_read = input_queue[7] / 2.0f;
                 }
                 else if (spa_temp_scale == TEMP_SCALE::F)
                 {
