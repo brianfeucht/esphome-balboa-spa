@@ -699,29 +699,29 @@ namespace esphome
                 spaState.highrange = spa_component_state;
             }
 
-            // 16:Flags Byte 11
-            spa_component_state = bitRead(input_queue[16], 1);
+            // 16:Flags Byte 11 - Multi-speed jet pumps (2 bits each: 0=OFF, 1=LOW, 2=HIGH)
+            spa_component_state = (input_queue[16] & 0x03); // Bits 0-1 for jet1
             if (spa_component_state != spaState.jet1)
             {
                 ESP_LOGD(TAG, "Spa/jet_1/state: %.0f", spa_component_state);
                 spaState.jet1 = spa_component_state;
             }
 
-            spa_component_state = bitRead(input_queue[16], 3);
+            spa_component_state = (input_queue[16] & 0x0C) >> 2; // Bits 2-3 for jet2
             if (spa_component_state != spaState.jet2)
             {
                 ESP_LOGD(TAG, "Spa/jet_2/state: %.0f", spa_component_state);
                 spaState.jet2 = spa_component_state;
             }
 
-            spa_component_state = bitRead(input_queue[16], 5);
+            spa_component_state = (input_queue[16] & 0x30) >> 4; // Bits 4-5 for jet3
             if (spa_component_state != spaState.jet3)
             {
                 ESP_LOGD(TAG, "Spa/jet_3/state: %.0f", spa_component_state);
                 spaState.jet3 = spa_component_state;
             }
 
-            spa_component_state = bitRead(input_queue[16], 7);
+            spa_component_state = (input_queue[16] & 0xC0) >> 6; // Bits 6-7 for jet4
             if (spa_component_state != spaState.jet4)
             {
                 ESP_LOGD(TAG, "Spa/jet_4/state: %.0f", spa_component_state);
