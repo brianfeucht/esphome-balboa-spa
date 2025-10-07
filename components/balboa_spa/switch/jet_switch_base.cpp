@@ -50,7 +50,17 @@ namespace esphome
                 }
                 else
                 {
-                    ESP_LOGW(tag_, "Spa/%s/switch: failed to turn OFF after %d attempts - spa may be in filter cycle or maintenance mode", jet_name_, MAX_TOGGLE_ATTEMPTS);
+                    // If we're failing in HIGH mode (2), do one more toggle to try to get to LOW mode (1)
+                    if (jet_raw_state >= 2.0)
+                    {
+                        this->discard_updates = this->discard_updates_config_;
+                        this->toggle_jet();
+                        ESP_LOGW(tag_, "Spa/%s/switch: failed to turn OFF after %d attempts, trying one final toggle from HIGH to LOW mode", jet_name_, MAX_TOGGLE_ATTEMPTS);
+                    }
+                    else
+                    {
+                        ESP_LOGW(tag_, "Spa/%s/switch: failed to turn OFF after %d attempts - spa may be in filter cycle or maintenance mode", jet_name_, MAX_TOGGLE_ATTEMPTS);
+                    }
                     this->setState = ToggleStateMaybe::DONT_KNOW;
                     this->toggle_attempts = 0;
                 }
