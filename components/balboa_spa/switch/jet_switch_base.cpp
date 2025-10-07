@@ -24,12 +24,14 @@ namespace esphome
             else if (this->setState == ToggleStateMaybe::ON && !jet_is_on)
             {
                 // Want ON but currently OFF - toggle to get to LOW speed
+                this->discard_updates = this->discard_updates_config_;
                 this->toggle_jet();
                 ESP_LOGD(tag_, "Spa/%s/switch: want ON, currently OFF (%.0f), toggling", jet_name_, jet_raw_state);
             }
             else if (this->setState == ToggleStateMaybe::OFF && jet_is_on)
             {
                 // Want OFF but currently ON (LOW or HIGH) - keep toggling until OFF
+                this->discard_updates = this->discard_updates_config_;
                 this->toggle_jet();
                 ESP_LOGD(tag_, "Spa/%s/switch: want OFF, currently ON (%.0f), toggling", jet_name_, jet_raw_state);
             }
@@ -57,9 +59,9 @@ namespace esphome
             if (jet_is_on != state)
             {
                 this->setState = state ? ToggleStateMaybe::ON : ToggleStateMaybe::OFF;
+                this->discard_updates = this->discard_updates_config_;
                 this->toggle_jet();
                 ESP_LOGD(tag_, "Spa/%s/switch: toggling, wants %s, discard_updates set to %d", jet_name_, TOGGLE_STATE_MAYBE_STRINGS[this->setState], this->discard_updates_config_);
-                this->discard_updates = this->discard_updates_config_;
             }
         }
 
