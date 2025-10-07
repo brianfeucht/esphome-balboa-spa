@@ -29,6 +29,8 @@ namespace esphome
             ToggleStateMaybe setState = ToggleStateMaybe::DONT_KNOW;
             uint8_t discard_updates = 0;
             uint8_t discard_updates_config_ = 10;
+            uint8_t toggle_attempts = 0;
+            static const uint8_t MAX_TOGGLE_ATTEMPTS = 5;
         };
 
     } // namespace balboa_spa

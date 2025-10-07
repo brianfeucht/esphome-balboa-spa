@@ -24,21 +24,42 @@ namespace esphome
             else if (this->setState == ToggleStateMaybe::ON && !jet_is_on)
             {
                 // Want ON but currently OFF - toggle to get to LOW speed
-                this->discard_updates = this->discard_updates_config_;
-                this->toggle_jet();
-                ESP_LOGD(tag_, "Spa/%s/switch: want ON, currently OFF (%.0f), toggling", jet_name_, jet_raw_state);
+                if (this->toggle_attempts < MAX_TOGGLE_ATTEMPTS)
+                {
+                    this->toggle_attempts++;
+                    this->discard_updates = this->discard_updates_config_;
+                    this->toggle_jet();
+                    ESP_LOGD(tag_, "Spa/%s/switch: want ON, currently OFF (%.0f), toggling (attempt %d/%d)", jet_name_, jet_raw_state, this->toggle_attempts, MAX_TOGGLE_ATTEMPTS);
+                }
+                else
+                {
+                    ESP_LOGW(tag_, "Spa/%s/switch: failed to turn ON after %d attempts - spa may be in filter cycle or maintenance mode", jet_name_, MAX_TOGGLE_ATTEMPTS);
+                    this->setState = ToggleStateMaybe::DONT_KNOW;
+                    this->toggle_attempts = 0;
+                }
             }
             else if (this->setState == ToggleStateMaybe::OFF && jet_is_on)
             {
                 // Want OFF but currently ON (LOW or HIGH) - keep toggling until OFF
-                this->discard_updates = this->discard_updates_config_;
-                this->toggle_jet();
-                ESP_LOGD(tag_, "Spa/%s/switch: want OFF, currently ON (%.0f), toggling", jet_name_, jet_raw_state);
+                if (this->toggle_attempts < MAX_TOGGLE_ATTEMPTS)
+                {
+                    this->toggle_attempts++;
+                    this->discard_updates = this->discard_updates_config_;
+                    this->toggle_jet();
+                    ESP_LOGD(tag_, "Spa/%s/switch: want OFF, currently ON (%.0f), toggling (attempt %d/%d)", jet_name_, jet_raw_state, this->toggle_attempts, MAX_TOGGLE_ATTEMPTS);
+                }
+                else
+                {
+                    ESP_LOGW(tag_, "Spa/%s/switch: failed to turn OFF after %d attempts - spa may be in filter cycle or maintenance mode", jet_name_, MAX_TOGGLE_ATTEMPTS);
+                    this->setState = ToggleStateMaybe::DONT_KNOW;
+                    this->toggle_attempts = 0;
+                }
             }
             else if (this->setState != ToggleStateMaybe::DONT_KNOW)
             {
                 // We've reached the desired state
                 this->setState = ToggleStateMaybe::DONT_KNOW;
+                this->toggle_attempts = 0;
                 ESP_LOGD(tag_, "Spa/%s/switch: reached desired state (%.0f), setState is now DONT_KNOW", jet_name_, jet_raw_state);
             }
         }
@@ -59,6 +80,7 @@ namespace esphome
             if (jet_is_on != state)
             {
                 this->setState = state ? ToggleStateMaybe::ON : ToggleStateMaybe::OFF;
+                this->toggle_attempts = 0; // Reset attempt counter for new request
                 this->discard_updates = this->discard_updates_config_;
                 this->toggle_jet();
                 ESP_LOGD(tag_, "Spa/%s/switch: toggling, wants %s, discard_updates set to %d", jet_name_, TOGGLE_STATE_MAYBE_STRINGS[this->setState], this->discard_updates_config_);
