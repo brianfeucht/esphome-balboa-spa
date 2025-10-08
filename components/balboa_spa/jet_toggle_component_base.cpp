@@ -76,9 +76,23 @@ namespace esphome
             }
             else
             {
-                // Max attempts reached, give up and sync with spa state
-                ESP_LOGW(tag, "Spa/%s: max toggle attempts (%d) reached, syncing with spa state %d",
-                         jet_name, this->max_toggle_attempts, jet_state);
+                // Max attempts reached
+                // Special case: If trying to turn OFF but stuck in HIGH mode (2), 
+                // do one final toggle to try to get to LOW mode (1)
+                if (target_state == 0 && jet_state >= 2)
+                {
+                    this->discard_updates = this->discard_updates_config;
+                    this->toggle_jet();
+                    ESP_LOGW(tag, "Spa/%s: failed to turn OFF after %d attempts, trying one final toggle from HIGH to LOW mode",
+                             jet_name, this->max_toggle_attempts);
+                }
+                else
+                {
+                    ESP_LOGW(tag, "Spa/%s: failed to reach target state after %d attempts - spa may be in filter cycle or maintenance mode",
+                             jet_name, this->max_toggle_attempts);
+                }
+                
+                // Reset state machine and sync with spa
                 this->desired_state = ToggleStateMaybe::DONT_KNOW;
                 this->toggle_attempts = 0;
                 current_state = jet_state;
