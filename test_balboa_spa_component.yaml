@@ -32,6 +32,26 @@ switch:
     blower:
       name: Blower
 
+fan:
+  - platform: balboa_spa
+    balboa_spa_id: test_spa
+    jet_1:
+      name: "Jet 1 Fan"
+      id: jet1_fan
+      max_toggle_attempts: 4
+    jet_2:
+      name: "Jet 2 Fan"
+      id: jet2_fan
+      discard_updates: 10
+    jet_3:
+      name: "Jet 3 Fan"
+      id: jet3_fan
+    jet_4:
+      name: "Jet 4 Fan"
+      id: jet4_fan
+      discard_updates: 5
+      max_toggle_attempts: 2
+
 climate:
   - platform: balboa_spa
     balboa_spa_id: test_spa

@@ -67,6 +67,25 @@ switch:
     blower:
       name: Blower
 
+# Fan platform for multi-speed jet control (recommended for jets with speed support)
+fan:
+  - platform: balboa_spa
+    balboa_spa_id: spa
+    jet_1:
+      name: "Jet 1"
+      id: jet1_fan
+      max_toggle_attempts: 5  # Optional: max attempts to reach desired state (default: 5)
+      discard_updates: 20     # Optional: state updates to ignore after each toggle (default: 20)
+    jet_2:
+      name: "Jet 2"
+      id: jet2_fan
+    jet_3:
+      name: "Jet 3"
+      id: jet3_fan
+    jet_4:
+      name: "Jet 4"
+      id: jet4_fan
+
 climate:
   - platform: balboa_spa
     balboa_spa_id: spa
@@ -143,6 +162,72 @@ button:
     disable_filter2:
       name: "Disable Filter 2"
 ```
+
+## Jet Control: Switch vs Fan Components
+
+This component provides two ways to control your spa jets, each with different capabilities:
+
+### Fan Components
+
+The **fan** platform provides full control over multi-speed jets with three distinct states:
+- **OFF** - Jet is completely off
+- **LOW** - Low speed (speed 1)
+- **HIGH** - High speed (speed 2)
+
+**Configuration:**
+```yaml
+fan:
+  - platform: balboa_spa
+    balboa_spa_id: spa
+    jet_1:
+      name: "Jet 1"
+      max_toggle_attempts: 5  # Optional, default: 5
+      discard_updates: 20     # Optional, default: 20
+```
+
+### Switch Components (Simple ON/OFF Control)
+
+The **switch** platform provides simple boolean control:
+- **OFF** - Jet is off
+- **ON** - Jet is on (typically LOW speed)
+
+**When to use switches:**
+- Your spa only supports simple ON/OFF jets (no multi-speed)
+- You prefer simple toggle behavior
+- You need backwards compatibility with existing automations
+
+**Configuration:**
+```yaml
+switch:
+  - platform: balboa_spa
+    balboa_spa_id: spa
+    jet1:
+      name: Jet1
+      max_toggle_attempts: 5  # Optional, default: 5
+      discard_updates: 20      # Optional, default: 20
+```
+
+### MAX_TOGGLE_ATTEMPTS Behavior
+
+Both switch and fan components support two configurable parameters:
+
+**`max_toggle_attempts`** (default: 5) - Maximum retry attempts when spa blocks state changes
+**`discard_updates`** (default: 20) - Number of state updates to ignore after each toggle command
+
+These work together to handle cases where the spa temporarily blocks state changes:
+
+- **Why it's needed:** During heating or filter cycles, the spa may prevent jets from turning off
+- **How it works:** If a state change is requested but not achieved, the component will retry on each spa state update
+- **Max attempts:** After reaching the maximum number of attempts, the component will sync with the actual spa state and stop retrying
+- **Typical value:** 5 attempts is usually sufficient (covers about 5-10 seconds)
+- **Discard updates:** After each toggle command, the component ignores the next 20 state updates to allow the spa to process the change
+
+**Example scenario:** If you try to turn off a jet during a heating cycle:
+1. Component sends toggle command
+2. Spa ignores the command (heating in progress)
+3. Component retries on next state update
+4. After heating completes, spa accepts the command
+5. Jet turns off successfully
 
 ## Troubleshooting
 
