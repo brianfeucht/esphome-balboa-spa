@@ -17,13 +17,8 @@ namespace esphome
 
             void update(const SpaState *spaState);
             void set_parent(BalboaSpa *parent);
-            void set_discard_updates(uint8_t value)
-            {
-                // Support both legacy name and new separate config
-                this->set_discard_updates_count(value);
-            }
+            void set_discard_updates(uint8_t value) { JetToggleComponentBase::set_discard_updates(value); }
             void set_max_toggle_attempts(uint8_t value) { JetToggleComponentBase::set_max_toggle_attempts(value); }
-            void set_discard_updates_count(uint8_t value) { JetToggleComponentBase::set_discard_updates(value); }
 
         protected:
             void write_state(bool state) override;
