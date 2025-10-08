@@ -54,6 +54,8 @@ switch:
     balboa_spa_id: spa
     jet1:
       name: Jet1
+      max_toggle_attempts: 5  # Optional: max attempts to reach desired state (default: 5)      
+      discard_updates: 5      # Optional: state updates to ignore after each toggle (default: 20)
     jet2:
       name: Jet2
     jet3:
