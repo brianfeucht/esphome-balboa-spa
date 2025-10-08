@@ -20,7 +20,7 @@ namespace esphome
             void set_discard_updates(uint8_t value)
             {
                 // Support both legacy name and new separate config
-                this->set_max_toggle_attempts(value);
+                this->set_discard_updates_count(value);
             }
             void set_max_toggle_attempts(uint8_t value) { JetToggleComponentBase::set_max_toggle_attempts(value); }
             void set_discard_updates_count(uint8_t value) { JetToggleComponentBase::set_discard_updates(value); }
