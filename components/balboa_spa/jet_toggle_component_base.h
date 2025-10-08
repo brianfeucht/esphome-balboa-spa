@@ -66,7 +66,7 @@ namespace esphome
             uint8_t toggle_attempts = 0;
             uint8_t max_toggle_attempts = 5;
             uint8_t discard_updates = 0;
-            uint8_t discard_updates_config = 5;
+            uint8_t discard_updates_config = 20;
         };
 
     } // namespace balboa_spa
