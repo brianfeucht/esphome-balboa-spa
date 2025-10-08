@@ -31,7 +31,8 @@ CONF_JET4 = "jet4"
 CONF_LIGHTS = "light"
 CONF_LIGHT2 = "light2"
 CONF_BLOWER = "blower"
-CONF_DISCARD_UPDATES = "discard_updates"
+CONF_DISCARD_UPDATES = "discard_updates"  
+CONF_MAX_TOGGLE_ATTEMPTS = "max_toggle_attempts"
 
 def jet_switch_schema(cls):
     return switch.switch_schema(
@@ -39,6 +40,7 @@ def jet_switch_schema(cls):
         icon=ICON_FAN,
         default_restore_mode="DISABLED",
     ).extend({
+        cv.Optional(CONF_MAX_TOGGLE_ATTEMPTS, default=5): cv.positive_int,
         cv.Optional(CONF_DISCARD_UPDATES, default=20): cv.positive_int,
     })
 
@@ -83,5 +85,7 @@ async def to_code(config):
         if conf := config.get(switch_type):
             sw_var = await switch.new_switch(conf)
             cg.add(sw_var.set_parent(parent))
+            if CONF_MAX_TOGGLE_ATTEMPTS in conf:
+                cg.add(sw_var.set_max_toggle_attempts(conf[CONF_MAX_TOGGLE_ATTEMPTS]))
             if CONF_DISCARD_UPDATES in conf:
                 cg.add(sw_var.set_discard_updates(conf[CONF_DISCARD_UPDATES]))

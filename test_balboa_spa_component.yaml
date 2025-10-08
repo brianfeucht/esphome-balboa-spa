@@ -11,13 +11,16 @@ balboa_spa:
   spa_temp_scale: F
   esphome_temp_scale: C
 
+# Example 1: Using switches for simple ON/OFF control (backwards compatible)
 switch:
   - platform: balboa_spa
     balboa_spa_id: test_spa
     jet1:
       name: Jet1
+      max_toggle_attempts: 5  # Optional: default is 5 (discard_updates still works for backwards compat)
     jet2:
       name: Jet2
+      discard_updates: 20 # Optional: default is 20
     jet3:
       name: Jet3
     jet4:
