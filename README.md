@@ -19,6 +19,10 @@ esp32:
   board: lolin_s2_mini
   framework: 
     type: arduino
+    # Required for ESP32-S2/S3/C3 boards with native USB (ESPHome 2025.10.0+)
+    platformio_options:
+      build_flags:
+        - "-DARDUINO_USB_CDC_ON_BOOT=1"
 
 external_components:
   - source:
@@ -230,6 +234,27 @@ These work together to handle cases where the spa temporarily blocks state chang
 5. Jet turns off successfully
 
 ## Troubleshooting
+
+### ESP32-S2/S3/C3 Boards with Native USB (ESPHome 2025.10.0+)
+
+**Important**: If you're using an ESP32-S2, ESP32-S3, or ESP32-C3 board with native USB support (e.g., `lolin_s2_mini`, `esp32-s3-devkitc-1`) with ESPHome 2025.10.0 or later, you **must** add the USB CDC build flag to your configuration:
+
+```yaml
+esp32:
+  board: lolin_s2_mini
+  framework: 
+    type: arduino
+    platformio_options:
+      build_flags:
+        - "-DARDUINO_USB_CDC_ON_BOOT=1"
+```
+
+**Why this is required**: ESPHome 2025.10.0 upgraded to arduino-esp32 3.1.0, which has a breaking change that requires this flag for boards with native USB support. Without it, compilation will fail with `USBSerial not declared` errors.
+
+**Note**: This flag is NOT needed for:
+- ESP32 classic boards (e.g., `esp32dev`, `nodemcu-32s`)
+- ESP-IDF framework (uses `type: esp-idf` instead of `type: arduino`)
+- ESP8266 boards
 
 ### UART RX Buffer Size
 
