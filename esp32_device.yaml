@@ -11,4 +11,3 @@ esp32:
   board: lolin_s2_mini
   framework: 
     type: arduino
-    platform_version: 6.10.0
