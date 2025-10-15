@@ -13,4 +13,4 @@ uart:
   parity: NONE
   stop_bits: 1
   baud_rate: 115200
-  rx_buffer_size: 128
+  rx_buffer_size: 512
