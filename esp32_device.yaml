@@ -4,8 +4,8 @@ esphome:
     name: balboa-spa-test-esp32
     build_path: .build/balboa_spa_test_esp32
     platformio_options:
-      build_flags:
-        - "-DARDUINO_USB_CDC_ON_BOOT=1"
+      board_build.extra_flags:
+        - "-DARDUINO_USB_CDC_ON_BOOT=0"
 
 esp32:
   board: lolin_s2_mini

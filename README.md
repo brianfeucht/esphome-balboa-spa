@@ -16,8 +16,8 @@ esphome:
   friendly_name: hottub
   # Required for ESP32-S2/S3/C3 boards with native USB (ESPHome 2025.10.0+)
   platformio_options:
-    build_flags:
-      - "-DARDUINO_USB_CDC_ON_BOOT=1"
+    board_build.extra_flags:
+      - "-DARDUINO_USB_CDC_ON_BOOT=0"
 
 esp32:
   board: lolin_s2_mini
@@ -243,8 +243,8 @@ These work together to handle cases where the spa temporarily blocks state chang
 esphome:
   name: your_device_name
   platformio_options:
-    build_flags:
-      - "-DARDUINO_USB_CDC_ON_BOOT=1"
+    board_build.extra_flags:
+      - "-DARDUINO_USB_CDC_ON_BOOT=0"
 
 esp32:
   board: lolin_s2_mini
@@ -252,7 +252,9 @@ esp32:
     type: arduino
 ```
 
-**Why this is required**: ESPHome 2025.10.0 upgraded to arduino-esp32 3.1.0, which has a breaking change that requires this flag for boards with native USB support. Without it, compilation will fail with `USBSerial not declared` errors.
+**Why this is required**: ESPHome 2025.10.0 upgraded to arduino-esp32 3.1.0, which has a breaking change affecting boards with native USB support. Setting `ARDUINO_USB_CDC_ON_BOOT=0` disables USB CDC on boot, forcing the board to use regular UART for Serial communication instead of USBSerial. Without this flag, compilation will fail with `USBSerial not declared` errors.
+
+**Technical explanation**: The ESP32-S2/S3/C3 boards have native USB hardware. By default, arduino-esp32 3.1.0 tries to use USB CDC (making `Serial` use `USBSerial`), but this requires additional configuration. Setting the flag to `0` disables this feature and uses the traditional UART-based Serial interface, which works with standard ESPHome configurations.
 
 **Note**: This flag is NOT needed for:
 - ESP32 classic boards (e.g., `esp32dev`, `nodemcu-32s`)
