@@ -14,15 +14,11 @@ I and multiple other users see a ton of CRC errors.  I've spent some time invest
 esphome:
   name: hottub
   friendly_name: hottub
-  # Required for ESP32-S2/S3/C3 boards with native USB (ESPHome 2025.10.0+)
-  platformio_options:
-    board_build.extra_flags:
-      - "-DARDUINO_USB_CDC_ON_BOOT=0"
 
 esp32:
   board: lolin_s2_mini
   framework: 
-    type: arduino
+    type: esp-idf
 
 external_components:
   - source:
