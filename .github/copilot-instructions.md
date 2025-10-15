@@ -168,6 +168,111 @@ balboa_spa:
 
 ## AI Development Workflow & Best Practices
 
+### Background Agent Test Build Requirements
+**CRITICAL**: Background agents MUST always perform test builds as part of any code modification workflow. This ensures component integrity and prevents breaking changes from being introduced.
+
+#### Mandatory Build Validation Steps
+1. **Before making changes**: Run initial build validation to establish baseline
+2. **After each significant change**: Validate builds continue to work
+3. **Before completing session**: Perform comprehensive build validation
+4. **Use automated workflow**: Leverage `.github/workflows/copilot-setup-steps.yml` for validation
+
+#### Test Build Execution Methods
+
+##### Method 1: GitHub Actions Workflow (Recommended)
+```bash
+# Trigger the copilot-setup-steps workflow via GitHub API or manual dispatch
+# This workflow uses the official esphome/build-action@v7.1.0 for consistent builds
+gh workflow run copilot-setup-steps.yml --field validate_all=true
+
+# Build only specific platforms
+gh workflow run copilot-setup-steps.yml --field esp32_only=true
+gh workflow run copilot-setup-steps.yml --field esp8266_only=true
+```
+
+##### Method 2: Local ESPHome Compilation
+```bash
+# Install ESPHome if not present
+pip install esphome
+
+# Validate all test configurations
+esphome compile esp32_test_component.yaml
+esphome compile esp32idf_test_component.yaml  
+esphome compile esp8266_test_component.yaml
+```
+
+##### Method 3: Quick Syntax Validation
+```bash
+# Fast syntax check without full compilation
+esphome config esp32_test_component.yaml
+esphome config esp32idf_test_component.yaml
+esphome config esp8266_test_component.yaml
+```
+
+#### Test Configuration Coverage
+The project includes comprehensive test configurations that MUST be validated:
+
+- **esp32_test_component.yaml**: ESP32 with Arduino framework
+- **esp32idf_test_component.yaml**: ESP32 with ESP-IDF framework  
+- **esp8266_test_component.yaml**: ESP8266 with Arduino framework
+
+Each configuration tests all component platforms:
+- Climate (thermostat functionality)
+- Switch (jets, lights, blower controls)
+- Fan (multi-speed jet controls)
+- Sensor (status monitoring)
+- Binary sensor (binary status indicators)
+- Text sensor (configuration and time display)
+- Button (control actions)
+- Text (configuration input)
+
+#### Build Failure Handling
+When builds fail, background agents MUST:
+
+1. **Identify root cause**: Parse compilation errors and warnings
+2. **Fix systematically**: Address issues in logical order
+3. **Verify incrementally**: Test fixes with targeted builds
+4. **Document changes**: Commit working fixes with clear messages
+5. **Full validation**: Ensure all configurations build before completion
+
+#### Integration with Development Workflow
+Background agents should integrate test builds into their standard workflow:
+
+1. **Assessment Phase**: Check current build status
+2. **Planning Phase**: Consider build impact of planned changes
+3. **Execution Phase**: Validate builds after each logical change group
+4. **Completion Phase**: Full build validation before session end
+
+#### Continuous Integration Alignment
+The copilot-setup-steps.yml workflow mirrors the main CI pipeline but provides:
+- **Official ESPHome Action**: Uses `esphome/build-action@v7.1.0` for consistent, reliable builds
+- **Manual trigger capability**: For background agent validation
+- **Flexible platform selection**: Build only specific configurations if needed
+- **Enhanced reporting**: Detailed analysis and artifact generation
+- **Fail-fast behavior**: Quick identification of issues
+- **Matrix strategy**: Parallel validation and builds for efficiency
+
+#### Performance Considerations
+- **Parallel builds**: The workflow builds platforms in parallel for speed
+- **Caching**: Leverages ESPHome build caching to reduce build times
+- **Selective building**: Can target specific platforms to save time during development
+- **Early validation**: Syntax checking before expensive compilation
+
+#### Documentation Requirements
+When build issues are encountered and resolved:
+1. **Document the issue**: Clear description of what failed
+2. **Explain the solution**: Why the fix works
+3. **Update patterns**: If it reveals a broader pattern issue
+4. **Commit message**: Include build validation status
+
+#### Success Metrics
+A successful background agent session should achieve:
+- ✅ All test configurations compile without errors
+- ✅ No new compiler warnings introduced
+- ✅ Component functionality preserved
+- ✅ Memory usage within acceptable bounds
+- ✅ Platform compatibility maintained
+
 ### Session Management & Context
 - **Start with current state assessment**: Always check git status, recent commits, and file modifications before making changes
 - **Use semantic_search first**: Understand the codebase structure before making targeted changes
