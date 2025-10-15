@@ -22,150 +22,66 @@ on:
         required: false
         default: false
         type: boolean
-      check_syntax:
-        description: 'Perform syntax validation before builds'
-        required: false
-        default: true
-        type: boolean
 
 env:
   ESPHOME_VERSION: "stable"
 
 jobs:
-  validation:
-    name: Pre-build Validation
+  copilot-setup-steps:
+    name: ESPHome Component Validation
     runs-on: ubuntu-latest
-    if: ${{ inputs.check_syntax == 'true' || inputs.check_syntax == true }}
-    strategy:
-      fail-fast: false
-      matrix:
-        config:
-          - name: "ESP32 Arduino"
-            file: "esp32_test_component.yaml"
-          - name: "ESP32 IDF"
-            file: "esp32idf_test_component.yaml"
-          - name: "ESP8266 Arduino"
-            file: "esp8266_test_component.yaml"
     
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
-        
-      - name: Validate ${{ matrix.config.name }} Configuration
+      
+      # Validate ESP32 Arduino configuration
+      - name: Validate ESP32 Arduino Configuration
+        if: ${{ inputs.validate_all == true || inputs.esp32_only == true }}
         uses: esphome/build-action@v7.1.0
         with:
-          yaml-file: ${{ matrix.config.file }}
+          yaml-file: esp32_test_component.yaml
           version: ${{ env.ESPHOME_VERSION }}
-
-  build-esp32:
-    name: Build ESP32 Configurations
-    runs-on: ubuntu-latest
-    needs: [validation]
-    if: |
-      always() && 
-      (needs.validation.result == 'success' || needs.validation.result == 'skipped') &&
-      (inputs.validate_all == 'true' || inputs.validate_all == true || inputs.esp32_only == 'true' || inputs.esp32_only == true) &&
-      (inputs.esp8266_only != 'true' && inputs.esp8266_only != true)
-    strategy:
-      fail-fast: false
-      matrix:
-        config:
-          - name: "ESP32 Arduino"
-            file: "esp32_test_component.yaml"
-          - name: "ESP32 IDF"
-            file: "esp32idf_test_component.yaml"
-    
-    steps:
-      - name: Checkout source code
-        uses: actions/checkout@v4
-        
-      - name: Build ${{ matrix.config.name }}
+      
+      # Validate ESP32 IDF configuration  
+      - name: Validate ESP32 IDF Configuration
+        if: ${{ inputs.validate_all == true || inputs.esp32_only == true }}
         uses: esphome/build-action@v7.1.0
         with:
-          yaml-file: ${{ matrix.config.file }}
+          yaml-file: esp32idf_test_component.yaml
           version: ${{ env.ESPHOME_VERSION }}
-
-  build-esp8266:
-    name: Build ESP8266 Configuration
-    runs-on: ubuntu-latest
-    needs: [validation]
-    if: |
-      always() && 
-      (needs.validation.result == 'success' || needs.validation.result == 'skipped') &&
-      (inputs.validate_all == 'true' || inputs.validate_all == true || inputs.esp8266_only == 'true' || inputs.esp8266_only == true) &&
-      (inputs.esp32_only != 'true' && inputs.esp32_only != true)
-    
-    steps:
-      - name: Checkout source code
-        uses: actions/checkout@v4
-        
-      - name: Build ESP8266 Arduino
+      
+      # Validate ESP8266 configuration
+      - name: Validate ESP8266 Configuration
+        if: ${{ inputs.validate_all == true || inputs.esp8266_only == true }}
         uses: esphome/build-action@v7.1.0
         with:
           yaml-file: esp8266_test_component.yaml
           version: ${{ env.ESPHOME_VERSION }}
-
-  component-analysis:
-    name: Component Analysis
-    runs-on: ubuntu-latest
-    needs: [validation]
-    if: always() && (needs.validation.result == 'success' || needs.validation.result == 'skipped')
-    
-    steps:
-      - name: Checkout source code
-        uses: actions/checkout@v4
-        
-      - name: Analyze component structure
+      
+      # Component analysis
+      - name: Analyze Component Structure
         run: |
-          echo "## Component Analysis Report" >> analysis_report.md
-          echo "" >> analysis_report.md
-          
-          echo "### Component Files:" >> analysis_report.md
-          find components/balboa_spa -name "*.cpp" -o -name "*.h" -o -name "*.py" | sort >> analysis_report.md
-          echo "" >> analysis_report.md
-          
-          echo "### Configuration Files:" >> analysis_report.md
-          ls -la *.yaml >> analysis_report.md
-          echo "" >> analysis_report.md
-          
-          echo "### External Component Structure:" >> analysis_report.md
-          echo "\`\`\`" >> analysis_report.md
-          find components/ -type f | sed 's/[^/]*\///g' | sort >> analysis_report.md
-          echo "\`\`\`" >> analysis_report.md
-
-  summary:
-    name: Build Summary
-    runs-on: ubuntu-latest
-    needs: [validation, build-esp32, build-esp8266, component-analysis]
-    if: always()
-    
-    steps:
-      - name: Generate Summary
-        run: |
-          echo "# ESPHome Balboa Spa Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "## ESPHome Balboa Spa Component Analysis" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
-          echo "## Job Results:" >> $GITHUB_STEP_SUMMARY
-          echo "- **Validation**: ${{ needs.validation.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **ESP32 Builds**: ${{ needs.build-esp32.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **ESP8266 Build**: ${{ needs.build-esp8266.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Component Analysis**: ${{ needs.component-analysis.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          
-          if [[ "${{ needs.validation.result }}" == "success" && "${{ needs.build-esp32.result }}" == "success" && "${{ needs.build-esp8266.result }}" == "success" ]]; then
-            echo "✅ **All builds completed successfully!**" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "The ESPHome Balboa Spa component is ready for deployment." >> $GITHUB_STEP_SUMMARY
-          else
-            echo "❌ **Some builds failed or were skipped.**" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "Please review the individual job logs for detailed error information." >> $GITHUB_STEP_SUMMARY
-          fi
-          
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "## Configuration Details:" >> $GITHUB_STEP_SUMMARY
+          echo "### Build Configuration:" >> $GITHUB_STEP_SUMMARY
           echo "- **ESPHome Version**: ${{ env.ESPHOME_VERSION }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Validate All**: ${{ inputs.validate_all }}" >> $GITHUB_STEP_SUMMARY
           echo "- **ESP32 Only**: ${{ inputs.esp32_only }}" >> $GITHUB_STEP_SUMMARY
           echo "- **ESP8266 Only**: ${{ inputs.esp8266_only }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Check Syntax**: ${{ inputs.check_syntax }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "### Component Files:" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          find components/balboa_spa -name "*.cpp" -o -name "*.h" -o -name "*.py" | sort >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "### Configuration Files:" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          ls -1 *.yaml >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "✅ **Component validation completed successfully!**" >> $GITHUB_STEP_SUMMARY
