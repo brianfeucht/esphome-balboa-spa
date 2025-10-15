@@ -40,7 +40,7 @@ uart:
   parity: NONE
   stop_bits: 1
   baud_rate: 115200
-  rx_buffer_size: 128
+  rx_buffer_size: 512
 
 balboa_spa:
   id: spa
@@ -230,6 +230,29 @@ These work together to handle cases where the spa temporarily blocks state chang
 5. Jet turns off successfully
 
 ## Troubleshooting
+
+### UART RX Buffer Size
+
+**Important**: The `rx_buffer_size` parameter in the UART configuration must be set appropriately for your ESP framework:
+
+- **ESP-IDF framework (esp32)**: The RX buffer size **must be greater than 128 bytes** (the hardware FIFO length). Using exactly 128 will cause boot loops with errors like:
+  - `uart rx buffer length error`
+  - `uart_driver_install failed: ESP_FAIL`
+  - `uart is marked FAILED: unspecified`
+
+- **Recommended value**: **512 bytes or higher** (512-1024 is a good balance between memory usage and reliability)
+- **Minimum value for ESP-IDF**: 256 bytes (but 512 is strongly recommended)
+
+```yaml
+uart:
+  id: spa_uart_bus
+  tx_pin: GPIO37
+  rx_pin: GPIO39
+  baud_rate: 115200
+  rx_buffer_size: 512  # Recommended: 512 or higher, minimum 256 for ESP-IDF
+```
+
+If you experience boot loops when using ESP-IDF framework, increase your `rx_buffer_size` to 512 or higher.
 
 ### CRC Errors
 
