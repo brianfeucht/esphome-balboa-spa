@@ -7,6 +7,13 @@ on:
   pull_request:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      esphome_version:
+        description: 'ESPHome version to test (e.g., "stable", "dev", "2025.11.0")'
+        required: false
+        default: 'stable'
+        type: string
 
 jobs:
  ci:
@@ -20,14 +27,14 @@ jobs:
         uses: esphome/build-action@v7.1.0
         with:
           yaml-file: esp32_test_component.yaml
-          version: stable
+          version: ${{ inputs.esphome_version || 'stable' }}
       - name: ESPHome ESP32 IDF
         uses: esphome/build-action@v7.1.0
         with:
           yaml-file: esp32idf_test_component.yaml
-          version: stable
+          version: ${{ inputs.esphome_version || 'stable' }}
       - name: ESPHome ESP8266
         uses: esphome/build-action@v7.1.0
         with:
           yaml-file: esp8266_test_component.yaml
-          version: stable
+          version: ${{ inputs.esphome_version || 'stable' }}
