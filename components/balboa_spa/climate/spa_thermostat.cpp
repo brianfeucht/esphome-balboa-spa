@@ -12,7 +12,7 @@ namespace esphome
         {
             auto traits = climate::ClimateTraits();
             traits.set_supported_modes({climate::CLIMATE_MODE_OFF, climate::ClimateMode::CLIMATE_MODE_HEAT});
-            traits.add_feature_flags(climate::CLIMATE_FEATURE_SUPPORTS_ACTION | climate::CLIMATE_FEATURE_SUPPORTS_CURRENT_TEMPERATURE);
+            traits.add_feature_flags(climate::CLIMATE_SUPPORTS_ACTION | climate::CLIMATE_SUPPORTS_CURRENT_TEMPERATURE);
             traits.set_supported_presets({climate::ClimatePreset::CLIMATE_PRESET_HOME, climate::ClimatePreset::CLIMATE_PRESET_ECO});
             return traits;
         }
