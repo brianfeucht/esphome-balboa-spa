@@ -34,3 +34,6 @@
 # Python cache
 __pycache__
 /.esphome
+
+# CodeQL temporary files
+_codeql_detected_source_root
