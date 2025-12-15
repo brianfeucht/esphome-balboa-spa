@@ -26,7 +26,6 @@ namespace esphome
         {
             ESP_LOGD(TAG, "Switch/write_state: Setting highrange to %s", state ? "HIGH" : "LOW");
             spa->set_highrange(state);
-            this->publish_state(state);
         }
 
     } // namespace balboa_spa
