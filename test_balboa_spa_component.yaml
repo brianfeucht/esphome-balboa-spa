@@ -31,6 +31,8 @@ switch:
       name: Second Lights
     blower:
       name: Blower
+    highrange:
+      name: Temperature Mode
 
 fan:
   - platform: balboa_spa
