@@ -6,6 +6,7 @@ from esphome.const import (
     ICON_FAN,
     ICON_LIGHTBULB,
     ICON_GRAIN,
+    ICON_THERMOMETER,
 )
 
 from .. import (
@@ -23,6 +24,7 @@ Jet4Switch = balboa_spa_ns.class_("Jet4Switch", switch.Switch)
 LightsSwitch = balboa_spa_ns.class_("LightsSwitch", switch.Switch)
 Light2Switch = balboa_spa_ns.class_("Light2Switch", switch.Switch)
 BlowerSwitch = balboa_spa_ns.class_("BlowerSwitch", switch.Switch)
+HighrangeSwitch = balboa_spa_ns.class_("HighrangeSwitch", switch.Switch)
 
 CONF_JET1 = "jet1"
 CONF_JET2 = "jet2"
@@ -31,6 +33,7 @@ CONF_JET4 = "jet4"
 CONF_LIGHTS = "light"
 CONF_LIGHT2 = "light2"
 CONF_BLOWER = "blower"
+CONF_HIGHRANGE = "highrange"
 CONF_DISCARD_UPDATES = "discard_updates"  
 CONF_MAX_TOGGLE_ATTEMPTS = "max_toggle_attempts"
 
@@ -68,6 +71,11 @@ CONFIG_SCHEMA = cv.Schema(
         ).extend({
             cv.Optional(CONF_DISCARD_UPDATES, default=20): cv.positive_int,
         }),
+        cv.Optional(CONF_HIGHRANGE): switch.switch_schema(
+            HighrangeSwitch,
+            icon=ICON_THERMOMETER,
+            default_restore_mode="DISABLED",
+        ),
     })
 
 async def to_code(config):
@@ -81,6 +89,7 @@ async def to_code(config):
         (CONF_BLOWER, BlowerSwitch),
         (CONF_LIGHTS, LightsSwitch),
         (CONF_LIGHT2, Light2Switch),
+        (CONF_HIGHRANGE, HighrangeSwitch),
     ]:
         if conf := config.get(switch_type):
             sw_var = await switch.new_switch(conf)
