@@ -6,7 +6,7 @@ namespace esphome
     {
         static const char *TAG = "BalboaSpa.highrange_switch";
 
-        void HighrangeSwitch::update(const SpaState *spaState)
+        void HighrangeSwitch::update(SpaState *spaState)
         {
             if (this->state != spaState->highrange)
             {
@@ -18,7 +18,7 @@ namespace esphome
         void HighrangeSwitch::set_parent(BalboaSpa *parent)
         {
             spa = parent;
-            parent->register_listener([this](const SpaState *spaState)
+            parent->register_listener([this](SpaState *spaState)
                                       { this->update(spaState); });
         }
 
