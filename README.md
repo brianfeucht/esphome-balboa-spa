@@ -156,7 +156,7 @@ text_sensor:
 
 button:
   - platform: balboa_spa
-    balboa_spa_id: test_spa
+    balboa_spa_id: spa
     sync_time:
       name: "Sync Spa Time"
     disable_filter2:
