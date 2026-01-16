@@ -21,7 +21,7 @@ namespace esphome
             if (last_received_time + 10000 < now)
             {
                 ESP_LOGW(TAG, "No new message since %d Seconds! Mark as dead!", (now - last_received_time) / 1000);
-                status_set_error("No Communication with Balboa Mainboard!");
+                status_set_error(LOG_STR("No Communication with Balboa Mainboard!"));
                 client_id = 0;
             }
             else if (status_has_error())
