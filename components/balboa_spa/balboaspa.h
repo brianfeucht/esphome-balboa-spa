@@ -49,6 +49,7 @@ namespace esphome
       SpaConfig get_current_config();
       SpaState *get_current_state();
       SpaFilterSettings *get_current_filter_settings();
+      SpaFaultLog *get_current_fault_log();
 
       void set_temp(float temp);
       void set_hour(int hour);
@@ -78,11 +79,13 @@ namespace esphome
 
       void register_listener(const std::function<void(SpaState *)> &func) { this->listeners_.push_back(func); }
       void register_filter_listener(const std::function<void(SpaFilterSettings *)> &func) { this->filter_listeners_.push_back(func); }
+      void register_fault_log_listener(const std::function<void(SpaFaultLog *)> &func) { this->fault_log_listeners_.push_back(func); }
 
       bool get_restmode();
       void toggle_heat();
       void request_config_update();
       void request_filter_settings_update();
+      void request_fault_log_update();
 
     private:
       CircularBuffer<uint8_t, 100> input_queue;
@@ -116,6 +119,7 @@ namespace esphome
 
       std::vector<std::function<void(SpaState *)>> listeners_;
       std::vector<std::function<void(SpaFilterSettings *)>> filter_listeners_;
+      std::vector<std::function<void(SpaFaultLog *)>> fault_log_listeners_;
 
       char config_request_status = 0;         // stages: 0-> want it; 1-> requested it; 2-> got it; 3-> further processed it
       char faultlog_request_status = 0;       // stages: 0-> want it; 1-> requested it; 2-> got it; 3-> further processed it
