@@ -192,8 +192,8 @@ The component provides comprehensive fault monitoring capabilities to help diagn
 - `fault_days_ago`: Number of days since the fault occurred
 
 **Text Sensors:**
-- `fault_message`: Human-readable description of the fault
-- `fault_log_time`: Formatted timestamp of when the fault occurred (e.g., "Today 14:30", "2 days ago 09:15")
+- `fault_message`: Human-readable description of the fault (automatically converts fault codes to messages - see fault codes table below)
+- `fault_log_time`: ISO 8601 formatted timestamp of when the fault occurred (e.g., "2026-01-20T15:52:21")
 
 ### Request Fault Log Button
 
@@ -226,6 +226,8 @@ The following fault codes are recognized by the component:
 | 37 | Standby Mode (Hold Mode) |
 
 **Note:** The spa only stores the most recent fault entry. When a new fault occurs, it overwrites the previous entry.
+
+**Tip:** Use the `fault_message` text sensor to automatically get the human-readable fault description instead of manually looking up fault codes in this table.
 
 ## Jet Control: Switch vs Fan Components
 
