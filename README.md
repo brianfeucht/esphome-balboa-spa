@@ -108,6 +108,15 @@ sensor:
       name: Rest Mode
     heatstate:
       name: Heat State
+    # Fault log sensors (optional)
+    fault_code:
+      name: Fault Code
+    fault_total_entries:
+      name: Fault Total Entries
+    fault_current_entry:
+      name: Fault Current Entry
+    fault_days_ago:
+      name: Fault Days Ago
 
 binary_sensor:
   - platform: balboa_spa
@@ -153,6 +162,11 @@ text_sensor:
       name: "Filter 1 Config"
     filter2_config:
       name: "Filter 2 Config"
+    # Fault log text sensors (optional)
+    fault_message:
+      name: "Fault Message"
+    fault_log_time:
+      name: "Fault Log Time"
 
 button:
   - platform: balboa_spa
@@ -161,7 +175,57 @@ button:
       name: "Sync Spa Time"
     disable_filter2:
       name: "Disable Filter 2"
+    request_fault_log:
+      name: "Request Fault Log"
 ```
+
+## Fault Monitoring
+
+The component provides comprehensive fault monitoring capabilities to help diagnose spa issues:
+
+### Fault Sensors
+
+**Numeric Sensors:**
+- `fault_code`: The numeric fault code (see fault codes table below)
+- `fault_total_entries`: Total number of fault log entries stored in the spa
+- `fault_current_entry`: The entry number of the current fault (0-23)
+- `fault_days_ago`: Number of days since the fault occurred
+
+**Text Sensors:**
+- `fault_message`: Human-readable description of the fault
+- `fault_log_time`: Formatted timestamp of when the fault occurred (e.g., "Today 14:30", "2 days ago 09:15")
+
+### Request Fault Log Button
+
+The `request_fault_log` button manually triggers a fault log update from the spa. The fault log is automatically retrieved during startup, but this button allows you to refresh the fault information on demand.
+
+### Fault Codes
+
+The following fault codes are recognized by the component:
+
+| Code | Message |
+|------|---------|
+| 15 | Sensors are out of sync |
+| 16 | The water flow is low |
+| 17 | The water flow has failed |
+| 18 | The settings have been reset |
+| 19 | Priming Mode |
+| 20 | The clock has failed |
+| 21 | The settings have been reset |
+| 22 | Program memory failure |
+| 26 | Sensors are out of sync -- Call for service |
+| 27 | The heater is dry |
+| 28 | The heater may be dry |
+| 29 | The water is too hot |
+| 30 | The heater is too hot |
+| 31 | Sensor A Fault |
+| 32 | Sensor B Fault |
+| 34 | A pump may be stuck on |
+| 35 | Hot fault |
+| 36 | The GFCI test failed |
+| 37 | Standby Mode (Hold Mode) |
+
+**Note:** The spa only stores the most recent fault entry. When a new fault occurs, it overwrites the previous entry.
 
 ## Jet Control: Switch vs Fan Components
 
