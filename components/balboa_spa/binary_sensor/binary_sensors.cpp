@@ -56,7 +56,7 @@ namespace esphome
         void BalboaSpaBinarySensors::update(SpaState *spaState)
         {
             bool sensor_state_value;
-            if (spa == nullptr || (!spa->is_communicating() && sensor_type != BalboaSpaBinarySensorType::CONNECTED))
+            if (spa == nullptr || spaState == nullptr || (!spa->is_communicating() && sensor_type != BalboaSpaBinarySensorType::CONNECTED))
             {
                 this->publish_state(NAN);
                 return;
@@ -68,6 +68,12 @@ namespace esphome
                 sensor_type == BalboaSpaBinarySensorType::FILTER2_RUNNING)
             {
                 filterSettings = spa->get_current_filter_settings();
+                if (filterSettings == nullptr)
+                {
+                    // Filter settings not available yet
+                    this->publish_state(NAN);
+                    return;
+                }
             }
 
             uint8_t state_value = 0;
