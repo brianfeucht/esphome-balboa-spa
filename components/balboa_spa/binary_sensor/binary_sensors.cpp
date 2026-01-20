@@ -8,6 +8,41 @@ namespace esphome
 
         static const char *TAG = "BalboaSpa.binary_sensors";
 
+        /**
+         * Helper function to check if a filter cycle is currently running
+         * @param current_hour Current spa hour (0-23)
+         * @param current_minute Current spa minute (0-59)
+         * @param start_hour Filter start hour (0-23)
+         * @param start_minute Filter start minute (0-59)
+         * @param duration_hour Filter duration hours (0-23)
+         * @param duration_minute Filter duration minutes (0-59)
+         * @return true if filter should be running, false otherwise
+         */
+        static bool is_filter_running(uint8_t current_hour, uint8_t current_minute,
+                                       uint8_t start_hour, uint8_t start_minute,
+                                       uint8_t duration_hour, uint8_t duration_minute)
+        {
+            // Convert times to total minutes since midnight for easier comparison
+            int current_minutes = current_hour * 60 + current_minute;
+            int start_minutes = start_hour * 60 + start_minute;
+            int duration_total_minutes = duration_hour * 60 + duration_minute;
+            int end_minutes = start_minutes + duration_total_minutes;
+
+            // Handle wrap-around midnight case
+            if (end_minutes >= 1440) // 1440 = 24 * 60 (minutes in a day)
+            {
+                // Filter cycle wraps past midnight
+                // Running if: current >= start OR current < (end - 1440)
+                return (current_minutes >= start_minutes) || (current_minutes < (end_minutes - 1440));
+            }
+            else
+            {
+                // Normal case: filter cycle within same day
+                // Running if: start <= current < end
+                return (current_minutes >= start_minutes) && (current_minutes < end_minutes);
+            }
+        }
+
         void BalboaSpaBinarySensors::set_parent(BalboaSpa *parent)
         {
             this->spa = parent;
@@ -57,6 +92,32 @@ namespace esphome
             case BalboaSpaBinarySensorType::CONNECTED:
                 sensor_state_value = spa->is_communicating();
                 break;
+            case BalboaSpaBinarySensorType::FILTER1_RUNNING:
+            {
+                auto filterSettings = spa->get_current_filter_settings();
+                sensor_state_value = is_filter_running(
+                    spaState->hour, spaState->minutes,
+                    filterSettings->filter1_hour, filterSettings->filter1_minute,
+                    filterSettings->filter1_duration_hour, filterSettings->filter1_duration_minute);
+                break;
+            }
+            case BalboaSpaBinarySensorType::FILTER2_RUNNING:
+            {
+                auto filterSettings = spa->get_current_filter_settings();
+                // Filter 2 can only be running if it's enabled
+                if (filterSettings->filter2_enable)
+                {
+                    sensor_state_value = is_filter_running(
+                        spaState->hour, spaState->minutes,
+                        filterSettings->filter2_hour, filterSettings->filter2_minute,
+                        filterSettings->filter2_duration_hour, filterSettings->filter2_duration_minute);
+                }
+                else
+                {
+                    sensor_state_value = false;
+                }
+                break;
+            }
             default:
                 ESP_LOGD(TAG, "Spa/BSensors/UnknownSensorType: SensorType Number: %d", sensor_type);
                 // Unknown enum value. Ignore

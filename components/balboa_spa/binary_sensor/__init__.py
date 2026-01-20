@@ -25,6 +25,8 @@ CONF_CIRCULATION = "circulation"
 CONF_RESTMODE = "restmode"
 CONF_HEATSTATE = "heatstate"
 CONF_CONNECTED = "connected"
+CONF_FILTER1_RUNNING = "filter1_running"
+CONF_FILTER2_RUNNING = "filter2_running"
 
 CONFIG_SCHEMA = cv.Schema(
     {
@@ -58,12 +60,24 @@ CONFIG_SCHEMA = cv.Schema(
             device_class=DEVICE_CLASS_CONNECTIVITY,
             entity_category=ENTITY_CATEGORY_DIAGNOSTIC
         ),
+        cv.Optional(CONF_FILTER1_RUNNING): binary_sensor.binary_sensor_schema(
+            SpaSensor,
+            icon="mdi:air-filter",
+            device_class=DEVICE_CLASS_POWER,
+            entity_category=ENTITY_CATEGORY_DIAGNOSTIC
+        ),
+        cv.Optional(CONF_FILTER2_RUNNING): binary_sensor.binary_sensor_schema(
+            SpaSensor,
+            icon="mdi:air-filter",
+            device_class=DEVICE_CLASS_POWER,
+            entity_category=ENTITY_CATEGORY_DIAGNOSTIC
+        ),
     })
 
 async def to_code(config):
     parent = await cg.get_variable(config[CONF_SPA_ID])
 
-    for sensor_type in [CONF_BLOWER, CONF_HIGHRANGE, CONF_CIRCULATION, CONF_RESTMODE, CONF_HEATSTATE, CONF_CONNECTED]:
+    for sensor_type in [CONF_BLOWER, CONF_HIGHRANGE, CONF_CIRCULATION, CONF_RESTMODE, CONF_HEATSTATE, CONF_CONNECTED, CONF_FILTER1_RUNNING, CONF_FILTER2_RUNNING]:
         if conf := config.get(sensor_type):
             var = await binary_sensor.new_binary_sensor(conf)
             cg.add(var.set_parent(parent))

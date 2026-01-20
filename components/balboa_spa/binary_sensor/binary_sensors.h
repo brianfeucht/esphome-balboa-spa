@@ -21,7 +21,9 @@ namespace esphome
         CIRCULATION,
         RESTMODE,
         HEATSTATE,
-        CONNECTED
+        CONNECTED,
+        FILTER1_RUNNING,
+        FILTER2_RUNNING
       };
 
     public:
