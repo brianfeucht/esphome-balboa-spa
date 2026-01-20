@@ -11,7 +11,8 @@ from .. import (
 from esphome.const import (
     DEVICE_CLASS_CONNECTIVITY,
     ENTITY_CATEGORY_DIAGNOSTIC,
-    DEVICE_CLASS_POWER
+    DEVICE_CLASS_POWER,
+    DEVICE_CLASS_RUNNING
 )
 
 DEPENDENCIES = ["balboa_spa"]
@@ -63,13 +64,13 @@ CONFIG_SCHEMA = cv.Schema(
         cv.Optional(CONF_FILTER1_RUNNING): binary_sensor.binary_sensor_schema(
             SpaSensor,
             icon="mdi:air-filter",
-            device_class=DEVICE_CLASS_POWER,
+            device_class=DEVICE_CLASS_RUNNING,
             entity_category=ENTITY_CATEGORY_DIAGNOSTIC
         ),
         cv.Optional(CONF_FILTER2_RUNNING): binary_sensor.binary_sensor_schema(
             SpaSensor,
             icon="mdi:air-filter",
-            device_class=DEVICE_CLASS_POWER,
+            device_class=DEVICE_CLASS_RUNNING,
             entity_category=ENTITY_CATEGORY_DIAGNOSTIC
         ),
     })
