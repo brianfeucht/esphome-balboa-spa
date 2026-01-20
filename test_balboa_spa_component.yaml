@@ -92,6 +92,10 @@ binary_sensor:
       name: Heat State
     connected:
       name: Connected
+    filter1_running:
+      name: Filter 1 Running
+    filter2_running:
+      name: Filter 2 Running
 
 text_sensor:
   - platform: balboa_spa
