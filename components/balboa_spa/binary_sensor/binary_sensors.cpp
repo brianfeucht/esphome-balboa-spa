@@ -7,6 +7,9 @@ namespace esphome
     {
 
         static const char *TAG = "BalboaSpa.binary_sensors";
+        
+        // Constant for time calculations
+        static constexpr int MINUTES_PER_DAY = 24 * 60; // 1440 minutes in a day
 
         /**
          * Helper function to check if a filter cycle is currently running
@@ -22,9 +25,6 @@ namespace esphome
                                        uint8_t start_hour, uint8_t start_minute,
                                        uint8_t duration_hour, uint8_t duration_minute)
         {
-            // Constants for time calculations
-            static constexpr int MINUTES_PER_DAY = 24 * 60; // 1440 minutes in a day
-
             // Convert times to total minutes since midnight for easier comparison
             const int current_minutes = current_hour * 60 + current_minute;
             const int start_minutes = start_hour * 60 + start_minute;
@@ -62,6 +62,14 @@ namespace esphome
                 return;
             }
 
+            // Get filter settings once if needed for filter-related sensors
+            SpaFilterSettings *filterSettings = nullptr;
+            if (sensor_type == BalboaSpaBinarySensorType::FILTER1_RUNNING ||
+                sensor_type == BalboaSpaBinarySensorType::FILTER2_RUNNING)
+            {
+                filterSettings = spa->get_current_filter_settings();
+            }
+
             uint8_t state_value = 0;
             switch (sensor_type)
             {
@@ -97,7 +105,6 @@ namespace esphome
                 break;
             case BalboaSpaBinarySensorType::FILTER1_RUNNING:
             {
-                auto filterSettings = spa->get_current_filter_settings();
                 sensor_state_value = is_filter_running(
                     spaState->hour, spaState->minutes,
                     filterSettings->filter1_hour, filterSettings->filter1_minute,
@@ -106,7 +113,6 @@ namespace esphome
             }
             case BalboaSpaBinarySensorType::FILTER2_RUNNING:
             {
-                auto filterSettings = spa->get_current_filter_settings();
                 // Filter 2 can only be running if it's enabled
                 if (filterSettings->filter2_enable)
                 {
