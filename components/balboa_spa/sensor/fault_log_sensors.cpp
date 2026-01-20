@@ -16,7 +16,7 @@ namespace esphome
 
         void BalboaSpaFaultLogSensors::update(SpaFaultLog *spaFaultLog)
         {
-            uint8_t sensor_state_value;
+            uint8_t sensor_state_value = 0; // Initialize to avoid undefined behavior
 
             switch (sensor_type)
             {
@@ -33,7 +33,7 @@ namespace esphome
                 sensor_state_value = spaFaultLog->days_ago;
                 break;
             default:
-                ESP_LOGD(TAG, "Spa/FaultLogSensors/UnknownSensorType: SensorType Number: %d", sensor_type);
+                ESP_LOGD(TAG, "Spa/FaultLogSensors/UnknownSensorType: SensorType Number: %u", static_cast<uint8_t>(sensor_type));
                 // Unknown enum value. Ignore
                 return;
             }

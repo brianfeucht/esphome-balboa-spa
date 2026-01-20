@@ -21,6 +21,7 @@ namespace esphome
                 spaFaultLog->hour != last_hour_ || 
                 spaFaultLog->minutes != last_minutes_)
             {
+                // Buffer size: max length is "255 days ago 23:59" (21 chars) + null terminator
                 char buf[32];
                 if (spaFaultLog->days_ago == 0)
                 {
