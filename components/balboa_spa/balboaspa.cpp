@@ -56,6 +56,7 @@ namespace esphome
         SpaConfig BalboaSpa::get_current_config() { return spaConfig; }
         SpaState *BalboaSpa::get_current_state() { return &spaState; }
         SpaFilterSettings *BalboaSpa::get_current_filter_settings() { return &spaFilterSettings; }
+        SpaFaultLog *BalboaSpa::get_current_fault_log() { return &spaFaultLog; }
 
         void BalboaSpa::set_temp(float temp)
         {
@@ -126,6 +127,12 @@ namespace esphome
         {
             ESP_LOGD(TAG, "Requesting spa filter settings update");
             filtersettings_request_status = 0; // Reset to request filter settings again
+        }
+
+        void BalboaSpa::request_fault_log_update()
+        {
+            ESP_LOGD(TAG, "Requesting spa fault log update");
+            faultlog_request_status = 0; // Reset to request fault log again
         }
 
         void BalboaSpa::set_hour(int hour)
@@ -888,6 +895,12 @@ namespace esphome
             ESP_LOGD(TAG, "Spa/fault/Minutes: %d", spaFaultLog.minutes);
             faultlog_request_status = 2;
             // ESP_LOGD(TAG, "Spa/debug/faultlog_request_status: have the faultlog, #2");
+
+            // Notify fault log listeners
+            for (const auto &listener : this->fault_log_listeners_)
+            {
+                listener(&spaFaultLog);
+            }
 
             // Update CRC state to prevent reprocessing the same message
             last_state_crc = input_queue[input_queue[1]];
