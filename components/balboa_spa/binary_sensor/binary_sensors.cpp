@@ -22,18 +22,21 @@ namespace esphome
                                        uint8_t start_hour, uint8_t start_minute,
                                        uint8_t duration_hour, uint8_t duration_minute)
         {
+            // Constants for time calculations
+            static constexpr int MINUTES_PER_DAY = 24 * 60; // 1440 minutes in a day
+
             // Convert times to total minutes since midnight for easier comparison
-            int current_minutes = current_hour * 60 + current_minute;
-            int start_minutes = start_hour * 60 + start_minute;
-            int duration_total_minutes = duration_hour * 60 + duration_minute;
-            int end_minutes = start_minutes + duration_total_minutes;
+            const int current_minutes = current_hour * 60 + current_minute;
+            const int start_minutes = start_hour * 60 + start_minute;
+            const int duration_total_minutes = duration_hour * 60 + duration_minute;
+            const int end_minutes = start_minutes + duration_total_minutes;
 
             // Handle wrap-around midnight case
-            if (end_minutes >= 1440) // 1440 = 24 * 60 (minutes in a day)
+            if (end_minutes >= MINUTES_PER_DAY)
             {
                 // Filter cycle wraps past midnight
-                // Running if: current >= start OR current < (end - 1440)
-                return (current_minutes >= start_minutes) || (current_minutes < (end_minutes - 1440));
+                // Running if: current >= start OR current < (end - MINUTES_PER_DAY)
+                return (current_minutes >= start_minutes) || (current_minutes < (end_minutes - MINUTES_PER_DAY));
             }
             else
             {
