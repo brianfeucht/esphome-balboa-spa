@@ -4,7 +4,7 @@ namespace esphome
 {
     namespace balboa_spa
     {
-        static const char *TAG = "Filter2Switch";
+        static const char *TAG = "balboa_spa.switch";
 
         void Filter2Switch::update(SpaFilterSettings *filterSettings)
         {
