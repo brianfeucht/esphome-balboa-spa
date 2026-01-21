@@ -45,6 +45,9 @@ namespace esphome
                     settings->filter2_duration_hour,
                     settings->filter2_duration_minute
                 );
+                ESP_LOGI(TAG, "Filter 2 enabled with start time %02d:%02d and duration %02d:%02d", 
+                         settings->filter2_hour, settings->filter2_minute,
+                         settings->filter2_duration_hour, settings->filter2_duration_minute);
                 // Request fresh filter settings to ensure switch state syncs promptly
                 this->parent_->request_filter_settings_update();
             }
@@ -52,6 +55,7 @@ namespace esphome
             {
                 // User wants to turn OFF filter 2
                 this->parent_->disable_filter2();
+                ESP_LOGI(TAG, "Filter 2 disabled");
                 // Request fresh filter settings to ensure switch state syncs promptly
                 this->parent_->request_filter_settings_update();
             }
