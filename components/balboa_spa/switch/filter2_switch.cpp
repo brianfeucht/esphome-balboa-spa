@@ -45,11 +45,15 @@ namespace esphome
                     settings->filter2_duration_hour,
                     settings->filter2_duration_minute
                 );
+                // Request fresh filter settings to ensure switch state syncs promptly
+                this->parent_->request_filter_settings_update();
             }
             else
             {
                 // User wants to turn OFF filter 2
                 this->parent_->disable_filter2();
+                // Request fresh filter settings to ensure switch state syncs promptly
+                this->parent_->request_filter_settings_update();
             }
         }
 
