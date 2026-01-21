@@ -20,7 +20,7 @@ namespace esphome
             void write_state(bool state) override;
 
         private:
-            BalboaSpa *parent_;
+            BalboaSpa *spa;
             static const char *TAG;
         };
 

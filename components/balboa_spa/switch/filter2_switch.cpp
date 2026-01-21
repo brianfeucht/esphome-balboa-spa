@@ -16,7 +16,7 @@ namespace esphome
 
         void Filter2Switch::set_parent(BalboaSpa *parent)
         {
-            this->parent_ = parent;
+            spa = parent;
             // Subscribe to filter settings updates to sync switch state
             parent->register_filter_listener([this](SpaFilterSettings *filterSettings) {
                 this->update(filterSettings);
@@ -25,7 +25,7 @@ namespace esphome
 
         void Filter2Switch::write_state(bool state)
         {
-            SpaFilterSettings *settings = this->parent_->get_current_filter_settings();
+            SpaFilterSettings *settings = spa->get_current_filter_settings();
             
             if (state)
             {
@@ -39,7 +39,7 @@ namespace esphome
                 }
 
                 // Enable filter 2 with the current settings
-                this->parent_->set_filter2_config(
+                spa->set_filter2_config(
                     settings->filter2_hour,
                     settings->filter2_minute,
                     settings->filter2_duration_hour,
@@ -49,15 +49,15 @@ namespace esphome
                          settings->filter2_hour, settings->filter2_minute,
                          settings->filter2_duration_hour, settings->filter2_duration_minute);
                 // Request fresh filter settings to ensure switch state syncs promptly
-                this->parent_->request_filter_settings_update();
+                spa->request_filter_settings_update();
             }
             else
             {
                 // User wants to turn OFF filter 2
-                this->parent_->disable_filter2();
+                spa->disable_filter2();
                 ESP_LOGI(TAG, "Filter 2 disabled");
                 // Request fresh filter settings to ensure switch state syncs promptly
-                this->parent_->request_filter_settings_update();
+                spa->request_filter_settings_update();
             }
         }
 
