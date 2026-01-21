@@ -66,6 +66,8 @@ switch:
       name: Lights
     blower:
       name: Blower
+    filter2:
+      name: "Filter 2"
 
 # Fan platform for multi-speed jet control (recommended for jets with speed support)
 fan:
@@ -356,6 +358,44 @@ logger:
   logs:
     BalboaSpa.CRC: NONE  # Silence CRC error messages
 ```
+
+## Filter 2 Switch
+
+The Filter 2 switch allows you to enable and disable the secondary filter cycle while viewing its current state from the spa.
+
+**Configuration:**
+```yaml
+switch:
+  - platform: balboa_spa
+    balboa_spa_id: spa
+    filter2:
+      name: "Filter 2"
+```
+
+**How it works:**
+- The switch displays the current filter 2 enabled/disabled state from the spa
+- When turned ON, it enables filter 2 using the configuration from the text components
+- When turned OFF, it disables filter 2 (equivalent to the `disable_filter2` button)
+- If no filter 2 configuration exists, turning ON will log an error and revert the switch to OFF
+
+**Required setup for turning ON:**
+Use the text components to set filter 2 configuration first:
+```yaml
+text:
+  - platform: balboa_spa
+    balboa_spa_id: spa
+    filter2_start_time:
+      name: "Set Filter 2 Start Time"
+      mode: TEXT
+    filter2_duration:
+      name: "Set Filter 2 Duration"
+      mode: TEXT
+```
+
+Set the start time and duration, then use the Filter 2 switch to enable/disable as needed.
+
+**Coexistence with disable_filter2 button:**
+Both the Filter 2 switch and the `disable_filter2` button can be used together. The switch will reflect state changes made by either control method. They are fully compatible for backward compatibility.
 
 ## Text Components (Writable)
 
