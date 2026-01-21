@@ -21,7 +21,6 @@ namespace esphome
 
         private:
             BalboaSpa *spa;
-            static const char *TAG;
         };
 
     } // namespace balboa_spa
