@@ -33,6 +33,8 @@ switch:
       name: Blower
     highrange:
       name: Temperature Mode
+    filter2:
+      name: "Filter 2"
 
 fan:
   - platform: balboa_spa
