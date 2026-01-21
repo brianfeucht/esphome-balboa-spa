@@ -30,11 +30,10 @@ namespace esphome
             if (state)
             {
                 // User wants to turn ON filter 2
-                // Check if we have a valid configuration to enable
-                if (settings == nullptr || (settings->filter2_hour == 0 && settings->filter2_minute == 0 && 
-                                            settings->filter2_duration_hour == 0 && settings->filter2_duration_minute == 0))
+                // Check if we have a valid duration configured (start time can be 00:00 which is valid)
+                if (settings == nullptr || (settings->filter2_duration_hour == 0 && settings->filter2_duration_minute == 0))
                 {
-                    ESP_LOGE(TAG, "Cannot enable Filter 2: No configuration set. Use filter2_start_time and filter2_duration text components to configure first.");
+                    ESP_LOGE(TAG, "Cannot enable Filter 2: Invalid or no duration configured. Use filter2_duration text component to set a valid duration first.");
                     this->publish_state(false);
                     return;
                 }
