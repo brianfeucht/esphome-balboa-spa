@@ -169,6 +169,9 @@ text_sensor:
       name: "Fault Message"
     fault_log_time:
       name: "Fault Log Time"
+    # Reminder text sensor (optional)
+    reminder:
+      name: "Reminder"
 
 button:
   - platform: balboa_spa
@@ -179,6 +182,8 @@ button:
       name: "Disable Filter 2"
     request_fault_log:
       name: "Request Fault Log"
+    clear_reminder:
+      name: "Clear Reminder"
 ```
 
 ## Fault Monitoring
@@ -230,6 +235,51 @@ The following fault codes are recognized by the component:
 **Note:** The spa only stores the most recent fault entry. When a new fault occurs, it overwrites the previous entry.
 
 **Tip:** Use the `fault_message` text sensor to automatically get the human-readable fault description instead of manually looking up fault codes in this table.
+
+## Reminder Monitoring
+
+The component provides reminder monitoring capabilities to help track spa maintenance reminders:
+
+### Reminder Text Sensor
+
+The `reminder` text sensor displays the current reminder status from the spa. The spa can display various maintenance reminders:
+
+**Reminder Types:**
+- `None` - No active reminders
+- `Clean Filter` - Time to clean or replace the filter
+- `Check pH` - Check and adjust pH levels
+- `Check Sanitizer` - Check and adjust sanitizer levels
+- `Fault` - Indicates a fault condition (check fault sensors for details)
+
+**Configuration:**
+```yaml
+text_sensor:
+  - platform: balboa_spa
+    balboa_spa_id: spa
+    reminder:
+      name: "Reminder"
+```
+
+### Clear Reminder Button
+
+The `clear_reminder` button allows you to clear/acknowledge active reminders on the spa. This sends a clear notification command to the spa controller.
+
+**Configuration:**
+```yaml
+button:
+  - platform: balboa_spa
+    balboa_spa_id: spa
+    clear_reminder:
+      name: "Clear Reminder"
+```
+
+**Usage:**
+1. Monitor the `reminder` text sensor for active reminders
+2. Perform the required maintenance (clean filter, adjust chemicals, etc.)
+3. Press the `clear_reminder` button to acknowledge and clear the reminder
+
+**Note:** The reminder feature is based on the Balboa protocol Type Code 0x13 (Status Update) which reports reminder status, and Type Code 0x11 with Item Code 0x03 which clears reminders. The specific reminders available may vary depending on your spa model and firmware version.
+
 
 ## Jet Control: Switch vs Fan Components
 
