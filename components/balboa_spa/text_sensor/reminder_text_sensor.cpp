@@ -39,8 +39,10 @@ namespace esphome
                         reminder_message = "Fault";
                         break;
                     default:
-                        reminder_message = "Unknown (0x" + 
-                            format_hex_pretty(spaState->reminder) + ")";
+                        // Format unknown reminder code in hex
+                        char hex_str[8];
+                        snprintf(hex_str, sizeof(hex_str), "0x%02X", spaState->reminder);
+                        reminder_message = std::string("Unknown (") + hex_str + ")";
                         break;
                 }
                 
