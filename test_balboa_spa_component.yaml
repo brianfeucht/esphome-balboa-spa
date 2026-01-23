@@ -120,6 +120,8 @@ text_sensor:
       name: "Fault Message"
     fault_log_time:
       name: "Fault Log Time"
+    reminder:
+      name: "Reminder"
 
 button:
   - platform: balboa_spa
@@ -130,6 +132,8 @@ button:
       name: "Disable Filter 2"
     request_fault_log:
       name: "Request Fault Log"
+    clear_reminder:
+      name: "Clear Reminder"
 
 text:
   - platform: balboa_spa
