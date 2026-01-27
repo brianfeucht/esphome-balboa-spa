@@ -135,6 +135,28 @@ binary_sensor:
       name: Heat State
     connected:
       name: Connected
+    filter1_running:
+      name: "Filter 1 Running"
+    filter2_running:
+      name: "Filter 2 Running"
+
+## Binary Sensors
+
+The binary sensor platform provides various spa status indicators:
+
+**Available Binary Sensors:**
+- **blower**: Indicates if the blower is currently running
+- **highrange**: Indicates if high range heating mode is active
+- **circulation**: Indicates if the circulation pump is running
+- **restmode**: Indicates if the spa is in rest/sleep mode
+- **heatstate**: Indicates if the heater is currently active
+- **connected**: Indicates if the component is actively communicating with the spa
+- **filter1_running**: Indicates if filter 1 cycle is currently running
+- **filter2_running**: Indicates if filter 2 cycle is currently running
+
+### Filter Running Sensors
+
+The **filter1_running** and **filter2_running** sensors automatically determine whether each filter cycle should be running based on the current spa time and configured filter schedule.
 
 text:
   - platform: balboa_spa
