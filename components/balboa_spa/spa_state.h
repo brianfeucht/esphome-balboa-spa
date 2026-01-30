@@ -13,6 +13,7 @@ class SpaState {
             heat_state = 254;
             target_temp = NAN;
             current_temp = NAN;
+            reminder = 0;
         }
         uint8_t jet1 :2;
         uint8_t jet2 :2;
@@ -29,6 +30,7 @@ class SpaState {
         uint8_t heat_state;
         float target_temp;
         float current_temp;
+        uint8_t reminder;
 };
 }  // namespace balboa_spa
 }  // namespace esphome
