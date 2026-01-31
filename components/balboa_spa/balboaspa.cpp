@@ -652,33 +652,42 @@ namespace esphome
             }
 
             // 7:Flag Byte 2 - Actual temperature
-            if (input_queue[7] != 0xFF)
             {
-                if (spa_temp_scale == TEMP_SCALE::C)
-                {
-                    temp_read = input_queue[7] / 2.0f;
-                }
-                else if (spa_temp_scale == TEMP_SCALE::F)
-                {
-                    temp_read = convert_f_to_c(input_queue[7]);
-                }
+                const uint8_t raw = input_queue[7];
 
-                if (esphome_temp_scale == TEMP_SCALE::C)
-                {
-                    spaState.current_temp = temp_read;
-                    ESP_LOGD(TAG, "Spa/temperature/current: %.2f C", temp_read);
-                }
-                else if (esphome_temp_scale == TEMP_SCALE::F)
-                {
-                    spaState.current_temp = convert_c_to_f(temp_read);
-                    ESP_LOGD(TAG, "Spa/temperature/current: %.2f F", temp_read);
-                }
-                else
-                {
-                    ESP_LOGW(TAG, "Spa/temperature/current INVALID %2.f %.2f %d %d",
-                             input_queue[7], temp_read, spaConfig.temperature_scale, esphome_temp_scale);
+                // Filter out invalid raw values that creates 126/127C spikes  0xFC-0xFF
+                if (raw >= 0xFC) {
+                    ESP_LOGW(TAG, "Dropping invalid current temp raw=0x%02X", raw);
+                } else {
+                    float temp_c = NAN;
+
+                    // Use Celsius
+                    if (spa_temp_scale == TEMP_SCALE::C) {
+                        temp_c = raw / 2.0f;
+                    } else if (spa_temp_scale == TEMP_SCALE::F) {
+                        temp_c = convert_f_to_c(raw);
+                    } else {
+                        ESP_LOGW(TAG, "Dropping current temp: spa_temp_scale undefined");
+                        return;
+                    }
+
+                    // Range check with Celsius
+                    if (temp_c < ESPHOME_BALBOASPA_MIN_TEMPERATURE_C ||
+                        temp_c > ESPHOME_BALBOASPA_MAX_TEMPERATURE_C) {
+                        ESP_LOGW(TAG, "Dropping out-of-range current temp: %.2fC (raw=0x%02X)", temp_c, raw);
+                    } else {
+                        // Publish value
+                        if (esphome_temp_scale == TEMP_SCALE::C) {
+                            spaState.current_temp = temp_c;
+                            ESP_LOGD(TAG, "Spa/temperature/current: %.2f C", temp_c);
+                        } else if (esphome_temp_scale == TEMP_SCALE::F) {
+                            spaState.current_temp = convert_c_to_f(temp_c);
+                            ESP_LOGD(TAG, "Spa/temperature/current: %.2f F", spaState.current_temp);
+                        }
+                    }
                 }
             }
+
 
             // 8:Flag Byte 3 Hour & 9:Flag Byte 4 Minute => Time
 
