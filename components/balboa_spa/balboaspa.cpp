@@ -672,7 +672,13 @@ namespace esphome
                     temp_read = convert_f_to_c(input_queue[7]);
                 }
 
-                if (esphome_temp_scale == TEMP_SCALE::C)
+                if (temp_read > 80)
+                {
+                    // Temp is getting close to boiling. Definitely invalid.
+                    ESP_LOGW(TAG, "Spa/temperature/current INVALID %2.f %.2f %d",
+                             input_queue[7], temp_read, spaConfig.temperature_scale);
+                }
+                else if (esphome_temp_scale == TEMP_SCALE::C)
                 {
                     spaState.current_temp = temp_read;
                     ESP_LOGD(TAG, "Spa/temperature/current: %.2f C", temp_read);
