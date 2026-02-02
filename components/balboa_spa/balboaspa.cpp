@@ -278,8 +278,6 @@ namespace esphome
         void BalboaSpa::clear_reminder()
         {
             // Set command to 0x03 to clear notification/reminder
-            // This will be sent as a 0x11 toggle item request with item code 0x03
-            // The 0x11 wrapper is added by rs485_send logic starting at line 440
             send_command = 0x03;
             ESP_LOGI(TAG, "Clearing spa reminder");
         }
