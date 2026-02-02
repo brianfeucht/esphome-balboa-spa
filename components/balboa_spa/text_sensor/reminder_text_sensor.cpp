@@ -4,7 +4,6 @@ namespace esphome
 {
     namespace balboa_spa
     {
-        static const char *TAG = "balboa_spa.text_sensor.reminder";
 
         void ReminderTextSensor::set_parent(BalboaSpa *parent)
         {
@@ -50,8 +49,6 @@ namespace esphome
                         break;
                 }
                 
-                ESP_LOGD(TAG, "Reminder update: %s (0x%02X)", 
-                         reminder_message.c_str(), spaState->reminder);
                 this->publish_state(reminder_message);
                 last_reminder_ = spaState->reminder;
             }
