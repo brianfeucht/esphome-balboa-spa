@@ -278,6 +278,7 @@ namespace esphome
         void BalboaSpa::clear_reminder()
         {
             send_command = 0x03;
+            ESP_LOGI(TAG, "Clearing spa reminder");
         }
 
         void BalboaSpa::read_serial()
