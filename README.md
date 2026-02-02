@@ -273,6 +273,8 @@ The `reminder` text sensor displays the current reminder status from the spa. Th
 - `Check Sanitizer` - Check and adjust sanitizer levels
 - `Fault` - Indicates a fault condition (check fault sensors for details)
 
+**Note:** This list of reminder codes is incomplete. If your spa displays a reminder that shows as `Unknown (0x##)` in the sensor, please [open a GitHub issue](https://github.com/brianfeucht/esphome-balboa-spa/issues/new) with the code value and the actual reminder message displayed on your spa control panel. This helps us expand the reminder code mapping for all users.
+
 **Configuration:**
 ```yaml
 text_sensor:

@@ -20,6 +20,9 @@ namespace esphome
             // Check if the reminder has changed
             if (spaState->reminder != last_reminder_)
             {
+                // NOTE: This list of reminder codes is incomplete. If you encounter an unknown
+                // code, please open a GitHub issue with the code value and the reminder message
+                // displayed on your spa control panel so we can expand this mapping.
                 std::string reminder_message;
                 switch (spaState->reminder)
                 {
