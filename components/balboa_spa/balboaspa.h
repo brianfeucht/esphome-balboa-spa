@@ -70,6 +70,7 @@ namespace esphome
       void toggle_jet4();
       void toggle_blower();
       void set_highrange(bool high);
+      void clear_reminder();
 
       void set_spa_temp_scale(TEMP_SCALE scale);
       void set_esphome_temp_scale(TEMP_SCALE scale);

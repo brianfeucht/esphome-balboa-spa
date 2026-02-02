@@ -8,6 +8,9 @@ namespace esphome
         static const char *TAG = "BalboaSpa.component";
         static const char *CRC_TAG = "BalboaSpa.CRC";
 
+        // Protocol byte indices for status update (0x13) message
+        static const uint8_t STATUS_UPDATE_REMINDER_BYTE = 6;
+
         void BalboaSpa::setup()
         {
             input_queue.clear();
@@ -270,6 +273,12 @@ namespace esphome
         void BalboaSpa::toggle_blower()
         {
             send_command = 0x0C;
+        }
+
+        void BalboaSpa::clear_reminder()
+        {
+            send_command = 0x03;
+            ESP_LOGI(TAG, "Clearing spa reminder");
         }
 
         void BalboaSpa::read_serial()
@@ -763,6 +772,15 @@ namespace esphome
             {
                 ESP_LOGD(TAG, "Spa/light2/state: %.0f", spa_component_state);
                 spaState.light2 = spa_component_state;
+            }
+
+            // Parse reminder type from byte 6 of the status update (0x13 message)
+            // 0x00=None, 0x04=Clean filter, 0x0A=Check pH, 0x09=Check sanitizer, 0x1E=Fault
+            uint8_t reminder_value = input_queue[STATUS_UPDATE_REMINDER_BYTE];
+            if (reminder_value != spaState.reminder)
+            {
+                ESP_LOGD(TAG, "Spa/reminder/state: 0x%02X", reminder_value);
+                spaState.reminder = reminder_value;
             }
 
             // TODO: callback on newState
