@@ -33,9 +33,11 @@ namespace esphome
             }
 
             // Filter settings periodic update timer (every 5 minutes)
-            if (filtersettings_request_status == 2) {
+            if (filtersettings_request_status == 2)
+            {
                 filtersettings_update_timer++;
-                if (filtersettings_update_timer >= 6000) { // 6000 * 50ms = 5 minutes
+                if (filtersettings_update_timer >= 6000)
+                {                                      // 6000 * 50ms = 5 minutes
                     filtersettings_request_status = 0; // Reset to request again
                     filtersettings_update_timer = 0;
                     ESP_LOGD(TAG, "Spa/debug/filtersettings_request_status: %s", "resetting for periodic update");
@@ -401,8 +403,8 @@ namespace esphome
                             faultlog_request_status = 1;
                             ESP_LOGD(TAG, "Spa/debug/faultlog_request_status: %s", "requesting fault log, #1");
                         }
-                        else if (filtersettings_request_status == 0 && 
-                                (faultlog_request_status == 2 || faultlog_request_status == 0))
+                        else if (filtersettings_request_status == 0 &&
+                                 (faultlog_request_status == 2 || faultlog_request_status == 0))
                         { // Get the filter cycles log once we have the faultlog, or periodically
                             output_queue.push(client_id);
                             output_queue.push(0xBF);
@@ -656,7 +658,7 @@ namespace esphome
             }
             else
             {
-                ESP_LOGW(TAG, "Spa/temperature/target INVALID %2.f %.2f %d %d",
+                ESP_LOGW(TAG, "Spa/temperature/target INVALID %.2f %.2f %d %d",
                          input_queue[25], temp_read, spaConfig.temperature_scale, esphome_temp_scale);
             }
 
@@ -675,7 +677,7 @@ namespace esphome
                 if (temp_read > 80)
                 {
                     // Temp is getting close to boiling. Definitely invalid.
-                    ESP_LOGW(TAG, "Spa/temperature/current INVALID %2.f %.2f %d",
+                    ESP_LOGW(TAG, "Spa/temperature/current INVALID %.2f %.2f %d",
                              input_queue[7], temp_read, spaConfig.temperature_scale);
                 }
                 else if (esphome_temp_scale == TEMP_SCALE::C)
@@ -690,7 +692,7 @@ namespace esphome
                 }
                 else
                 {
-                    ESP_LOGW(TAG, "Spa/temperature/current INVALID %2.f %.2f %d %d",
+                    ESP_LOGW(TAG, "Spa/temperature/current INVALID %.2f %.2f %d %d",
                              input_queue[7], temp_read, spaConfig.temperature_scale, esphome_temp_scale);
                 }
             }
@@ -828,7 +830,7 @@ namespace esphome
             {
                 listener(&spaState);
             }
-            
+
             // Notify filter listeners about filter settings update
             for (const auto &filter_listener : this->filter_listeners_)
             {
