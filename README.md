@@ -194,6 +194,8 @@ text_sensor:
     # Reminder text sensor (optional)
     reminder:
       name: "Reminder"
+    component_version:
+      name: "Component Version"
 
 button:
   - platform: balboa_spa
