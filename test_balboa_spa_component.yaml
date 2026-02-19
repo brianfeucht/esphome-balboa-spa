@@ -122,6 +122,8 @@ text_sensor:
       name: "Fault Log Time"
     reminder:
       name: "Reminder"
+    component_version:
+      name: "Component Version"
 
 button:
   - platform: balboa_spa

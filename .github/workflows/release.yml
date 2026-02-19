@@ -1,0 +1,51 @@
+name: Create Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check if VERSION warrants a new release
+        id: check
+        run: |
+          CURR_VERSION=$(cat VERSION)
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          TAGGED_VERSION="${LATEST_TAG#v}"
+
+          echo "Current VERSION: $CURR_VERSION"
+          echo "Latest tag: ${LATEST_TAG:-"(none)"} (version: ${TAGGED_VERSION:-"(none)"})"
+
+          if [ "$CURR_VERSION" = "$TAGGED_VERSION" ]; then
+            echo "VERSION matches latest tag - no new release needed"
+            echo "create_release=false" >> $GITHUB_OUTPUT
+          else
+            echo "New version detected: $CURR_VERSION"
+            echo "create_release=true" >> $GITHUB_OUTPUT
+            echo "version=$CURR_VERSION" >> $GITHUB_OUTPUT
+            echo "tag=v$CURR_VERSION" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create tag and GitHub Release
+        if: steps.check.outputs.create_release == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ steps.check.outputs.tag }}"
+          git tag "$TAG"
+          git push origin "$TAG"
+          gh release create "$TAG" \
+            --title "Release $TAG" \
+            --generate-notes
