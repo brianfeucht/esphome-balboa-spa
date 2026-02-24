@@ -351,6 +351,7 @@ switch:
 - You have existing automations targeting a switch entity and want to avoid migration
 - You prefer a consistent switch-only approach across all toggleable spa components
 
+**Note:** For a given physical spa light, choose *either* the `light` platform *or* the legacy `switch` platform, not both. Configuring both will create two Home Assistant entities (one `light`, one `switch`) that control the same hardware, which can be confusing.
 ## Jet Control: Switch vs Fan Components
 
 This component provides two ways to control your spa jets, each with different capabilities:
