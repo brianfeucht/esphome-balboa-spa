@@ -49,12 +49,20 @@ balboa_spa:
   # Optional: Override the automatically assigned client ID
   # client_id: 10
 
+light:
+  - platform: balboa_spa
+    balboa_spa_id: spa
+    light:
+      name: Lights
+    light2:
+      name: "Lights 2"
+
 switch:
   - platform: balboa_spa
     balboa_spa_id: spa
     jet1:
       name: Jet1
-      max_toggle_attempts: 5  # Optional: max attempts to reach desired state (default: 5)      
+      max_toggle_attempts: 5  # Optional: max attempts to reach desired state (default: 5)
       discard_updates: 5      # Optional: state updates to ignore after each toggle (default: 20)
     jet2:
       name: Jet2
@@ -62,8 +70,6 @@ switch:
       name: Jet3
     jet4:
       name: Jet4
-    light:
-      name: Lights
     blower:
       name: Blower
     filter2:
@@ -306,6 +312,44 @@ button:
 
 **Note:** The reminder feature is based on the Balboa protocol Type Code 0x13 (Status Update) which reports reminder status, and Type Code 0x11 with Item Code 0x03 which clears reminders. The specific reminders available may vary depending on your spa model and firmware version.
 
+
+## Light Control: Light vs Switch Components
+
+This component provides two ways to expose spa lights to Home Assistant:
+
+### Light Component (Recommended)
+
+The **light** platform places lights in the correct Home Assistant **Lights** domain, enabling full integration with light-aware automations, dashboards, and voice assistants.
+
+**Configuration:**
+```yaml
+light:
+  - platform: balboa_spa
+    balboa_spa_id: spa
+    light:
+      name: "Lights"
+    light2:
+      name: "Lights 2"
+```
+
+### Switch Component (Legacy)
+
+The **switch** platform exposes lights as simple switches. This was the original implementation and remains available for backward compatibility.
+
+**Configuration:**
+```yaml
+switch:
+  - platform: balboa_spa
+    balboa_spa_id: spa
+    light:
+      name: Lights
+    light2:
+      name: "Lights 2"
+```
+
+**When to use switches:**
+- You have existing automations targeting a switch entity and want to avoid migration
+- You prefer a consistent switch-only approach across all toggleable spa components
 
 ## Jet Control: Switch vs Fan Components
 

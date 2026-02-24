@@ -36,6 +36,14 @@ switch:
     filter2:
       name: "Filter 2"
 
+light:
+  - platform: balboa_spa
+    balboa_spa_id: test_spa
+    light:
+      name: "Lights"
+    light2:
+      name: "Second Lights"
+
 fan:
   - platform: balboa_spa
     balboa_spa_id: test_spa
