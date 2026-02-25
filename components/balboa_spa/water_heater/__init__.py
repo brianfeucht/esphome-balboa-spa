@@ -12,7 +12,7 @@ from .. import (
 DEPENDENCIES = ["balboa_spa", "water_heater"]
 AUTO_LOAD = ["water_heater"]
 
-BalboaSpaWaterHeater = balboa_spa_ns.class_("BalboaSpaWaterHeater", cg.Component, water_heater.WaterHeater)
+BalboaSpaWaterHeater = balboa_spa_ns.class_("BalboaSpaWaterHeater", water_heater.WaterHeater)
 
 CONFIG_SCHEMA = (
     water_heater.water_heater_schema(BalboaSpaWaterHeater).extend(
@@ -26,8 +26,6 @@ CONFIG_SCHEMA = (
 
 async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
-    await cg.register_component(var, config)
-
     await water_heater.register_water_heater(var, config)
 
     parent = await cg.get_variable(config[CONF_SPA_ID])

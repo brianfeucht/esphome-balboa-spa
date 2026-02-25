@@ -9,7 +9,7 @@ namespace esphome
   namespace balboa_spa
   {
 
-    class BalboaSpaWaterHeater : public water_heater::WaterHeater, public Component
+    class BalboaSpaWaterHeater : public water_heater::WaterHeater
     {
     public:
       BalboaSpaWaterHeater()
@@ -20,6 +20,11 @@ namespace esphome
 
       void update(SpaState *spaState);
       void set_parent(BalboaSpa *parent);
+
+      water_heater::WaterHeaterCallInternal make_call() override
+      {
+        return water_heater::WaterHeaterCallInternal(this);
+      }
 
     protected:
       void control(const water_heater::WaterHeaterCall &call) override;

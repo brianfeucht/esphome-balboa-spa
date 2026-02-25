@@ -28,9 +28,10 @@ namespace esphome
 
         void BalboaSpaWaterHeater::control(const water_heater::WaterHeaterCall &call)
         {
-            if (call.get_target_temperature().has_value())
+            float target_temp = call.get_target_temperature();
+            if (!std::isnan(target_temp))
             {
-                spa->set_temp(*call.get_target_temperature());
+                spa->set_temp(target_temp);
             }
 
             if (call.get_mode().has_value())
@@ -88,18 +89,18 @@ namespace esphome
 
             if (!spa->is_communicating())
             {
-                this->target_temperature = NAN;
-                this->current_temperature = NAN;
+                this->target_temperature_ = NAN;
+                this->current_temperature_ = NAN;
                 return;
             }
 
             float target_temp = spaState->target_temp;
-            needs_update = wh_is_diff_no_nan(target_temp, this->target_temperature) || needs_update;
-            this->target_temperature = !std::isnan(target_temp) ? target_temp : this->target_temperature;
+            needs_update = wh_is_diff_no_nan(target_temp, this->target_temperature_) || needs_update;
+            this->target_temperature_ = !std::isnan(target_temp) ? target_temp : this->target_temperature_;
 
             float current_temp = spaState->current_temp;
-            needs_update = wh_is_diff_no_nan(current_temp, this->current_temperature) || needs_update;
-            this->current_temperature = !std::isnan(current_temp) ? current_temp : this->current_temperature;
+            needs_update = wh_is_diff_no_nan(current_temp, this->current_temperature_) || needs_update;
+            this->current_temperature_ = !std::isnan(current_temp) ? current_temp : this->current_temperature_;
 
             // Map spa state to water heater mode.
             // rest_mode=254 is undefined (spa not yet initialised); skip mode update.
@@ -119,8 +120,8 @@ namespace esphome
                     new_mode = water_heater::WATER_HEATER_MODE_HEAT_PUMP;
                 }
 
-                needs_update = new_mode != this->mode || needs_update;
-                this->mode = new_mode;
+                needs_update = new_mode != this->mode_ || needs_update;
+                this->mode_ = new_mode;
             }
 
             needs_update = this->last_update_time + 300000 < millis() || needs_update;
