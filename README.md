@@ -418,6 +418,35 @@ These work together to handle cases where the spa temporarily blocks state chang
 4. After heating completes, spa accepts the command
 5. Jet turns off successfully
 
+## Water Heater Component
+
+The `water_heater` platform is an alternative to the `climate` platform. It exposes the spa as a Home Assistant Water Heater entity. The two platforms are functionally equivalent — choose whichever fits your setup better.
+
+### Modes
+
+The water heater maps the spa's two independent settings (`rest_mode` and `highrange`) onto three Water Heater modes:
+
+| Mode | Spa State | Description |
+|------|-----------|-------------|
+| `ECO` | rest_mode=1 | Energy-saving rest/sleep mode — spa maintains a lower standby temperature |
+| `HEAT_PUMP` | rest_mode=0, highrange=0 | Ready mode with standard temperature range |
+| `PERFORMANCE` | rest_mode=0, highrange=1 | Ready mode with high temperature range (allows higher target temps) |
+
+### Configuration
+
+```yaml
+water_heater:
+  - platform: balboa_spa
+    balboa_spa_id: spa
+    name: "Spa Water Heater"
+    visual:
+      min_temperature: 62 °F    # min: 7 C
+      max_temperature: 105 °F   # max: 40 C
+      target_temperature_step: 0.5
+```
+
+> **Note:** Use either `climate` or `water_heater` — not both. Running both simultaneously is redundant and will send duplicate commands to the spa.
+
 ## Troubleshooting
 
 ### ESP32-S2/S3/C3 Boards with Native USB (ESPHome 2025.10.0+)
