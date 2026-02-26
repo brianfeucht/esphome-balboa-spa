@@ -424,13 +424,13 @@ The `water_heater` platform is an alternative to the `climate` platform. It expo
 
 ### Modes
 
-The water heater maps the spa's two independent settings (`rest_mode` and `highrange`) onto three Water Heater modes:
+The water heater maps the spa's `rest_mode` and `highrange` state bits onto three modes:
 
 | Mode | Spa State | Description |
 |------|-----------|-------------|
-| `ECO` | rest_mode=1 | Energy-saving rest/sleep mode — spa maintains a lower standby temperature |
-| `HEAT_PUMP` | rest_mode=0, highrange=0 | Ready mode with standard temperature range |
-| `PERFORMANCE` | rest_mode=0, highrange=1 | Ready mode with high temperature range (allows higher target temps) |
+| `OFF` | rest_mode=1 | Sleep/rest mode — energy-saving standby |
+| `ECO` | rest_mode=0, highrange=0 | Ready mode, standard temperature range |
+| `PERFORMANCE` | rest_mode=0, highrange=1 | Ready mode, high temperature range |
 
 ### Configuration
 
