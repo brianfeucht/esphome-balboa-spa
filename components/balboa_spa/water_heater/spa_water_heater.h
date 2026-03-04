@@ -20,9 +20,10 @@ namespace esphome
       {
         spa = nullptr;
         last_update_time = 0;
+        setup_complete_ = false;
       };
 
-      void setup() override;
+      void setup();
       void update(SpaState *spaState);
       void set_parent(BalboaSpa *parent);
 
@@ -38,6 +39,7 @@ namespace esphome
     private:
       BalboaSpa *spa;
       uint32_t last_update_time;
+      bool setup_complete_;
     };
 
   } // namespace balboa_spa

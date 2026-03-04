@@ -28,24 +28,12 @@ namespace esphome
 
         void BalboaSpaWaterHeater::setup()
         {
-            WaterHeater::setup();
+            if (this->setup_complete_)
+                return;
+            this->setup_complete_ = true;
 
-            // Restore the last mode so HA never sees this entity as unavailable
-            // (with device_id set, HA requires at least one publish_state() to
-            //  consider the entity available; the spa listener may not fire for
-            //  several seconds after boot).
-            auto call = this->restore_state();
-            if (call.has_value() && call->get_mode().has_value())
-            {
-                this->mode_ = *call->get_mode();
-                float saved_temp = call->get_target_temperature();
-                if (!std::isnan(saved_temp))
-                    this->target_temperature_ = saved_temp;
-            }
-            else
-            {
-                this->mode_ = water_heater::WATER_HEATER_MODE_OFF;
-            }
+            // Ensure an initial state is published so HA can mark the entity as available.
+            this->mode_ = water_heater::WATER_HEATER_MODE_OFF;
             this->publish_state();
         }
 
@@ -94,6 +82,7 @@ namespace esphome
         void BalboaSpaWaterHeater::set_parent(BalboaSpa *parent)
         {
             spa = parent;
+            this->setup();
             parent->register_listener([this](SpaState *spaState)
                                       { this->update(spaState); });
         }
