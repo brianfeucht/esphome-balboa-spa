@@ -123,6 +123,8 @@ binary_sensor:
       name: Filter 1 Running
     filter2_running:
       name: Filter 2 Running
+    cleanup_cycle:
+      name: Cleanup Cycle
 
 text_sensor:
   - platform: balboa_spa
