@@ -10,6 +10,7 @@ namespace esphome
 
         // Protocol byte indices for status update (0x13) message
         static const uint8_t STATUS_UPDATE_REMINDER_BYTE = 6;
+        static const uint8_t CLEANUP_CYCLE_ACTIVE_VALUE = 0x0C;
 
         void BalboaSpa::setup()
         {
@@ -780,6 +781,14 @@ namespace esphome
             {
                 ESP_LOGD(TAG, "Spa/light2/state: %.0f", spa_component_state);
                 spaState.light2 = spa_component_state;
+            }
+
+            // 24:Flags Byte 19 - Cleanup Cycle (bits 0-3: 0x0C=ON, 0x04=OFF, 0x00=N/A)
+            spa_component_state = ((input_queue[24] & 0x0F) == CLEANUP_CYCLE_ACTIVE_VALUE) ? 1 : 0;
+            if (spa_component_state != spaState.cleanup_cycle)
+            {
+                ESP_LOGD(TAG, "Spa/cleanup_cycle/state: %.0f", spa_component_state);
+                spaState.cleanup_cycle = spa_component_state;
             }
 
             // Parse reminder type from byte 6 of the status update (0x13 message)
