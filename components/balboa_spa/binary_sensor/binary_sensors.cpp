@@ -133,6 +133,9 @@ namespace esphome
                 }
                 break;
             }
+            case BalboaSpaBinarySensorType::CLEANUP_CYCLE:
+                sensor_state_value = spaState->cleanup_cycle;
+                break;
             default:
                 ESP_LOGD(TAG, "Spa/BSensors/UnknownSensorType: SensorType Number: %d", sensor_type);
                 // Unknown enum value. Ignore

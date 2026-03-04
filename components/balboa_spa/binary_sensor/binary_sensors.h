@@ -23,7 +23,8 @@ namespace esphome
         HEATSTATE,
         CONNECTED,
         FILTER1_RUNNING,
-        FILTER2_RUNNING
+        FILTER2_RUNNING,
+        CLEANUP_CYCLE
       };
 
     public:

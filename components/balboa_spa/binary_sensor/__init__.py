@@ -28,6 +28,7 @@ CONF_HEATSTATE = "heatstate"
 CONF_CONNECTED = "connected"
 CONF_FILTER1_RUNNING = "filter1_running"
 CONF_FILTER2_RUNNING = "filter2_running"
+CONF_CLEANUP_CYCLE = "cleanup_cycle"
 
 CONFIG_SCHEMA = cv.Schema(
     {
@@ -73,12 +74,23 @@ CONFIG_SCHEMA = cv.Schema(
             device_class=DEVICE_CLASS_RUNNING,
             entity_category=ENTITY_CATEGORY_DIAGNOSTIC
         ),
+        cv.Optional(CONF_CLEANUP_CYCLE): binary_sensor.binary_sensor_schema(
+            SpaSensor,
+            icon="mdi:vacuum",
+            device_class=DEVICE_CLASS_RUNNING,
+            entity_category=ENTITY_CATEGORY_DIAGNOSTIC
+        ),
     })
 
 async def to_code(config):
     parent = await cg.get_variable(config[CONF_SPA_ID])
 
-    for sensor_type in [CONF_BLOWER, CONF_HIGHRANGE, CONF_CIRCULATION, CONF_RESTMODE, CONF_HEATSTATE, CONF_CONNECTED, CONF_FILTER1_RUNNING, CONF_FILTER2_RUNNING]:
+    sensor_types = [
+        CONF_BLOWER, CONF_HIGHRANGE, CONF_CIRCULATION, CONF_RESTMODE,
+        CONF_HEATSTATE, CONF_CONNECTED, CONF_FILTER1_RUNNING,
+        CONF_FILTER2_RUNNING, CONF_CLEANUP_CYCLE,
+    ]
+    for sensor_type in sensor_types:
         if conf := config.get(sensor_type):
             var = await binary_sensor.new_binary_sensor(conf)
             cg.add(var.set_parent(parent))

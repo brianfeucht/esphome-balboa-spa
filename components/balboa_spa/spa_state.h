@@ -24,6 +24,7 @@ class SpaState {
         uint8_t light2 :1;
         uint8_t highrange:1;        
         uint8_t circulation:1;
+        uint8_t cleanup_cycle:1;
         uint8_t hour:5;
         uint8_t minutes:6;
         uint8_t rest_mode;
