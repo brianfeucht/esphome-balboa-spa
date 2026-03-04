@@ -66,6 +66,6 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "chore: update VERSION to $(cat VERSION) [skip ci]"
+            git commit -m "chore: update VERSION to $(cat VERSION)"
             git push origin HEAD:${{ github.head_ref }}
           fi
