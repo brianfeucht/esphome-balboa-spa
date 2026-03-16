@@ -38,7 +38,7 @@ jobs:
       # Validate ESP32 Arduino configuration
       - name: Validate ESP32 Arduino Configuration
         if: ${{ inputs.validate_all == true || inputs.esp32_only == true }}
-        uses: esphome/build-action@v7.1.0
+        uses: esphome/build-action@v7.2.0
         with:
           yaml-file: esp32_test_component.yaml
           version: ${{ env.ESPHOME_VERSION }}
@@ -46,7 +46,7 @@ jobs:
       # Validate ESP32 IDF configuration  
       - name: Validate ESP32 IDF Configuration
         if: ${{ inputs.validate_all == true || inputs.esp32_only == true }}
-        uses: esphome/build-action@v7.1.0
+        uses: esphome/build-action@v7.2.0
         with:
           yaml-file: esp32idf_test_component.yaml
           version: ${{ env.ESPHOME_VERSION }}
@@ -54,7 +54,7 @@ jobs:
       # Validate ESP8266 configuration
       - name: Validate ESP8266 Configuration
         if: ${{ inputs.validate_all == true || inputs.esp8266_only == true }}
-        uses: esphome/build-action@v7.1.0
+        uses: esphome/build-action@v7.2.0
         with:
           yaml-file: esp8266_test_component.yaml
           version: ${{ env.ESPHOME_VERSION }}
