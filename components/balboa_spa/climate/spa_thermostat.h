@@ -24,6 +24,8 @@ namespace esphome
     protected:
       void control(const climate::ClimateCall &call) override;
       climate::ClimateTraits traits() override;
+      float pending_current_temp{NAN};
+      uint32_t pending_temp_start{0};
 
     private:
       BalboaSpa *spa;

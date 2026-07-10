@@ -2,6 +2,7 @@
 #include "esphome/core/log.h"
 #include "spa_thermostat.h"
 #include "esphome/components/climate/climate_mode.h"
+#include <cmath>
 
 namespace esphome
 {
@@ -73,16 +74,64 @@ namespace esphome
             {
                 this->target_temperature = NAN;
                 this->current_temperature = NAN;
+                this->pending_current_temp = NAN;
                 return;
             }
 
+            // Target Temperature
             float target_temp = spaState->target_temp;
-            needs_update = is_diff_no_nan(target_temp, this->target_temperature) || needs_update;
-            this->target_temperature = !std::isnan(target_temp) ? target_temp : this->target_temperature;
+            if (!std::isnan(target_temp))
+            {
+                needs_update = is_diff_no_nan(target_temp, this->target_temperature) || needs_update;
+                this->target_temperature = target_temp;
+            }
 
-            auto current_temp = spaState->current_temp;
-            needs_update = is_diff_no_nan(current_temp, this->current_temperature) || needs_update;
-            this->current_temperature = !std::isnan(current_temp) ? current_temp : this->current_temperature;
+            // Current Temperature with Relative Filtering (scale-aware)
+            float raw_current_temp = spaState->current_temp;
+            if (!std::isnan(raw_current_temp))
+            {
+                if (std::isnan(this->current_temperature))
+                {
+                    // First valid reading after boot/reconnect, accept immediately
+                    needs_update = is_diff_no_nan(raw_current_temp, this->current_temperature) || needs_update;
+                    this->current_temperature = raw_current_temp;
+                }
+                else
+                {
+                    float delta = std::abs(raw_current_temp - this->current_temperature);
+                    // Determine threshold based on configured temperature scale
+                    bool is_fahrenheit = (spa->get_esphome_temp_scale() == TEMP_SCALE::F);
+                    float threshold = is_fahrenheit ? 9.0f : 5.0f;  // 9°F is equivalent to 5°C
+                    float tolerance = is_fahrenheit ? 1.0f : 0.5f;
+
+                    if (delta > threshold)
+                    {
+                        // Check if this is a new anomaly or an ongoing one
+                        if (std::isnan(this->pending_current_temp) || std::abs(raw_current_temp - this->pending_current_temp) > tolerance)
+                        {
+                            // Start tracking the new anomalous value
+                            this->pending_current_temp = raw_current_temp;
+                            this->pending_temp_start = millis();
+                            ESP_LOGD("spa_thermostat", "Anomalous temp jump detected (%.1f). Waiting to stabilize.", raw_current_temp);
+                        }
+                        else if (millis() - this->pending_temp_start > 60000) // Settle time: 60 seconds
+                        {
+                            // Temp has held at this anomalous level long enough, assume water change
+                            ESP_LOGD("spa_thermostat", "Anomalous temp (%.1f) stabilized. Accepting as new baseline.", raw_current_temp);
+                            needs_update = is_diff_no_nan(raw_current_temp, this->current_temperature) || needs_update;
+                            this->current_temperature = raw_current_temp;
+                            this->pending_current_temp = NAN; // Reset tracker
+                        }
+                    }
+                    else
+                    {
+                        // Normal incremental change
+                        needs_update = is_diff_no_nan(raw_current_temp, this->current_temperature) || needs_update;
+                        this->current_temperature = raw_current_temp;
+                        this->pending_current_temp = NAN; // Reset tracker
+                    }
+                }
+            }
 
             auto new_action = spaState->heat_state == 1 ? climate::CLIMATE_ACTION_HEATING : climate::CLIMATE_ACTION_IDLE;
             needs_update = new_action != this->action || needs_update;

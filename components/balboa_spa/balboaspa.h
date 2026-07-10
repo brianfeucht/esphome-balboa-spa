@@ -74,6 +74,7 @@ namespace esphome
 
       void set_spa_temp_scale(TEMP_SCALE scale);
       void set_esphome_temp_scale(TEMP_SCALE scale);
+      TEMP_SCALE get_esphome_temp_scale() const { return esphome_temp_scale; }
       void set_client_id(uint8_t id);
 
       bool is_communicating();
