@@ -693,6 +693,7 @@ namespace esphome
             ESP_LOGD(TAG, "Spa/config/aux2: %d", spaConfig.aux2);
             ESP_LOGD(TAG, "Spa/config/temperature_scale: %d", spaConfig.temperature_scale);
             ESP_LOGD(TAG, "Spa/config/clock_mode: %d", spaConfig.clock_mode);
+            spaConfig.valid = 1;
             config_request_status = 2;
             config_retries = 0;
             config_response_timer = 0;
