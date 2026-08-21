@@ -33,6 +33,65 @@ namespace esphome
                 status_clear_error();
             }
 
+            // Config request timeout guard.
+            //
+            // The spa does not always answer the first request, and without a
+            // retry the status sits at 1 forever, so the hardware configuration
+            // is never reported.
+            if (config_request_status == 1)
+            {
+                config_response_timer++;
+                if (config_response_timer >= 200) // 200 * 50ms = 10 seconds
+                {
+                    config_response_timer = 0;
+                    if (config_retries < 3)
+                    {
+                        config_retries++;
+                        config_request_status = 0; // ask again
+                        ESP_LOGW(TAG, "Spa/config/status: no response, retry %d/3", config_retries);
+                    }
+                    else
+                    {
+                        config_request_status = 3; // give up, unblock the chain
+                        ESP_LOGW(TAG, "Spa/config/status: %s", "no response after 3 retries, giving up");
+                    }
+                }
+            }
+            else
+            {
+                config_response_timer = 0;
+            }
+
+            // Fault log timeout guard.
+            //
+            // The request chain only asks for the filter settings once the fault
+            // log has come back. If the spa never answers, the status stays at 1
+            // forever and the filter schedule is never refreshed again. Retry a
+            // few times, then mark it abandoned so the chain can move on.
+            if (faultlog_request_status == 1)
+            {
+                faultlog_response_timer++;
+                if (faultlog_response_timer >= 200) // 200 * 50ms = 10 seconds
+                {
+                    faultlog_response_timer = 0;
+                    if (faultlog_retries < 3)
+                    {
+                        faultlog_retries++;
+                        faultlog_request_status = 0; // ask again
+                        ESP_LOGW(TAG, "Spa/debug/faultlog_request_status: no response, retry %d/3", faultlog_retries);
+                    }
+                    else
+                    {
+                        faultlog_request_status = 3; // give up, unblock the chain
+                        ESP_LOGW(TAG, "Spa/debug/faultlog_request_status: %s", "no response after 3 retries, giving up");
+                    }
+                }
+            }
+            else
+            {
+                faultlog_response_timer = 0;
+            }
+
             // Filter settings periodic update timer (every 5 minutes)
             if (filtersettings_request_status == 2)
             {
@@ -415,8 +474,11 @@ namespace esphome
                             ESP_LOGD(TAG, "Spa/debug/faultlog_request_status: %s", "requesting fault log, #1");
                         }
                         else if (filtersettings_request_status == 0 &&
-                                 (faultlog_request_status == 2 || faultlog_request_status == 0))
-                        { // Get the filter cycles log once we have the faultlog, or periodically
+                                 faultlog_request_status != 1)
+                        { // Get the filter cycles log once the fault log request has
+                          // finished, whether it succeeded (2), was already processed
+                          // (3) or was abandoned. Waiting only for status 2 meant an
+                          // unanswered fault log blocked this branch permanently.
                             output_queue.push(client_id);
                             output_queue.push(0xBF);
                             output_queue.push(0x22);
@@ -632,6 +694,8 @@ namespace esphome
             ESP_LOGD(TAG, "Spa/config/temperature_scale: %d", spaConfig.temperature_scale);
             ESP_LOGD(TAG, "Spa/config/clock_mode: %d", spaConfig.clock_mode);
             config_request_status = 2;
+            config_retries = 0;
+            config_response_timer = 0;
 
             if (spa_temp_scale == TEMP_SCALE::UNDEFINED)
             {
@@ -939,6 +1003,8 @@ namespace esphome
             ESP_LOGD(TAG, "Spa/fault/Hours: %d", spaFaultLog.hour);
             ESP_LOGD(TAG, "Spa/fault/Minutes: %d", spaFaultLog.minutes);
             faultlog_request_status = 2;
+            faultlog_retries = 0;
+            faultlog_response_timer = 0;
             // ESP_LOGD(TAG, "Spa/debug/faultlog_request_status: have the faultlog, #2");
 
             // Notify fault log listeners
