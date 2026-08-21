@@ -126,6 +126,10 @@ namespace esphome
       char faultlog_request_status = 0;       // stages: 0-> want it; 1-> requested it; 2-> got it; 3-> further processed it
       char filtersettings_request_status = 0; // stages: 0-> want it; 1-> requested it; 2-> got it; 3-> further processed it
       char faultlog_update_timer = 0;         // temp logic so we only get the fault log once per 5 minutes
+      uint16_t faultlog_response_timer = 0;   // timeout guard for an unanswered fault log request
+      uint8_t faultlog_retries = 0;           // consecutive unanswered fault log requests
+      uint16_t config_response_timer = 0;     // timeout guard for an unanswered config request
+      uint8_t config_retries = 0;             // consecutive unanswered config requests
       uint16_t filtersettings_update_timer = 0;   // timer for periodic filter settings requests (every 5 minutes)
 
       SpaConfig spaConfig;
