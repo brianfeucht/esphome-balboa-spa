@@ -291,8 +291,18 @@ namespace esphome
                 return;
             }
 
-            // Drop until SOF is seen
-            if (input_queue.first() != 0x7E && received_byte != 0x7E)
+            // Drop until SOF is seen.
+            //
+            // An empty buffer is the normal state between frames, so check for it
+            // explicitly rather than reading first() off an empty deque.
+            if (input_queue.size() == 0)
+            {
+                if (received_byte != 0x7E)
+                {
+                    return;
+                }
+            }
+            else if (input_queue.first() != 0x7E && received_byte != 0x7E)
             {
                 input_queue.clear();
                 return;
