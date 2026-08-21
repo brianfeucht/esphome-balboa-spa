@@ -60,7 +60,7 @@ namespace esphome
 
             bool push(T val)
             {
-                if (this->max_size < this->backingQue.size())
+                if (this->max_size <= this->backingQue.size())
                 {
                     this->backingQue.pop_front();
                     this->backingQue.push_back(val);
@@ -72,11 +72,23 @@ namespace esphome
 
             const T &last()
             {
+                if (this->backingQue.empty())
+                {
+                    ESP_LOGV(CIRCULAR_BUFFER_TAG, "last() called on empty buffer");
+                    static const T empty_value{};
+                    return empty_value;
+                }
                 return backingQue.back();
             };
 
             const T &first()
             {
+                if (this->backingQue.empty())
+                {
+                    ESP_LOGV(CIRCULAR_BUFFER_TAG, "first() called on empty buffer");
+                    static const T empty_value{};
+                    return empty_value;
+                }
                 return backingQue.front();
             };
 
@@ -89,7 +101,7 @@ namespace esphome
             {
                 if (index >= this->size())
                 {
-                    ESP_LOGE(CIRCULAR_BUFFER_TAG, "INDEX %d out of bounds. size=%d", index, this->size());
+                    ESP_LOGE(CIRCULAR_BUFFER_TAG, "INDEX %u out of bounds. size=%u", (unsigned)index, (unsigned)this->size());
                     return T();
                 }
                 return backingQue.at(index);
@@ -102,6 +114,11 @@ namespace esphome
 
             T pop()
             {
+                if (this->backingQue.empty())
+                {
+                    ESP_LOGV(CIRCULAR_BUFFER_TAG, "pop() called on empty buffer");
+                    return T();
+                }
                 T val = backingQue.back();
                 backingQue.pop_back();
                 return val;
@@ -109,7 +126,7 @@ namespace esphome
 
             bool unshift(T val)
             {
-                if (this->max_size >= this->backingQue.size())
+                if (this->max_size > this->backingQue.size())
                 {
                     this->backingQue.push_front(val);
                     return true;
