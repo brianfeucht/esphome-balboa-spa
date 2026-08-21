@@ -71,6 +71,7 @@ CONFIG_SCHEMA = cv.Schema(
             icon=ICON_GRAIN,
             default_restore_mode="DISABLED",
         ).extend({
+            cv.Optional(CONF_MAX_TOGGLE_ATTEMPTS, default=5): cv.positive_int,
             cv.Optional(CONF_DISCARD_UPDATES, default=20): cv.positive_int,
         }),
         cv.Optional(CONF_HIGHRANGE): switch.switch_schema(
