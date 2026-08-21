@@ -17,20 +17,35 @@ namespace esphome
                 this->publish_state(spaState->blower);
                 ESP_LOGD("blower_swtich", "Blower switch state updated to %s", spaState->blower ? STRON : STROFF);
             }
-            else if (this->setState == ToggleStateMaybe::ON && !spaState->blower)
+            else if ((this->setState == ToggleStateMaybe::ON && !spaState->blower) ||
+                     (this->setState == ToggleStateMaybe::OFF && spaState->blower))
             {
-                this->toggle_blower();
-                ESP_LOGD("blower_swtich", "Blower state changed %s setState is ON, toggling blower", state ? STRON : STROFF);
-            }
-            else if (this->setState == ToggleStateMaybe::OFF && spaState->blower)
-            {
-                this->toggle_blower();
-                ESP_LOGD("blower_swtich", "Blower state changed %s setState is OFF, toggling blower", state ? STRON : STROFF);
+                // Bounded retry: without a limit this loops forever whenever the
+                // spa refuses the command, or when the mainboard has no blower
+                // at all and never reports the requested state.
+                if (this->toggle_attempts_ < this->max_toggle_attempts_)
+                {
+                    this->toggle_attempts_++;
+                    this->toggle_blower();
+                    ESP_LOGD("blower_switch", "Toggling blower (attempt %d/%d), setState is %s",
+                             this->toggle_attempts_, this->max_toggle_attempts_,
+                             TOGGLE_STATE_MAYBE_STRINGS[this->setState]);
+                }
+                else
+                {
+                    ESP_LOGW("blower_switch", "Failed to reach target state after %d attempts - "
+                                              "spa may be in filter cycle, or this spa has no blower",
+                             this->max_toggle_attempts_);
+                    this->setState = ToggleStateMaybe::DONT_KNOW;
+                    this->toggle_attempts_ = 0;
+                    this->publish_state(spaState->blower);
+                }
             }
             else if (this->setState != ToggleStateMaybe::DONT_KNOW)
             {
                 this->setState = ToggleStateMaybe::DONT_KNOW;
-                ESP_LOGD("blower_swtich", "write_state sucessful, setState is now DONT_KNOW");
+                this->toggle_attempts_ = 0;
+                ESP_LOGD("blower_switch", "write_state successful, setState is now DONT_KNOW");
             }
         }
 
@@ -55,6 +70,7 @@ namespace esphome
             if (spaState->blower != state)
             {
                 this->setState = state ? ToggleStateMaybe::ON : ToggleStateMaybe::OFF;
+                this->toggle_attempts_ = 0;
                 this->toggle_blower();
             }
         }
