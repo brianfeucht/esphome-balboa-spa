@@ -54,7 +54,7 @@ namespace esphome
             }
 
             // Check if we've reached the target state
-            if (jet_state == target_state)
+            if (this->state_matches_target(jet_state, target_state))
             {
                 this->desired_state = ToggleStateMaybe::DONT_KNOW;
                 this->toggle_attempts = 0;
@@ -104,7 +104,7 @@ namespace esphome
         {
             int current_state = static_cast<int>(current_jet_state);
 
-            if (current_state == target_state)
+            if (this->state_matches_target(current_state, target_state))
             {
                 ESP_LOGD(tag, "Spa/%s: already at target state %d", jet_name, target_state);
                 return;
