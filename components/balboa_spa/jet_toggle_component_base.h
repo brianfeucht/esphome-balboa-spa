@@ -38,6 +38,19 @@ namespace esphome
             virtual void toggle_jet() = 0;
 
             /**
+             * @brief Decide whether the reported jet state satisfies the target.
+             *
+             * Default is an exact match, which is what fans need (0/1/2 map to
+             * OFF/LOW/HIGH). Switches override this: for them any non-zero
+             * state counts as "on", because some mainboards only ever report
+             * state 2 for a single-speed pump.
+             */
+            virtual bool state_matches_target(int jet_state, int target_state)
+            {
+                return jet_state == target_state;
+            }
+
+            /**
              * @brief Update logic called when spa state changes
              * @param spaState Current spa state
              * @param desired_state Desired jet state (0=OFF, 1=LOW, 2=HIGH)

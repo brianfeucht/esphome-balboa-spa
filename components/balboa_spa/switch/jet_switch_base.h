@@ -24,6 +24,7 @@ namespace esphome
             void write_state(bool state) override;
             virtual double get_jet_state(const SpaState *spaState) = 0;
             virtual void toggle_jet() = 0;
+            bool state_matches_target(int jet_state, int target_state) override;
 
         private:
             int current_switch_state_ = 0; // 0=OFF, >0=ON for switch

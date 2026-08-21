@@ -31,6 +31,18 @@ namespace esphome
                 });
         }
 
+        bool JetSwitchBase::state_matches_target(int jet_state, int target_state)
+        {
+            // A switch only distinguishes off from on. Some mainboards report a
+            // single-speed pump as state 2, so treat any non-zero state as "on"
+            // instead of demanding an exact match on 1.
+            if (target_state == 0)
+            {
+                return jet_state == 0;
+            }
+            return jet_state > 0;
+        }
+
         void JetSwitchBase::set_parent(BalboaSpa *parent)
         {
             JetToggleComponentBase::set_parent(parent);
