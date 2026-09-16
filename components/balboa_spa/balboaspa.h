@@ -110,6 +110,7 @@ namespace esphome
       uint8_t client_id_override = 0x00;
       bool use_client_id_override = false;
       uint32_t last_received_time = 0;
+      uint32_t last_received_time_us = 0;
       uint8_t send_preference_code = 0;
       uint8_t send_preference_data = 0;
 

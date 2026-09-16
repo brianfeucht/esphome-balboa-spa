@@ -137,7 +137,7 @@ namespace esphome
                 sensor_state_value = spaState->cleanup_cycle;
                 break;
             default:
-                ESP_LOGD(TAG, "Spa/BSensors/UnknownSensorType: SensorType Number: %d", sensor_type);
+                ESP_LOGD(TAG, "Spa/BSensors/UnknownSensorType: SensorType Number: %d", static_cast<int>(sensor_type));
                 // Unknown enum value. Ignore
                 return;
             }

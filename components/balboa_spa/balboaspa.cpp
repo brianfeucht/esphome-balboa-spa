@@ -24,7 +24,7 @@ namespace esphome
             uint32_t now = millis();
             if (last_received_time + 10000 < now)
             {
-                ESP_LOGW(TAG, "No new message since %d Seconds! Mark as dead!", (now - last_received_time) / 1000);
+                ESP_LOGW(TAG, "No new message since %u Seconds! Mark as dead!", (unsigned int)((now - last_received_time) / 1000));
                 status_set_error(LOG_STR("No Communication with Balboa Mainboard!"));
                 client_id = 0;
             }
@@ -350,6 +350,14 @@ namespace esphome
                 return;
             }
 
+            uint32_t now = millis();
+            uint32_t now_us = micros();
+            if (input_queue.size() > 0 && now_us - last_received_time_us > 15000)
+            {
+                ESP_LOGW(TAG, "Timeout waiting for rest of packet (size %d), clearing queue", input_queue.size());
+                input_queue.clear();
+            }
+
             // Drop until SOF is seen.
             //
             // An empty buffer is the normal state between frames, so check for it
@@ -367,14 +375,38 @@ namespace esphome
                 return;
             }
 
-            // Double SOF-marker, drop last one
-            if (input_queue.size() >= 2 && input_queue[1] == 0x7E)
+            // Double SOF-marker, drop the second SOF byte immediately
+            if (input_queue.size() == 1 && input_queue.first() == 0x7E && received_byte == 0x7E)
             {
-                input_queue.pop();
+                return;
+            }
+
+            // If we receive a 0x7E when the queue ends in a 0x7E from a partial/corrupted packet,
+            // we treat this as a packet boundary. Discard the corrupted queue and start the new packet.
+            if (received_byte == 0x7E && input_queue.size() > 1 && input_queue.last() == 0x7E)
+            {
+                input_queue.clear();
+                input_queue.push(0x7E);
+                last_received_time = millis();
+                last_received_time_us = micros();
                 return;
             }
 
             input_queue.push(received_byte);
+
+            // Validate length byte (index 1) once we have it
+            if (input_queue.size() == 2)
+            {
+                if (input_queue[1] < 5 || input_queue[1] > 35)
+                {
+                    input_queue.clear();
+                    if (received_byte == 0x7E)
+                    {
+                        input_queue.push(0x7E);
+                    }
+                    return;
+                }
+            }
 
             // Complete package
             // if (received_byte == 0x7E && input_queue[0] == 0x7E && input_queue[1] != 0x7E) {
@@ -571,6 +603,7 @@ namespace esphome
                 input_queue.clear();
             }
             last_received_time = millis();
+            last_received_time_us = micros();
         }
 
         uint8_t BalboaSpa::crc8(CircularBuffer<uint8_t, 100> &data, bool ignore_delimiter)
@@ -706,6 +739,12 @@ namespace esphome
 
         void BalboaSpa::decodeState()
         {
+            if (spa_temp_scale == TEMP_SCALE::UNDEFINED)
+            {
+                ESP_LOGD(TAG, "Postponing state decode because spa temperature scale is undefined");
+                return;
+            }
+
             // 25:Flag Byte 20 - Set Temperature
             float temp_read = 0.0f;
 
@@ -734,7 +773,7 @@ namespace esphome
             }
             else
             {
-                ESP_LOGW(TAG, "Spa/temperature/target INVALID %.2f %.2f %d %d",
+                ESP_LOGW(TAG, "Spa/temperature/target INVALID %u %.2f %d %d",
                          input_queue[25], temp_read, spaConfig.temperature_scale, esphome_temp_scale);
             }
 
@@ -750,10 +789,10 @@ namespace esphome
                     temp_read = convert_f_to_c(input_queue[7]);
                 }
 
-                if (temp_read > 80)
+                if (temp_read < 1.0f || temp_read > 80.0f)
                 {
-                    // Temp is getting close to boiling. Definitely invalid.
-                    ESP_LOGW(TAG, "Spa/temperature/current INVALID %.2f %.2f %d",
+                    // Temp is out of range. Definitely invalid.
+                    ESP_LOGW(TAG, "Spa/temperature/current INVALID %u %.2f %d",
                              input_queue[7], temp_read, spaConfig.temperature_scale);
                 }
                 else if (esphome_temp_scale == TEMP_SCALE::C)
@@ -768,7 +807,7 @@ namespace esphome
                 }
                 else
                 {
-                    ESP_LOGW(TAG, "Spa/temperature/current INVALID %.2f %.2f %d %d",
+                    ESP_LOGW(TAG, "Spa/temperature/current INVALID %u %.2f %d %d",
                              input_queue[7], temp_read, spaConfig.temperature_scale, esphome_temp_scale);
                 }
             }
