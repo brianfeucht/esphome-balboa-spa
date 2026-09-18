@@ -46,7 +46,7 @@ namespace esphome
                 }
                 break;
             default:
-                ESP_LOGD(TAG, "Spa/Sensors/UnknownSensorType: SensorType Number: %d", sensor_type);
+                ESP_LOGD(TAG, "Spa/Sensors/UnknownSensorType: SensorType Number: %d", static_cast<int>(sensor_type));
                 // Unknown enum value. Ignore
                 return;
             }
