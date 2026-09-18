@@ -8,6 +8,7 @@
 #include "spa_config.h"
 #include "spa_state.h"
 #include "CircularBuffer.h"
+#include <cmath>
 #include <string>
 #include <iostream>
 #include <sstream>
@@ -110,6 +111,9 @@ namespace esphome
       uint8_t client_id_override = 0x00;
       bool use_client_id_override = false;
       uint32_t last_received_time = 0;
+      float current_temp_baseline_c = NAN;  // last accepted current temperature
+      float pending_current_temp_c = NAN;   // sudden jump waiting to settle
+      uint32_t pending_current_temp_start = 0;
       uint8_t send_preference_code = 0;
       uint8_t send_preference_data = 0;
 
@@ -147,6 +151,7 @@ namespace esphome
       void print_msg(CircularBuffer<uint8_t, 100> &data);
       void decodeSettings();
       void decodeState();
+      bool accept_current_temp(float temp_c);
       void decodeFilterSettings();
       void decodeFault();
     };
