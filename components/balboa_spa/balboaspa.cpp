@@ -381,25 +381,34 @@ namespace esphome
 
             input_queue.push(received_byte);
 
+            // Reject impossible lengths as soon as the length byte arrives.
+            //
+            // Otherwise a corrupted length swallows real packets until the CRC
+            // check fails, or overflows the buffer if it is 99 or more. 5 is the
+            // shortest frame (a clear-to-send poll). The upper bound is kept loose
+            // because packet lengths vary by model.
+            if (input_queue.size() == 2 && (received_byte < 5 || received_byte > 64))
+            {
+                ESP_LOGD(TAG, "Invalid packet length %u, dropping", received_byte);
+                input_queue.clear();
+                return;
+            }
+
             // Complete package
             // if (received_byte == 0x7E && input_queue[0] == 0x7E && input_queue[1] != 0x7E) {
             if (received_byte == 0x7E && input_queue.size() > 2 && input_queue.size() >= input_queue[1] + 2)
             {
-
-                if (input_queue.size() - 2 < input_queue[1])
-                {
-                    ESP_LOGD(TAG, "packet_size: %d, recv_size: %d", input_queue[1], input_queue.size());
-                    ESP_LOGD(TAG, "%s", "Packet incomplete!");
-                    input_queue.clear();
-                    return;
-                }
-
                 auto calculated_crc = this->crc8(input_queue, true);
                 auto packet_crc = input_queue[input_queue[1]];
                 if (calculated_crc != packet_crc)
                 {
                     ESP_LOGD(CRC_TAG, "CRC %d != Packet crc %d end=0x%X", calculated_crc, packet_crc, input_queue[input_queue[1] + 1]);
+                    // If this frame was cut short, the 0x7E that closed it is
+                    // really the next frame's SOF, so keep it. If it was a genuine
+                    // end marker, the next frame's SOF follows and the double-SOF
+                    // check drops it.
                     input_queue.clear();
+                    input_queue.push(0x7E);
                     return;
                 }
 
