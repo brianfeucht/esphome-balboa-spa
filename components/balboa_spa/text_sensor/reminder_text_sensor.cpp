@@ -29,6 +29,9 @@ namespace esphome
                     case 0x00:
                         reminder_message = "None";
                         break;
+                    case 0x02:
+                        reminder_message = "Test GFCI";
+                        break;
                     case 0x03:
                     case 0x04:
                         reminder_message = "Clean Filter";
