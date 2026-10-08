@@ -276,6 +276,8 @@ The `reminder` text sensor displays the current reminder status from the spa. Th
 
 **Reminder Types:**
 - `None` - No active reminders
+- `Test GFCI` - Time to test the GFCI breaker
+- `Change Water` - Time to drain and refill the spa
 - `Clean Filter` - Time to clean or replace the filter
 - `Check pH` - Check and adjust pH levels
 - `Check Sanitizer` - Check and adjust sanitizer levels
@@ -309,6 +311,54 @@ button:
 1. Monitor the `reminder` text sensor for active reminders
 2. Perform the required maintenance (clean filter, adjust chemicals, etc.)
 3. Press the `clear_reminder` button to acknowledge and clear the reminder
+
+One press clears the reminder currently shown on the panel. The spa queues reminders and shows them one at a time, so if several are due, the next one appears right after the first is cleared and needs its own press.
+
+Changing the set temperature from ESPHome does **not** clear a reminder, even though pressing the temperature buttons on the topside panel does. The client protocol has no panel-button messages. A setpoint write (Type Code 0x20) is not treated as an acknowledgement, so use `clear_reminder` instead.
+
+**Clearing a reminder from a lambda:**
+
+`clear_reminder()` is also available on the component, so a template button or script can clear a reminder and do something else in the same step. For example, this button only sends the command when a reminder is showing and records when the filter reminder was acknowledged:
+
+```yaml
+globals:
+  - id: filter_cleaned_at
+    type: uint32_t
+    restore_value: true
+    initial_value: '0'
+
+button:
+  - platform: template
+    name: "Clear Reminder"
+    on_press:
+      - lambda: |-
+          if (!id(spa)->is_communicating()) return;
+          uint8_t code = id(spa)->get_current_state()->reminder;
+          if (code == 0x00) return;  // nothing on the panel
+          ESP_LOGI("reminder", "Clearing reminder 0x%02X", code);
+          id(spa)->clear_reminder();
+          if (code == 0x04)          // Clean Filter
+            id(filter_cleaned_at) = id(sntp_time).now().timestamp;
+```
+
+The raw reminder code is `id(spa)->get_current_state()->reminder`. Known values: `0x00` None, `0x02` Test GFCI, `0x03` Change Water, `0x04` Clean Filter, `0x09` Check Sanitizer, `0x0A` Check pH, `0x1E` Fault. The example assumes an `sntp` time source with `id: sntp_time`.
+
+**Clearing a reminder from Home Assistant:**
+
+The button shows up as an ordinary `button` entity, so an automation can press it. This one clears `Test GFCI` automatically and leaves every other reminder for a person to deal with:
+
+```yaml
+automation:
+  - alias: "Spa: auto-clear Test GFCI"
+    triggers:
+      - trigger: state
+        entity_id: sensor.hot_tub_reminder
+        to: "Test GFCI"
+    actions:
+      - action: button.press
+        target:
+          entity_id: button.hot_tub_clear_reminder
+```
 
 **Note:** The reminder feature is based on the Balboa protocol Type Code 0x13 (Status Update) which reports reminder status, and Type Code 0x11 with Item Code 0x03 which clears reminders. The specific reminders available may vary depending on your spa model and firmware version.
 

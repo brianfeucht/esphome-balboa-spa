@@ -33,6 +33,8 @@ namespace esphome
                         reminder_message = "Test GFCI";
                         break;
                     case 0x03:
+                        reminder_message = "Change Water";
+                        break;
                     case 0x04:
                         reminder_message = "Clean Filter";
                         break;
