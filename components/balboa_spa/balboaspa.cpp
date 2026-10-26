@@ -16,7 +16,6 @@ namespace esphome
         {
             input_queue.clear();
             output_queue.clear();
-            filtersettings_update_timer = 0;
         }
 
         void BalboaSpa::update()
@@ -41,28 +40,20 @@ namespace esphome
             // The spa does not always answer the first request, and without a
             // retry the status sits at 1 forever, so the hardware configuration
             // is never reported.
-            if (config_request_status == 1)
+            if (config_request_status == 1 &&
+                now - config_request_time >= ESPHOME_BALBOASPA_RESPONSE_TIMEOUT_MS)
             {
-                config_response_timer++;
-                if (config_response_timer >= 200) // 200 * 50ms = 10 seconds
+                if (config_retries < 3)
                 {
-                    config_response_timer = 0;
-                    if (config_retries < 3)
-                    {
-                        config_retries++;
-                        config_request_status = 0; // ask again
-                        ESP_LOGW(TAG, "Spa/config/status: no response, retry %d/3", config_retries);
-                    }
-                    else
-                    {
-                        config_request_status = 3; // give up, unblock the chain
-                        ESP_LOGW(TAG, "Spa/config/status: %s", "no response after 3 retries, giving up");
-                    }
+                    config_retries++;
+                    config_request_status = 0; // ask again
+                    ESP_LOGW(TAG, "Spa/config/status: no response, retry %d/3", config_retries);
                 }
-            }
-            else
-            {
-                config_response_timer = 0;
+                else
+                {
+                    config_request_status = 3; // give up, unblock the chain
+                    ESP_LOGW(TAG, "Spa/config/status: %s", "no response after 3 retries, giving up");
+                }
             }
 
             // Fault log timeout guard.
@@ -71,40 +62,28 @@ namespace esphome
             // log has come back. If the spa never answers, the status stays at 1
             // forever and the filter schedule is never refreshed again. Retry a
             // few times, then mark it abandoned so the chain can move on.
-            if (faultlog_request_status == 1)
+            if (faultlog_request_status == 1 &&
+                now - faultlog_request_time >= ESPHOME_BALBOASPA_RESPONSE_TIMEOUT_MS)
             {
-                faultlog_response_timer++;
-                if (faultlog_response_timer >= 200) // 200 * 50ms = 10 seconds
+                if (faultlog_retries < 3)
                 {
-                    faultlog_response_timer = 0;
-                    if (faultlog_retries < 3)
-                    {
-                        faultlog_retries++;
-                        faultlog_request_status = 0; // ask again
-                        ESP_LOGW(TAG, "Spa/debug/faultlog_request_status: no response, retry %d/3", faultlog_retries);
-                    }
-                    else
-                    {
-                        faultlog_request_status = 3; // give up, unblock the chain
-                        ESP_LOGW(TAG, "Spa/debug/faultlog_request_status: %s", "no response after 3 retries, giving up");
-                    }
+                    faultlog_retries++;
+                    faultlog_request_status = 0; // ask again
+                    ESP_LOGW(TAG, "Spa/debug/faultlog_request_status: no response, retry %d/3", faultlog_retries);
                 }
-            }
-            else
-            {
-                faultlog_response_timer = 0;
+                else
+                {
+                    faultlog_request_status = 3; // give up, unblock the chain
+                    ESP_LOGW(TAG, "Spa/debug/faultlog_request_status: %s", "no response after 3 retries, giving up");
+                }
             }
 
             // Filter settings periodic update timer (every 5 minutes)
-            if (filtersettings_request_status == 2)
+            if (filtersettings_request_status == 2 &&
+                now - filtersettings_received_time >= ESPHOME_BALBOASPA_FILTERSETTINGS_REFRESH_MS)
             {
-                filtersettings_update_timer++;
-                if (filtersettings_update_timer >= 6000)
-                {                                      // 6000 * 50ms = 5 minutes
-                    filtersettings_request_status = 0; // Reset to request again
-                    filtersettings_update_timer = 0;
-                    ESP_LOGD(TAG, "Spa/debug/filtersettings_request_status: %s", "resetting for periodic update");
-                }
+                filtersettings_request_status = 0; // Reset to request again
+                ESP_LOGD(TAG, "Spa/debug/filtersettings_request_status: %s", "resetting for periodic update");
             }
 
             while (available())
@@ -476,6 +455,7 @@ namespace esphome
                             output_queue.push(0x01);
                             ESP_LOGD(TAG, "Spa/config/status: %s", "Getting config");
                             config_request_status = 1;
+                            config_request_time = millis();
                         }
                         else if (faultlog_request_status == 0)
                         { // Get the fault log
@@ -486,6 +466,7 @@ namespace esphome
                             output_queue.push(0xFF);
                             output_queue.push(0x00);
                             faultlog_request_status = 1;
+                            faultlog_request_time = millis();
                             ESP_LOGD(TAG, "Spa/debug/faultlog_request_status: %s", "requesting fault log, #1");
                         }
                         else if (filtersettings_request_status == 0 &&
@@ -711,7 +692,6 @@ namespace esphome
             spaConfig.valid = 1;
             config_request_status = 2;
             config_retries = 0;
-            config_response_timer = 0;
 
             if (spa_temp_scale == TEMP_SCALE::UNDEFINED)
             {
@@ -973,7 +953,7 @@ namespace esphome
             ESP_LOGD(TAG, "Spa/filter2/state: %s", filter_payload);
 
             filtersettings_request_status = 2;
-            filtersettings_update_timer = 0; // Reset timer after successful decode
+            filtersettings_received_time = millis(); // Restart the periodic refresh window
 
             // Notify listeners about filter settings update
             for (const auto &listener : this->listeners_)
@@ -1071,7 +1051,6 @@ namespace esphome
             ESP_LOGD(TAG, "Spa/fault/Minutes: %d", spaFaultLog.minutes);
             faultlog_request_status = 2;
             faultlog_retries = 0;
-            faultlog_response_timer = 0;
             // ESP_LOGD(TAG, "Spa/debug/faultlog_request_status: have the faultlog, #2");
 
             // Notify fault log listeners
