@@ -68,7 +68,7 @@ uart:
 
 balboa_spa:
   id: spa
-  spa_temp_scale: F  # or C based on spa configuration
+  spa_temp_scale: AUTO  # default; or C/F to force the spa's native units
 ```
 
 ### Platform Implementation
@@ -131,7 +131,8 @@ balboa_spa:
 ## Configuration Best Practices
 
 ### Temperature Scale
-- Set `spa_temp_scale` to match your spa's native configuration (C or F)
+- `spa_temp_scale` defaults to `AUTO`, which reads the spa's native scale from its configuration message
+- Set it to `C` or `F` only to force a scale; target temperature changes are ignored until the scale is known
 - This affects both display and control ranges
 
 ### Component Selection
