@@ -452,7 +452,8 @@ namespace esphome
                         output_queue.push(client_id);
                         output_queue.push(0xBF);
                         output_queue.push(0x21);
-                        output_queue.push(target_hour);
+                        // Bit 7 of the hour byte selects 24h display; preserve the panel's current mode
+                        output_queue.push(spaConfig.clock_mode ? (target_hour | 0x80) : target_hour);
                         output_queue.push(target_minute);
                     }
                     else if (send_command == 0xff)
