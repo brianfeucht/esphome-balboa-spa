@@ -4,6 +4,11 @@ packages:
 
 <<: !include test_balboa_spa_component.yaml
 
+# Override to exercise spa_temp_scale auto-detection (option omitted)
+balboa_spa:
+  id: test_spa
+  esphome_temp_scale: C
+
 
 uart:
   id: spa_uart_bus

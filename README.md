@@ -44,8 +44,9 @@ uart:
 
 balboa_spa:
   id: spa
-  # Set this to C or F based on the units your spa is configured for
-  spa_temp_scale: F
+  # Optional: AUTO (default) reads the units from the spa's configuration.
+  # Set to C or F to force the units your spa is configured for.
+  # spa_temp_scale: AUTO
   # Optional: Override the automatically assigned client ID
   # client_id: 10
   # Optional: How often the UART is drained (default 10ms). Longer

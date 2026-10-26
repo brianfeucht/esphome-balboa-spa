@@ -14,16 +14,21 @@ balboa_spa_ns = cg.esphome_ns.namespace('balboa_spa')
 BalboaSpa = balboa_spa_ns.class_('BalboaSpa', cg.PollingComponent, uart.UARTDevice)
 
 TEMP_SCALE = balboa_spa_ns.enum("TEMP_SCALE")
-TEMP_SCALES = {
- 254: TEMP_SCALE.UNDEFINED,
+# AUTO leaves the scale undefined so it is read from the spa's config message
+SPA_TEMP_SCALES = {
+ "AUTO": TEMP_SCALE.UNDEFINED,
+ "F": TEMP_SCALE.F,
+ "C": TEMP_SCALE.C,
+}
+ESPHOME_TEMP_SCALES = {
  "F": TEMP_SCALE.F,
  "C": TEMP_SCALE.C,
 }
 
 CONFIG_SCHEMA = cv.Schema({
     cv.GenerateID(): cv.declare_id(BalboaSpa),
-    cv.Optional(CONF_SPA_TEMP_SCALE, default=254): cv.enum(TEMP_SCALES, upper=True),
-    cv.Optional(CONF_ESPHOME_TEMP_SCALE, default="C"): cv.enum(TEMP_SCALES, upper=True),
+    cv.Optional(CONF_SPA_TEMP_SCALE, default="AUTO"): cv.enum(SPA_TEMP_SCALES, upper=True),
+    cv.Optional(CONF_ESPHOME_TEMP_SCALE, default="C"): cv.enum(ESPHOME_TEMP_SCALES, upper=True),
     cv.Optional(CONF_CLIENT_ID): cv.int_range(min=1, max=47),
 }).extend(cv.polling_component_schema("10ms")).extend(uart.UART_DEVICE_SCHEMA)
 
