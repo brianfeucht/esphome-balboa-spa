@@ -48,6 +48,9 @@ balboa_spa:
   spa_temp_scale: F
   # Optional: Override the automatically assigned client ID
   # client_id: 10
+  # Optional: How often the UART is drained (default 10ms). Longer
+  # intervals can overflow the receive buffer and cause CRC errors.
+  # update_interval: 10ms
 
 light:
   - platform: balboa_spa

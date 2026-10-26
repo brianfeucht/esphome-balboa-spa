@@ -27,7 +27,9 @@ namespace esphome
     static const uint8_t ESPHOME_BALBOASPA_MIN_TEMPERATURE_F = 60;
     static const uint8_t ESPHOME_BALBOASPA_MAX_TEMPERATURE_F = 104;
 
-    static const float ESPHOME_BALBOASPA_POLLING_INTERVAL = 50; // frequency to poll uart device
+    static const uint32_t ESPHOME_BALBOASPA_POLLING_INTERVAL = 10; // default ms between uart drains, overridable via update_interval
+    static const uint32_t ESPHOME_BALBOASPA_RESPONSE_TIMEOUT_MS = 10000;      // wait for a config / fault log response
+    static const uint32_t ESPHOME_BALBOASPA_FILTERSETTINGS_REFRESH_MS = 300000; // re-request filter settings every 5 minutes
 
 #define STRON "ON"
 #define STROFF "OFF"
@@ -130,11 +132,11 @@ namespace esphome
       char faultlog_request_status = 0;       // stages: 0-> want it; 1-> requested it; 2-> got it; 3-> further processed it
       char filtersettings_request_status = 0; // stages: 0-> want it; 1-> requested it; 2-> got it; 3-> further processed it
       char faultlog_update_timer = 0;         // temp logic so we only get the fault log once per 5 minutes
-      uint16_t faultlog_response_timer = 0;   // timeout guard for an unanswered fault log request
+      uint32_t faultlog_request_time = 0;     // millis() when the fault log was last requested
       uint8_t faultlog_retries = 0;           // consecutive unanswered fault log requests
-      uint16_t config_response_timer = 0;     // timeout guard for an unanswered config request
+      uint32_t config_request_time = 0;       // millis() when the config was last requested
       uint8_t config_retries = 0;             // consecutive unanswered config requests
-      uint16_t filtersettings_update_timer = 0;   // timer for periodic filter settings requests (every 5 minutes)
+      uint32_t filtersettings_received_time = 0; // millis() when the filter settings were last received
 
       SpaConfig spaConfig;
       SpaState spaState;
